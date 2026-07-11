@@ -281,8 +281,10 @@ function formatDate(iso: string) {
                 >
                   <span class="mark-symbol">✓</span>
                   <span v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</span>
-                  <span v-if="cellInfo(i, p.id).isFastest" class="corner-dot fastest-dot" title="這題目前執行最快"></span>
-                  <span v-if="cellInfo(i, p.id).isFirstSolver" class="corner-dot first-dot" title="最先解出這題"></span>
+                  <span v-if="cellInfo(i, p.id).isFirstSolver || cellInfo(i, p.id).isFastest" class="corner-dots">
+                    <span v-if="cellInfo(i, p.id).isFirstSolver" class="corner-dot first-dot" data-tooltip="最先解出這題"></span>
+                    <span v-if="cellInfo(i, p.id).isFastest" class="corner-dot fastest-dot" data-tooltip="這題目前執行最快"></span>
+                  </span>
                 </button>
                 <span
                   v-else
@@ -593,22 +595,50 @@ function formatDate(iso: string) {
   flex-shrink: 0;
 }
 
-.corner-dot {
+.corner-dots {
   position: absolute;
   top: -5px;
+  right: -6px;
+  display: flex;
+  gap: 3px;
+}
+
+.corner-dot {
+  position: relative;
   width: 7px;
   height: 7px;
   border-radius: 999px;
   border: 1.5px solid var(--cs-bg);
+  cursor: default;
+}
+
+.corner-dot::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 130%;
+  right: -4px;
+  background: var(--cs-text);
+  color: var(--cs-bg);
+  font-size: 0.65rem;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 10;
+}
+
+.corner-dot:hover::after {
+  opacity: 1;
 }
 
 .first-dot {
-  right: -7px;
   background: #d4a017;
 }
 
 .fastest-dot {
-  left: -7px;
   background: #2f6fed;
 }
 
