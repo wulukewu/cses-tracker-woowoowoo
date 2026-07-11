@@ -13,6 +13,10 @@ export class CsesSessionExpiredError extends Error {
  * page comes back as a login page instead of the stats page.
  */
 export async function fetchSolvedTaskIds(csesId: string, sessionCookie: string): Promise<number[]> {
+  if (!sessionCookie) {
+    console.error(`[cses] CSES_SESSION_COOKIE is empty when fetching user ${csesId}`)
+  }
+
   const res = await fetch(`https://cses.fi/problemset/user/${csesId}/`, {
     headers: {
       cookie: sessionCookie,
@@ -25,6 +29,10 @@ export async function fetchSolvedTaskIds(csesId: string, sessionCookie: string):
 
   const taskScoreEls = $('a.task-score')
   if (taskScoreEls.length === 0) {
+    console.error(
+      `[cses] no .task-score found for user ${csesId} — status=${res.status} bodyLength=${html.length} ` +
+        `cookieLength=${sessionCookie.length} loginPrompt=${html.includes('Please login')} bodySnippet=${JSON.stringify(html.slice(0, 300))}`,
+    )
     throw new CsesSessionExpiredError()
   }
 
