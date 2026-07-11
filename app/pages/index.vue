@@ -72,6 +72,12 @@ function cellInfo(userIndex: number, problemId: number): CellInfo {
   }
 }
 
+function cellSymbol(info: CellInfo) {
+  if (info.solved) return '✓'
+  if (info.waCount > 0) return '✗'
+  return '–'
+}
+
 const modalProblem = ref<WeekProblem | null>(null)
 const modalUserName = ref<string | null>(null)
 
@@ -176,14 +182,20 @@ function formatDate(iso: string) {
                   v-if="cellInfo(i, p.id).clickable"
                   type="button"
                   class="mark solved clickable"
-                  :aria-label="`已解，含送出紀錄，點擊查看`"
+                  aria-label="已解，含送出紀錄，點擊查看"
                   @click="openModal(p, u.name)"
                 >
-                  ✓<sup v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</sup>
+                  <span class="mark-symbol">✓</span>
+                  <span v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</span>
                 </button>
-                <span v-else class="mark" :class="{ solved: cellInfo(i, p.id).solved }" :aria-label="cellInfo(i, p.id).solved ? '已解' : '未解'">
-                  {{ cellInfo(i, p.id).solved ? '✓' : '–' }}
-                  <sup v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</sup>
+                <span
+                  v-else
+                  class="mark"
+                  :class="{ solved: cellInfo(i, p.id).solved, attempted: cellInfo(i, p.id).waCount > 0 }"
+                  :aria-label="cellInfo(i, p.id).solved ? '已解' : cellInfo(i, p.id).waCount ? '嘗試過但未解出' : '未解'"
+                >
+                  <span class="mark-symbol">{{ cellSymbol(cellInfo(i, p.id)) }}</span>
+                  <span v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</span>
                   <span v-if="cellInfo(i, p.id).locked" class="lock-hint" title="分身帳號還沒解過這題，需要手動解一下才能看到送出紀錄">🔒</span>
                 </span>
               </td>
@@ -202,7 +214,7 @@ function formatDate(iso: string) {
         <ul v-if="modalSummary?.submissions.length" class="submission-list">
           <li v-for="(s, idx) in modalSummary.submissions" :key="idx" class="submission-row" :class="s.verdict === 'AC' ? 'ac' : 'fail'">
             <span class="submission-time">{{ s.time }}</span>
-            <span class="submission-verdict">{{ s.verdict === 'AC' ? 'AC' : '未通過' }}</span>
+            <span class="submission-verdict">{{ s.verdict === 'AC' ? '✓' : '✗' }}</span>
           </li>
         </ul>
         <p v-else class="empty-state">沒有抓到送出紀錄。</p>
@@ -398,6 +410,9 @@ function formatDate(iso: string) {
 }
 
 .mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   color: var(--cs-text-muted);
   font: inherit;
   background: none;
@@ -405,24 +420,39 @@ function formatDate(iso: string) {
   padding: 0;
 }
 
+.mark-symbol {
+  font-weight: 600;
+}
+
 .mark.solved {
   color: var(--cs-accent);
-  font-weight: 600;
+}
+
+.mark.attempted {
+  color: #c0392b;
 }
 
 .mark.clickable {
   cursor: pointer;
 }
 
-.mark.clickable:hover {
+.mark.clickable:hover .mark-symbol {
   text-decoration: underline;
 }
 
 .wa-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: #fbe9e7;
   color: #c0392b;
   font-weight: 700;
-  font-size: 0.7rem;
-  margin-left: 0.1rem;
+  font-size: 0.68rem;
+  line-height: 1;
 }
 
 .lock-hint {
@@ -495,7 +525,8 @@ function formatDate(iso: string) {
 }
 
 .submission-verdict {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1rem;
 }
 
 .submission-row.ac .submission-verdict {
