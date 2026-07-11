@@ -24,14 +24,16 @@ const week = computed(() => progress.value?.week ?? null)
 const users = computed(() => progress.value?.users ?? [])
 const staleSince = computed(() => progress.value?.staleSince ?? null)
 
-function solvedCountFor(solvedIds: number[]) {
+const solvedSets = computed(() => users.value.map((u) => new Set(u.solvedIds)))
+
+function solvedCountFor(index: number) {
   if (!week.value) return 0
-  const solvedSet = new Set(solvedIds)
-  return week.value.problems.filter((p) => solvedSet.has(p.id)).length
+  const set = solvedSets.value[index]
+  return week.value.problems.filter((p) => set.has(p.id)).length
 }
 
-function solvedCountForProblem(problemId: number) {
-  return users.value.filter((u) => u.solvedIds.includes(problemId)).length
+function isSolved(index: number, problemId: number) {
+  return solvedSets.value[index]?.has(problemId) ?? false
 }
 
 function formatDate(iso: string) {
@@ -54,6 +56,7 @@ function formatDate(iso: string) {
             <template v-if="weeks && w.id === weeks[0].id"> (最新)</template>
           </option>
         </select>
+        <NuxtLink v-if="week" :to="`/plan?edit=${encodeURIComponent(week.id)}`" class="edit-link">編輯這一週</NuxtLink>
         <button class="refresh-btn" :disabled="pending" @click="refresh()">重新整理</button>
       </div>
 
@@ -61,34 +64,41 @@ function formatDate(iso: string) {
         資料自 {{ formatDate(staleSince) }} 起未更新
       </div>
 
-      <section v-if="week" class="progress-overview">
-        <h2>進度總覽</h2>
-        <ul class="user-progress-list">
-          <li v-for="u in users" :key="u.csesId" class="user-progress-item">
-            <div class="user-progress-header">
-              <span class="user-name">{{ u.name }}</span>
-              <span class="user-count">{{ solvedCountFor(u.solvedIds) }} / {{ week.problems.length }}</span>
-            </div>
-            <div class="progress-bar-track">
-              <div
-                class="progress-bar-fill"
-                :style="{ width: `${week.problems.length ? (solvedCountFor(u.solvedIds) / week.problems.length) * 100 : 0}%` }"
-              />
-            </div>
-          </li>
-        </ul>
+      <section v-if="week" class="progress-summary">
+        <div v-for="(u, i) in users" :key="u.csesId" class="summary-item">
+          <div class="summary-header">
+            <span class="user-name">{{ u.name }}</span>
+            <span class="user-count">{{ solvedCountFor(i) }} / {{ week.problems.length }}</span>
+          </div>
+          <div class="progress-bar-track">
+            <div
+              class="progress-bar-fill"
+              :style="{ width: `${week.problems.length ? (solvedCountFor(i) / week.problems.length) * 100 : 0}%` }"
+            />
+          </div>
+        </div>
       </section>
 
-      <section v-if="week" class="problem-list">
-        <h2>逐題狀態</h2>
-        <ul>
-          <li v-for="p in week.problems" :key="p.id" class="problem-item">
-            <a :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">
-              {{ p.name }}
-            </a>
-            <span class="problem-count">{{ solvedCountForProblem(p.id) }} / {{ users.length }}</span>
-          </li>
-        </ul>
+      <section v-if="week" class="problem-table-wrap">
+        <table class="problem-table">
+          <thead>
+            <tr>
+              <th class="col-problem">題目</th>
+              <th v-for="u in users" :key="u.csesId" class="col-user">{{ u.name }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in week.problems" :key="p.id">
+              <td class="col-problem">
+                <a :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
+              </td>
+              <td v-for="(u, i) in users" :key="u.csesId" class="col-user">
+                <span v-if="isSolved(i, p.id)" class="mark solved" aria-label="已解">✓</span>
+                <span v-else class="mark" aria-label="未解">–</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </section>
     </template>
   </div>
@@ -98,32 +108,55 @@ function formatDate(iso: string) {
 .empty-state {
   padding: 2rem;
   text-align: center;
-  color: #9aa0aa;
+  color: var(--cs-text-muted);
 }
 
 .week-switcher {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.week-switcher label {
+  font-size: 0.85rem;
+  color: var(--cs-text-secondary);
 }
 
 .week-switcher select {
   flex: 1;
-  padding: 0.5rem;
-  background: #1a1d23;
-  color: inherit;
-  border: 1px solid #2c2f38;
-  border-radius: 6px;
+  padding: 0.45rem 0.6rem;
+  background: var(--cs-bg);
+  color: var(--cs-text);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  font-size: 0.9rem;
+}
+
+.edit-link {
+  font-size: 0.85rem;
+  color: var(--cs-text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.edit-link:hover {
+  color: var(--cs-text);
+  text-decoration: underline;
 }
 
 .refresh-btn {
-  padding: 0.5rem 0.9rem;
-  background: #2c2f38;
-  color: inherit;
-  border: none;
-  border-radius: 6px;
+  padding: 0.45rem 0.8rem;
+  background: var(--cs-bg);
+  color: var(--cs-text);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
   cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  border-color: #ccc;
 }
 
 .refresh-btn:disabled {
@@ -132,32 +165,27 @@ function formatDate(iso: string) {
 }
 
 .stale-banner {
-  background: #3a2f1a;
-  color: #e8c988;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
+  background: #fdf6e3;
+  color: #8a6d1a;
+  border: 1px solid #f0e2ae;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--cs-radius);
+  margin-bottom: 1.25rem;
+  font-size: 0.88rem;
 }
 
-h2 {
-  font-size: 1.05rem;
-  color: #c7cbd1;
-  margin: 1.5rem 0 0.75rem;
+.progress-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
 }
 
-.user-progress-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-}
-
-.user-progress-header {
+.summary-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.35rem;
+  font-size: 0.9rem;
 }
 
 .user-name {
@@ -165,50 +193,78 @@ h2 {
 }
 
 .user-count {
-  color: #9aa0aa;
+  color: var(--cs-text-secondary);
 }
 
 .progress-bar-track {
-  height: 10px;
+  height: 6px;
   border-radius: 999px;
-  background: #23262d;
+  background: var(--cs-border-subtle);
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: #4f8cff;
+  background: var(--cs-text);
   transition: width 0.2s ease;
 }
 
-.problem-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+.problem-table-wrap {
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  overflow: hidden;
 }
 
-.problem-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.6rem 0.8rem;
-  background: #1a1d23;
-  border-radius: 6px;
+.problem-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
 }
 
-.problem-item a {
+.problem-table thead tr {
+  background: var(--cs-bg-subtle);
+  border-bottom: 1px solid var(--cs-border);
+}
+
+.problem-table th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--cs-text-secondary);
+  padding: 0.6rem 0.9rem;
+}
+
+.problem-table td {
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--cs-border-subtle);
+}
+
+.problem-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.col-problem {
+  width: auto;
+}
+
+.col-problem a {
   text-decoration: none;
 }
 
-.problem-item a:hover {
+.col-problem a:hover {
   text-decoration: underline;
 }
 
-.problem-count {
-  color: #9aa0aa;
-  white-space: nowrap;
-  margin-left: 1rem;
+.col-user {
+  width: 90px;
+  text-align: center;
+}
+
+.mark {
+  color: var(--cs-text-muted);
+}
+
+.mark.solved {
+  color: var(--cs-accent);
+  font-weight: 600;
 }
 </style>

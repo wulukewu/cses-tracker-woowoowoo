@@ -15,6 +15,19 @@
 </template>
 
 <style>
+:root {
+  --cs-bg: #ffffff;
+  --cs-bg-subtle: #fafafa;
+  --cs-border: #e5e5e7;
+  --cs-border-subtle: #f0f0f1;
+  --cs-text: #16171a;
+  --cs-text-secondary: #666666;
+  --cs-text-muted: #a3a3a3;
+  --cs-accent: #0a8f5c;
+  --cs-accent-bg: #e8f6ee;
+  --cs-radius: 8px;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -22,8 +35,8 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #0f1115;
-  color: #e6e8eb;
+  background: var(--cs-bg);
+  color: var(--cs-text);
 }
 
 a {
@@ -41,12 +54,13 @@ a {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #23262d;
+  border-bottom: 1px solid var(--cs-border);
 }
 
 .brand {
-  font-weight: 700;
-  font-size: 1.1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--cs-text);
 }
 
 .top-nav nav {
@@ -56,19 +70,19 @@ a {
 
 .top-nav nav a {
   text-decoration: none;
-  color: #9aa0aa;
-  font-size: 0.95rem;
+  color: var(--cs-text-secondary);
+  font-size: 0.9rem;
 }
 
 .top-nav nav a.active {
-  color: #ffffff;
+  color: var(--cs-text);
   font-weight: 600;
 }
 
 .app-main {
   flex: 1;
-  padding: 1.5rem;
-  max-width: 960px;
+  padding: 2rem 1.5rem;
+  max-width: 880px;
   width: 100%;
   margin: 0 auto;
 }
