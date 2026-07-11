@@ -71,6 +71,63 @@ function cancelEdit() {
   router.replace({ path: '/plan' })
 }
 
+const deleting = ref(false)
+const deleteArmed = ref(false)
+let deleteArmTimer: ReturnType<typeof setTimeout> | null = null
+
+function handleDeleteClick() {
+  if (deleteArmed.value) {
+    confirmDeleteWeek()
+    return
+  }
+  deleteArmed.value = true
+  if (deleteArmTimer) clearTimeout(deleteArmTimer)
+  deleteArmTimer = setTimeout(() => {
+    deleteArmed.value = false
+  }, 4000)
+}
+
+async function confirmDeleteWeek() {
+  if (!editingWeekId.value) return
+  if (deleteArmTimer) clearTimeout(deleteArmTimer)
+  deleting.value = true
+  try {
+    await $fetch(`/api/weeks/${encodeURIComponent(editingWeekId.value)}`, { method: 'DELETE' })
+    deleteArmed.value = false
+    cancelEdit()
+    await refreshWeeks()
+  } finally {
+    deleting.value = false
+  }
+}
+
+const showResetModal = ref(false)
+const resetConfirmText = ref('')
+const resetting = ref(false)
+const RESET_PHRASE = '刪除全部'
+
+function openResetModal() {
+  resetConfirmText.value = ''
+  showResetModal.value = true
+}
+
+function closeResetModal() {
+  showResetModal.value = false
+}
+
+async function confirmResetAll() {
+  if (resetConfirmText.value !== RESET_PHRASE) return
+  resetting.value = true
+  try {
+    await $fetch('/api/weeks', { method: 'DELETE' })
+    showResetModal.value = false
+    cancelEdit()
+    await refreshWeeks()
+  } finally {
+    resetting.value = false
+  }
+}
+
 async function save() {
   if (selected.value.size === 0) return
   saving.value = true
@@ -119,9 +176,17 @@ function formatDate(iso: string) {
           編輯這次{{ editingWeek.deadline ? `（${formatDate(editingWeek.deadline)}）` : '' }}
         </h2>
         <h2 v-else>規劃下次題目</h2>
-        <button v-if="editingWeek" class="cancel-edit-btn" @click="cancelEdit">取消編輯，改為新增下一次</button>
+        <div class="header-links">
+          <button v-if="editingWeek" class="cancel-edit-btn" @click="cancelEdit">取消編輯，改為新增下一次</button>
+          <button v-if="editingWeek" class="delete-week-btn" :disabled="deleting" @click="handleDeleteClick">
+            {{ deleting ? '刪除中...' : deleteArmed ? '確定要刪除？再按一次' : '刪除這次' }}
+          </button>
+        </div>
       </div>
-      <button class="export-btn" @click="exportWeeks">匯出所有資料</button>
+      <div class="header-actions">
+        <button class="export-btn" @click="exportWeeks">匯出所有資料</button>
+        <button class="reset-btn" @click="openResetModal">重置所有次別</button>
+      </div>
     </div>
 
     <input v-model="search" class="search-input" type="text" placeholder="搜尋題目名稱..." />
@@ -160,6 +225,29 @@ function formatDate(iso: string) {
       <p v-if="saveSuccess" class="save-success">{{ editingWeek ? '已更新這次！' : '已儲存新的一次！' }}</p>
       <p v-if="saveError" class="save-error">{{ saveError }}</p>
     </div>
+
+    <div v-if="showResetModal" class="modal-overlay" @click.self="closeResetModal">
+      <div class="modal-card">
+        <h2>重置所有次別</h2>
+        <p>
+          這會刪除全部 {{ weeks?.length ?? 0 }} 個次別的題目與截止日期，無法復原。建議先按「匯出所有資料」備份。
+        </p>
+        <p>
+          請輸入「<strong>{{ RESET_PHRASE }}</strong>」以確認：
+        </p>
+        <input v-model="resetConfirmText" type="text" class="reset-confirm-input" autocomplete="off" />
+        <div class="modal-actions">
+          <button class="cancel-btn" @click="closeResetModal">取消</button>
+          <button
+            class="danger-btn"
+            :disabled="resetConfirmText !== RESET_PHRASE || resetting"
+            @click="confirmResetAll"
+          >
+            {{ resetting ? '刪除中...' : '確認刪除全部' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -178,6 +266,12 @@ function formatDate(iso: string) {
   margin: 0 0 0.3rem;
 }
 
+.header-links {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
 .cancel-edit-btn {
   background: none;
   border: none;
@@ -186,6 +280,27 @@ function formatDate(iso: string) {
   font-size: 0.82rem;
   text-decoration: underline;
   cursor: pointer;
+}
+
+.delete-week-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #b3261e;
+  font-size: 0.82rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.delete-week-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .export-btn {
@@ -201,6 +316,21 @@ function formatDate(iso: string) {
 
 .export-btn:hover {
   border-color: #ccc;
+}
+
+.reset-btn {
+  padding: 0.45rem 0.8rem;
+  background: var(--cs-bg);
+  color: #b3261e;
+  border: 1px solid #f0c4bf;
+  border-radius: var(--cs-radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.reset-btn:hover {
+  background: #fdf1f0;
 }
 
 .search-input {
@@ -313,5 +443,84 @@ function formatDate(iso: string) {
 .save-error {
   color: #b3261e;
   font-size: 0.85rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 100;
+}
+
+.modal-card {
+  background: var(--cs-bg);
+  border-radius: var(--cs-radius);
+  max-width: 420px;
+  width: 100%;
+  padding: 1.25rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-card h2 {
+  font-size: 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.modal-card p {
+  font-size: 0.85rem;
+  color: var(--cs-text-secondary);
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+}
+
+.reset-confirm-input {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  background: var(--cs-bg);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  color: var(--cs-text);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.cancel-btn {
+  padding: 0.5rem 0.9rem;
+  background: var(--cs-bg);
+  color: var(--cs-text);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.cancel-btn:hover {
+  border-color: #ccc;
+}
+
+.danger-btn {
+  padding: 0.5rem 0.9rem;
+  background: #b3261e;
+  color: #fff;
+  border: none;
+  border-radius: var(--cs-radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.danger-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 </style>
