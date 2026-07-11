@@ -129,8 +129,11 @@ function problemMeta(problemId: number) {
   const stats = problemStats.value?.[String(problemId)]
   const insight = problemInsights.value.get(problemId)
   const parts: string[] = []
-  if (stats) parts.push(`全站 ${stats.successRate}% 解出（${stats.solvedBy.toLocaleString()} 人）`)
+  if (stats) {
+    parts.push(`全站 ${stats.solvedBy.toLocaleString()} / ${stats.attemptedBy.toLocaleString()} 解出（${stats.successRate}%）`)
+  }
   if (insight?.firstSolverName) parts.push(`最先解出：${insight.firstSolverName}`)
+  if (insight?.fastestName) parts.push(`跑最快：${insight.fastestName}`)
   return parts.join(' · ')
 }
 
@@ -139,32 +142,20 @@ interface CellInfo {
   waCount: number
   locked: boolean
   clickable: boolean
-  isFirstSolver: boolean
-  isFastest: boolean
 }
 
-const emptyCell: CellInfo = {
-  solved: false,
-  waCount: 0,
-  locked: false,
-  clickable: false,
-  isFirstSolver: false,
-  isFastest: false,
-}
+const emptyCell: CellInfo = { solved: false, waCount: 0, locked: false, clickable: false }
 
 function cellInfo(userIndex: number, problemId: number): CellInfo {
   const solved = isSolved(userIndex, problemId)
   const userName = users.value[userIndex]?.name
   const summary = submissions.value?.[String(problemId)]?.[userName]
-  const insight = problemInsights.value.get(problemId)
   if (!summary) return { ...emptyCell, solved }
   return {
     solved,
     waCount: summary.waCount,
     locked: !summary.unlocked,
     clickable: solved && summary.unlocked,
-    isFirstSolver: insight?.firstSolverName === userName,
-    isFastest: insight?.fastestName === userName,
   }
 }
 
@@ -284,11 +275,6 @@ function formatDate(iso: string) {
                 >
                   <span class="mark-symbol">✓</span>
                   <span v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</span>
-                  <svg v-if="cellInfo(i, p.id).isFastest" class="fast-badge" viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
-                    <title>這題目前執行最快</title>
-                    <path fill="currentColor" d="M8.5 1 3 9h3.2L5 15l6-9H7.7z" />
-                  </svg>
-                  <span v-if="cellInfo(i, p.id).isFirstSolver" class="first-badge" title="最先解出這題"></span>
                 </button>
                 <span
                   v-else
@@ -550,7 +536,6 @@ function formatDate(iso: string) {
 }
 
 .mark {
-  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -597,22 +582,6 @@ function formatDate(iso: string) {
   color: var(--cs-text-muted);
   cursor: help;
   flex-shrink: 0;
-}
-
-.fast-badge {
-  color: #b8860b;
-  flex-shrink: 0;
-}
-
-.first-badge {
-  position: absolute;
-  top: -5px;
-  right: -7px;
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: #d4a017;
-  border: 1.5px solid var(--cs-bg);
 }
 
 .modal-overlay {
