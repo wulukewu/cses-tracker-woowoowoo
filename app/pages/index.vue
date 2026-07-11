@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import type { ProblemCategory, ProgressResponse, SubmissionsResponse, Week, WeekProblem } from '~~/shared/types'
+import type {
+  ProblemCategory,
+  ProblemStatsResponse,
+  ProgressResponse,
+  SubmissionsResponse,
+  Week,
+  WeekProblem,
+} from '~~/shared/types'
 
 const { data: weeks } = await useFetch<Week[]>('/api/weeks')
 const { data: categories } = await useFetch<ProblemCategory[]>('/api/problems')
@@ -52,17 +59,79 @@ const { data: submissions, refresh: refreshSubmissions } = await useFetch<Submis
   watch: [selectedWeekId],
 })
 
+const { data: problemStats, refresh: refreshProblemStats } = await useFetch<ProblemStatsResponse>(
+  '/api/problem-stats',
+  {
+    query: { week: selectedWeekId, force: forceRefresh },
+    watch: [selectedWeekId],
+  },
+)
+
 const refreshing = ref(false)
 
 async function refreshAll() {
   refreshing.value = true
   forceRefresh.value = true
   try {
-    await Promise.all([refresh(), refreshSubmissions()])
+    await Promise.all([refresh(), refreshSubmissions(), refreshProblemStats()])
   } finally {
     forceRefresh.value = false
     refreshing.value = false
   }
+}
+
+interface ProblemInsight {
+  firstSolverName: string | null
+  fastestName: string | null
+}
+
+// Only credited when at least two tracked users have a comparable value —
+// "first" or "fastest" among a field of one isn't a meaningful callout.
+const problemInsights = computed(() => {
+  const map = new Map<number, ProblemInsight>()
+  for (const p of week.value?.problems ?? []) {
+    const key = String(p.id)
+    let firstSolverName: string | null = null
+    let firstAcTime: string | null = null
+    let solvedCount = 0
+    let fastestName: string | null = null
+    let fastestTime = Infinity
+    let timedCount = 0
+
+    for (const u of users.value) {
+      const summary = submissions.value?.[key]?.[u.name]
+      if (!summary?.unlocked || !summary.firstAcTime) continue
+      solvedCount++
+      if (firstAcTime === null || summary.firstAcTime < firstAcTime) {
+        firstAcTime = summary.firstAcTime
+        firstSolverName = u.name
+      }
+      const acEntry = summary.submissions.find((s) => s.verdict === 'AC')
+      const execSeconds = acEntry ? Number.parseFloat(acEntry.execTime) : NaN
+      if (!Number.isNaN(execSeconds)) {
+        timedCount++
+        if (execSeconds < fastestTime) {
+          fastestTime = execSeconds
+          fastestName = u.name
+        }
+      }
+    }
+
+    map.set(p.id, {
+      firstSolverName: solvedCount >= 2 ? firstSolverName : null,
+      fastestName: timedCount >= 2 ? fastestName : null,
+    })
+  }
+  return map
+})
+
+function problemMeta(problemId: number) {
+  const stats = problemStats.value?.[String(problemId)]
+  const insight = problemInsights.value.get(problemId)
+  const parts: string[] = []
+  if (stats) parts.push(`全站 ${stats.successRate}% 解出（${stats.solvedBy.toLocaleString()} 人）`)
+  if (insight?.firstSolverName) parts.push(`最先解出：${insight.firstSolverName}`)
+  return parts.join(' · ')
 }
 
 interface CellInfo {
@@ -70,20 +139,32 @@ interface CellInfo {
   waCount: number
   locked: boolean
   clickable: boolean
+  isFirstSolver: boolean
+  isFastest: boolean
 }
 
-const emptyCell: CellInfo = { solved: false, waCount: 0, locked: false, clickable: false }
+const emptyCell: CellInfo = {
+  solved: false,
+  waCount: 0,
+  locked: false,
+  clickable: false,
+  isFirstSolver: false,
+  isFastest: false,
+}
 
 function cellInfo(userIndex: number, problemId: number): CellInfo {
   const solved = isSolved(userIndex, problemId)
   const userName = users.value[userIndex]?.name
   const summary = submissions.value?.[String(problemId)]?.[userName]
+  const insight = problemInsights.value.get(problemId)
   if (!summary) return { ...emptyCell, solved }
   return {
     solved,
     waCount: summary.waCount,
     locked: !summary.unlocked,
     clickable: solved && summary.unlocked,
+    isFirstSolver: insight?.firstSolverName === userName,
+    isFastest: insight?.fastestName === userName,
   }
 }
 
@@ -190,7 +271,8 @@ function formatDate(iso: string) {
             </tr>
             <tr v-for="p in group.problems" :key="p.id">
               <td class="col-problem">
-                <a :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
+                <a class="problem-name" :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
+                <span v-if="problemMeta(p.id)" class="problem-meta">{{ problemMeta(p.id) }}</span>
               </td>
               <td v-for="(u, i) in users" :key="u.csesId" class="col-user">
                 <button
@@ -202,6 +284,11 @@ function formatDate(iso: string) {
                 >
                   <span class="mark-symbol">✓</span>
                   <span v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</span>
+                  <svg v-if="cellInfo(i, p.id).isFastest" class="fast-badge" viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
+                    <title>這題目前執行最快</title>
+                    <path fill="currentColor" d="M8.5 1 3 9h3.2L5 15l6-9H7.7z" />
+                  </svg>
+                  <span v-if="cellInfo(i, p.id).isFirstSolver" class="first-badge" title="最先解出這題"></span>
                 </button>
                 <span
                   v-else
@@ -441,12 +528,20 @@ function formatDate(iso: string) {
   width: auto;
 }
 
-.col-problem a {
+.problem-name {
+  display: block;
   text-decoration: none;
 }
 
-.col-problem a:hover {
+.problem-name:hover {
   text-decoration: underline;
+}
+
+.problem-meta {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--cs-text-muted);
 }
 
 .col-user {
@@ -455,6 +550,7 @@ function formatDate(iso: string) {
 }
 
 .mark {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -501,6 +597,22 @@ function formatDate(iso: string) {
   color: var(--cs-text-muted);
   cursor: help;
   flex-shrink: 0;
+}
+
+.fast-badge {
+  color: #b8860b;
+  flex-shrink: 0;
+}
+
+.first-badge {
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #d4a017;
+  border: 1.5px solid var(--cs-bg);
 }
 
 .modal-overlay {

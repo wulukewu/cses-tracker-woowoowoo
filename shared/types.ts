@@ -49,3 +49,12 @@ export interface SubmissionSummary {
 
 /** `submissions[problemId][username]` */
 export type SubmissionsResponse = Record<string, Record<string, SubmissionSummary>>
+
+export interface ProblemStats {
+  solvedBy: number
+  attemptedBy: number
+  successRate: number
+}
+
+/** `problemStats[problemId]` */
+export type ProblemStatsResponse = Record<string, ProblemStats>

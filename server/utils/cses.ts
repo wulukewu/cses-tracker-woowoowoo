@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio'
-import type { SubmissionEntry, SubmissionSummary } from '~~/shared/types'
+import type { ProblemStats, SubmissionEntry, SubmissionSummary } from '~~/shared/types'
 
 export class CsesSessionExpiredError extends Error {
   constructor() {
@@ -136,4 +136,43 @@ export async function fetchSubmissionSummary(
   }
 
   return { unlocked: true, waCount, firstAcTime, submissions }
+}
+
+/**
+ * Fetches CSES's site-wide "Statistics" page for a task — solved/attempted
+ * counts across all CSES users, not just the tracked ones. Unlike the queue
+ * page, this doesn't require the scraper account to have solved the task
+ * itself.
+ */
+export async function fetchProblemStats(taskId: number, sessionCookie: string): Promise<ProblemStats | null> {
+  const res = await fetch(`https://cses.fi/problemset/stats/${taskId}/`, {
+    headers: {
+      cookie: sessionCookie,
+      'user-agent': 'Mozilla/5.0 (cses-tracker)',
+    },
+  })
+
+  if (!res.ok) return null
+
+  const html = await res.text()
+  const $ = cheerio.load(html)
+
+  let solvedBy: number | null = null
+  let attemptedBy: number | null = null
+  $('table.summary-table tr').each((_, el) => {
+    const tds = $(el).find('td')
+    if (tds.length < 2) return
+    const label = $(tds[0]).text().trim()
+    const value = $(tds[1]).text().trim().replace(/,/g, '')
+    if (label === 'Solved by:') solvedBy = Number(value)
+    else if (label === 'Attempted by:') attemptedBy = Number(value)
+  })
+
+  if (solvedBy === null || attemptedBy === null || attemptedBy === 0) return null
+
+  return {
+    solvedBy,
+    attemptedBy,
+    successRate: Math.round((solvedBy / attemptedBy) * 1000) / 10,
+  }
 }
