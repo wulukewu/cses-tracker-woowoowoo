@@ -174,6 +174,48 @@ function cellSymbol(info: CellInfo) {
 const modalProblem = ref<WeekProblem | null>(null)
 const modalUserName = ref<string | null>(null)
 
+const profileUserIndex = ref<number | null>(null)
+const expandedCategories = ref<Set<string>>(new Set())
+
+const profileUser = computed(() => (profileUserIndex.value === null ? null : users.value[profileUserIndex.value] ?? null))
+const profileSolvedSet = computed(() => (profileUserIndex.value === null ? null : solvedSets.value[profileUserIndex.value] ?? null))
+
+const totalProblemCount = computed(() => (categories.value ?? []).reduce((sum, c) => sum + c.problems.length, 0))
+
+const profileTotalSolved = computed(() => profileSolvedSet.value?.size ?? 0)
+
+interface CategoryProgress {
+  name: string
+  problems: WeekProblem[]
+  solvedCount: number
+}
+
+const profileCategories = computed<CategoryProgress[]>(() => {
+  const set = profileSolvedSet.value
+  if (!set) return []
+  return (categories.value ?? []).map((c) => ({
+    name: c.name,
+    problems: c.problems,
+    solvedCount: c.problems.filter((p) => set.has(p.id)).length,
+  }))
+})
+
+function openProfile(index: number) {
+  profileUserIndex.value = index
+  expandedCategories.value = new Set()
+}
+
+function closeProfile() {
+  profileUserIndex.value = null
+}
+
+function toggleCategory(name: string) {
+  const next = new Set(expandedCategories.value)
+  if (next.has(name)) next.delete(name)
+  else next.add(name)
+  expandedCategories.value = next
+}
+
 const modalSummary = computed(() => {
   if (!modalProblem.value || !modalUserName.value) return null
   return submissions.value?.[String(modalProblem.value.id)]?.[modalUserName.value] ?? null
@@ -242,7 +284,7 @@ function formatDate(iso: string) {
       <section v-if="week" class="progress-summary">
         <div v-for="(u, i) in users" :key="u.csesId" class="summary-item">
           <div class="summary-header">
-            <span class="user-name">{{ u.name }}</span>
+            <button type="button" class="user-name user-name-btn" @click="openProfile(i)">{{ u.name }}</button>
             <span class="user-count">{{ solvedCountFor(i) }} / {{ week.problems.length }}</span>
           </div>
           <div class="progress-bar-track">
@@ -259,7 +301,9 @@ function formatDate(iso: string) {
           <thead>
             <tr>
               <th class="col-problem">題目</th>
-              <th v-for="u in users" :key="u.csesId" class="col-user">{{ u.name }}</th>
+              <th v-for="(u, i) in users" :key="u.csesId" class="col-user">
+                <button type="button" class="user-name-btn" @click="openProfile(i)">{{ u.name }}</button>
+              </th>
             </tr>
           </thead>
           <tbody v-for="group in groupedProblems" :key="group.name">
@@ -346,6 +390,60 @@ function formatDate(iso: string) {
           </li>
         </ul>
         <p v-else class="empty-state">沒有抓到送出紀錄。</p>
+      </div>
+    </div>
+
+    <div v-if="profileUser" class="modal-overlay" @click.self="closeProfile">
+      <div class="modal-card profile-card" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <h2>{{ profileUser.name }}</h2>
+          <button type="button" class="modal-close" aria-label="關閉" @click="closeProfile">✕</button>
+        </div>
+
+        <div class="profile-summary">
+          <div class="profile-total">
+            <span class="profile-total-count">{{ profileTotalSolved }}</span>
+            <span class="profile-total-label">/ {{ totalProblemCount }} 題已解出</span>
+          </div>
+          <div class="progress-bar-track">
+            <div
+              class="progress-bar-fill"
+              :style="{ width: `${totalProblemCount ? (profileTotalSolved / totalProblemCount) * 100 : 0}%` }"
+            />
+          </div>
+          <a
+            class="profile-cses-link"
+            :href="`https://cses.fi/problemset/user/${profileUser.csesId}/`"
+            target="_blank"
+            rel="noopener"
+          >在 CSES 上查看 →</a>
+        </div>
+
+        <ul class="profile-category-list">
+          <li v-for="c in profileCategories" :key="c.name" class="profile-category">
+            <button type="button" class="profile-category-header" @click="toggleCategory(c.name)">
+              <span class="profile-category-name">{{ c.name }}</span>
+              <span class="profile-category-count">{{ c.solvedCount }} / {{ c.problems.length }}</span>
+            </button>
+            <div class="progress-bar-track category-track">
+              <div
+                class="progress-bar-fill"
+                :style="{ width: `${c.problems.length ? (c.solvedCount / c.problems.length) * 100 : 0}%` }"
+              />
+            </div>
+            <ul v-if="expandedCategories.has(c.name)" class="profile-problem-list">
+              <li
+                v-for="p in c.problems"
+                :key="p.id"
+                class="profile-problem-row"
+                :class="{ solved: profileSolvedSet?.has(p.id) }"
+              >
+                <span class="profile-problem-mark">{{ profileSolvedSet?.has(p.id) ? '✓' : '–' }}</span>
+                <a class="profile-problem-name" :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -461,6 +559,21 @@ function formatDate(iso: string) {
 
 .user-name {
   font-weight: 600;
+}
+
+.user-name-btn {
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.user-name-btn:hover {
+  color: var(--cs-accent);
+  text-decoration: underline;
 }
 
 .user-count {
@@ -740,6 +853,133 @@ function formatDate(iso: string) {
 }
 
 .submission-link:hover .submission-time {
+  text-decoration: underline;
+}
+
+.profile-card {
+  max-width: 480px;
+  max-height: 85vh;
+}
+
+.profile-summary {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--cs-border-subtle);
+}
+
+.profile-total {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  margin-bottom: 0.4rem;
+}
+
+.profile-total-count {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.profile-total-label {
+  font-size: 0.85rem;
+  color: var(--cs-text-secondary);
+}
+
+.profile-cses-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--cs-text-secondary);
+  text-decoration: none;
+}
+
+.profile-cses-link:hover {
+  color: var(--cs-accent);
+  text-decoration: underline;
+}
+
+.profile-category-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.profile-category {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--cs-border-subtle);
+}
+
+.profile-category:last-child {
+  border-bottom: none;
+}
+
+.profile-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.15rem 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.profile-category-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.profile-category-count {
+  font-size: 0.8rem;
+  color: var(--cs-text-secondary);
+  flex-shrink: 0;
+}
+
+.category-track {
+  margin-top: 0.3rem;
+  height: 4px;
+}
+
+.profile-problem-list {
+  list-style: none;
+  margin: 0.5rem 0 0.25rem;
+  padding: 0;
+}
+
+.profile-problem-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+  color: var(--cs-text-muted);
+}
+
+.profile-problem-row.solved {
+  color: var(--cs-text);
+}
+
+.profile-problem-mark {
+  width: 1rem;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--cs-text-muted);
+  text-align: center;
+}
+
+.profile-problem-row.solved .profile-problem-mark {
+  color: var(--cs-accent);
+}
+
+.profile-problem-name {
+  color: inherit;
+  text-decoration: none;
+}
+
+.profile-problem-name:hover {
   text-decoration: underline;
 }
 </style>
