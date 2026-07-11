@@ -8,4 +8,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     csesSessionCookie: process.env.CSES_SESSION_COOKIE || '',
   },
+  app: {
+    head: {
+      title: 'CSES Tracker — 週題進度',
+      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    },
+  },
 })

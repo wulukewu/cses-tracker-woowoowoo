@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import type { ProblemCategory, Week, WeekProblem } from '~~/shared/types'
 
+const route = useRoute()
+const router = useRouter()
+
 const { data: categories } = await useFetch<ProblemCategory[]>('/api/problems')
 const { data: weeks, refresh: refreshWeeks } = await useFetch<Week[]>('/api/weeks')
 
-const usedIds = computed(() => {
-  const set = new Set<number>()
-  for (const w of weeks.value ?? []) {
-    for (const p of w.problems) set.add(p.id)
-  }
-  return set
-})
+const editingWeekId = ref<string | null>(
+  typeof route.query.edit === 'string' ? route.query.edit : null,
+)
+const editingWeek = computed(() => weeks.value?.find((w) => w.id === editingWeekId.value) ?? null)
 
 const search = ref('')
 const selected = ref<Map<number, WeekProblem>>(new Map())
@@ -18,6 +18,30 @@ const deadline = ref('')
 const saving = ref(false)
 const saveError = ref('')
 const saveSuccess = ref(false)
+const initializedFor = ref<string | null>(null)
+
+watchEffect(() => {
+  const targetKey = editingWeek.value ? editingWeek.value.id : '__new__'
+  if (initializedFor.value === targetKey) return
+  initializedFor.value = targetKey
+
+  if (editingWeek.value) {
+    selected.value = new Map(editingWeek.value.problems.map((p) => [p.id, p]))
+    deadline.value = editingWeek.value.deadline ? editingWeek.value.deadline.slice(0, 10) : ''
+  } else {
+    selected.value = new Map()
+    deadline.value = ''
+  }
+})
+
+const usedIds = computed(() => {
+  const set = new Set<number>()
+  for (const w of weeks.value ?? []) {
+    if (w.id === editingWeekId.value) continue
+    for (const p of w.problems) set.add(p.id)
+  }
+  return set
+})
 
 const filteredCategories = computed(() => {
   const term = search.value.trim().toLowerCase()
@@ -37,11 +61,15 @@ function toggle(problem: WeekProblem) {
   } else {
     selected.value.set(problem.id, problem)
   }
-  // trigger reactivity for Map
   selected.value = new Map(selected.value)
 }
 
 const selectedCount = computed(() => selected.value.size)
+
+function cancelEdit() {
+  editingWeekId.value = null
+  router.replace({ path: '/plan' })
+}
 
 async function save() {
   if (selected.value.size === 0) return
@@ -49,15 +77,22 @@ async function save() {
   saveError.value = ''
   saveSuccess.value = false
   try {
-    await $fetch('/api/weeks', {
-      method: 'POST',
-      body: {
-        problems: Array.from(selected.value.values()),
-        deadline: deadline.value || null,
-      },
-    })
-    selected.value = new Map()
-    deadline.value = ''
+    const body = {
+      problems: Array.from(selected.value.values()),
+      deadline: deadline.value || null,
+    }
+
+    if (editingWeekId.value) {
+      await $fetch(`/api/weeks/${encodeURIComponent(editingWeekId.value)}`, {
+        method: 'PATCH',
+        body,
+      })
+    } else {
+      await $fetch('/api/weeks', { method: 'POST', body })
+      selected.value = new Map()
+      deadline.value = ''
+    }
+
     saveSuccess.value = true
     await refreshWeeks()
   } catch (err: any) {
@@ -70,12 +105,20 @@ async function save() {
 function exportWeeks() {
   window.open('/api/weeks/export', '_blank')
 }
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' })
+}
 </script>
 
 <template>
   <div class="plan-page">
     <div class="plan-header">
-      <h2>規劃下週題目</h2>
+      <div>
+        <h2 v-if="editingWeek">編輯 {{ formatDate(editingWeek.createdAt) }} 建立的週次</h2>
+        <h2 v-else>規劃下週題目</h2>
+        <button v-if="editingWeek" class="cancel-edit-btn" @click="cancelEdit">取消編輯，改為新增下一週</button>
+      </div>
       <button class="export-btn" @click="exportWeeks">匯出所有週次資料</button>
     </div>
 
@@ -110,9 +153,9 @@ function exportWeeks() {
         </label>
       </div>
       <button class="save-btn" :disabled="saving || selectedCount === 0" @click="save">
-        {{ saving ? '儲存中...' : '存檔' }}
+        {{ saving ? '儲存中...' : editingWeek ? '更新這一週' : '存檔' }}
       </button>
-      <p v-if="saveSuccess" class="save-success">已儲存新的一週！</p>
+      <p v-if="saveSuccess" class="save-success">{{ editingWeek ? '已更新這一週！' : '已儲存新的一週！' }}</p>
       <p v-if="saveError" class="save-error">{{ saveError }}</p>
     </div>
   </div>
@@ -122,41 +165,66 @@ function exportWeeks() {
 .plan-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.plan-header h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 0.3rem;
+}
+
+.cancel-edit-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--cs-text-secondary);
+  font-size: 0.82rem;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .export-btn {
-  padding: 0.5rem 0.9rem;
-  background: #2c2f38;
-  color: inherit;
-  border: none;
-  border-radius: 6px;
+  padding: 0.45rem 0.8rem;
+  background: var(--cs-bg);
+  color: var(--cs-text);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
   cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.export-btn:hover {
+  border-color: #ccc;
 }
 
 .search-input {
   width: 100%;
-  padding: 0.6rem 0.8rem;
-  background: #1a1d23;
-  border: 1px solid #2c2f38;
-  border-radius: 6px;
-  color: inherit;
+  padding: 0.55rem 0.8rem;
+  background: var(--cs-bg);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  color: var(--cs-text);
   margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
 
 .categories details {
-  background: #16181d;
-  border: 1px solid #23262d;
-  border-radius: 6px;
+  background: var(--cs-bg);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
   margin-bottom: 0.5rem;
   padding: 0.5rem 0.8rem;
 }
 
 .categories summary {
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 500;
   padding: 0.3rem 0;
+  color: var(--cs-text);
 }
 
 .categories ul {
@@ -173,23 +241,24 @@ function exportWeeks() {
   align-items: center;
   gap: 0.5rem;
   padding: 0.25rem 0;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
+  color: var(--cs-text);
 }
 
 .categories label.used {
-  color: #6a6f78;
+  color: var(--cs-text-muted);
 }
 
 .used-tag {
-  font-size: 0.75rem;
-  color: #6a6f78;
+  font-size: 0.72rem;
+  color: var(--cs-text-muted);
 }
 
 .plan-footer {
   position: sticky;
   bottom: 0;
-  background: #0f1115;
-  border-top: 1px solid #23262d;
+  background: var(--cs-bg);
+  border-top: 1px solid var(--cs-border);
   padding: 1rem 0 0.5rem;
   margin-top: 1.5rem;
 }
@@ -199,44 +268,48 @@ function exportWeeks() {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
+  font-size: 0.9rem;
 }
 
 .deadline-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #9aa0aa;
+  font-size: 0.85rem;
+  color: var(--cs-text-secondary);
 }
 
 .deadline-label input {
-  background: #1a1d23;
-  border: 1px solid #2c2f38;
-  color: inherit;
-  border-radius: 6px;
+  background: var(--cs-bg);
+  border: 1px solid var(--cs-border);
+  color: var(--cs-text);
+  border-radius: var(--cs-radius);
   padding: 0.3rem 0.5rem;
 }
 
 .save-btn {
-  padding: 0.6rem 1.2rem;
-  background: #4f8cff;
-  color: white;
+  padding: 0.55rem 1.1rem;
+  background: var(--cs-text);
+  color: var(--cs-bg);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--cs-radius);
   cursor: pointer;
   font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .save-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: default;
 }
 
 .save-success {
-  color: #7ddc8f;
+  color: var(--cs-accent);
+  font-size: 0.85rem;
 }
 
 .save-error {
-  color: #ff8080;
+  color: #b3261e;
+  font-size: 0.85rem;
 }
 </style>
