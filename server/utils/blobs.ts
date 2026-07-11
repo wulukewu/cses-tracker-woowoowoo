@@ -17,7 +17,7 @@ export async function listWeeks(): Promise<Week[]> {
   )
   return weeks
     .filter((w): w is Week => Boolean(w))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .sort((a, b) => (b.deadline ?? '').localeCompare(a.deadline ?? ''))
 }
 
 export async function getWeek(id: string): Promise<Week | null> {
