@@ -83,12 +83,23 @@ export async function fetchSubmissionSummary(
 
   const rows = $('table.full-width tr').filter((_, el) => $(el).find('th').length === 0)
 
-  type ParsedRow = { time: string; verdict: 'AC' | 'FAIL' | 'CE'; detailUrl: string | null }
+  type ParsedRow = {
+    time: string
+    verdict: 'AC' | 'FAIL' | 'CE'
+    lang: string
+    execTime: string
+    codeSize: string
+    detailUrl: string | null
+  }
   const newestFirst: ParsedRow[] = []
   rows.each((_, el) => {
     const tds = $(el).find('td')
     if (tds.length < 6) return
     const time = $(tds[0]).text().trim()
+    // tds[1] is the CSES username link — already known (this fetch is filtered to one user).
+    const lang = $(tds[2]).text().trim()
+    const execTime = $(tds[3]).text().trim().replace(/\s+/g, ' ')
+    const codeSize = $(tds[4]).text().trim().replace(/\s+/g, ' ')
     const classes = ($(tds[5]).attr('class') || '').split(/\s+/)
     const verdict: ParsedRow['verdict'] = classes.includes('full')
       ? 'AC'
@@ -98,7 +109,7 @@ export async function fetchSubmissionSummary(
     // Only AC rows carry a "details" link (to CSES's public hacking/results page for that entry).
     const detailHref = $(el).find('a.details-link').attr('href') || null
     const detailUrl = detailHref ? `https://cses.fi${detailHref}` : null
-    newestFirst.push({ time, verdict, detailUrl })
+    newestFirst.push({ time, verdict, lang, execTime, codeSize, detailUrl })
   })
 
   const chronological = [...newestFirst].reverse()
@@ -110,11 +121,18 @@ export async function fetchSubmissionSummary(
     if (row.verdict === 'CE') continue
     if (row.verdict === 'AC') {
       firstAcTime = row.time
-      submissions.push({ time: row.time, verdict: 'AC', detailUrl: row.detailUrl })
+      submissions.push({
+        time: row.time,
+        verdict: 'AC',
+        lang: row.lang,
+        execTime: row.execTime,
+        codeSize: row.codeSize,
+        detailUrl: row.detailUrl,
+      })
       break
     }
     waCount++
-    submissions.push({ time: row.time, verdict: 'FAIL' })
+    submissions.push({ time: row.time, verdict: 'FAIL', lang: row.lang, execTime: row.execTime, codeSize: row.codeSize })
   }
 
   return { unlocked: true, waCount, firstAcTime, submissions }

@@ -232,12 +232,18 @@ function formatDate(iso: string) {
         <ul v-if="modalSummary?.submissions.length" class="submission-list">
           <li v-for="(s, idx) in modalSummary.submissions" :key="idx" class="submission-row" :class="s.verdict === 'AC' ? 'ac' : 'fail'">
             <a v-if="s.detailUrl" :href="s.detailUrl" target="_blank" rel="noopener" class="submission-link">
-              <span class="submission-time">{{ s.time }}</span>
-              <span class="submission-verdict">✓</span>
+              <span class="submission-main">
+                <span class="submission-time">{{ s.time }}</span>
+                <span class="submission-verdict">✓</span>
+              </span>
+              <span class="submission-meta">{{ s.lang }} · {{ s.execTime }} · {{ s.codeSize }}</span>
             </a>
             <template v-else>
-              <span class="submission-time">{{ s.time }}</span>
-              <span class="submission-verdict">{{ s.verdict === 'AC' ? '✓' : '✗' }}</span>
+              <span class="submission-main">
+                <span class="submission-time">{{ s.time }}</span>
+                <span class="submission-verdict">{{ s.verdict === 'AC' ? '✓' : '✗' }}</span>
+              </span>
+              <span class="submission-meta">{{ s.lang }} · {{ s.execTime }} · {{ s.codeSize }}</span>
             </template>
           </li>
         </ul>
@@ -536,14 +542,21 @@ function formatDate(iso: string) {
 
 .submission-row {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.4rem 0;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.45rem 0;
   border-bottom: 1px solid var(--cs-border-subtle);
 }
 
 .submission-row:last-child {
   border-bottom: none;
+}
+
+.submission-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
 
 .submission-verdict {
@@ -559,12 +572,15 @@ function formatDate(iso: string) {
   color: #c0392b;
 }
 
+.submission-meta {
+  font-size: 0.75rem;
+  color: var(--cs-text-secondary);
+}
+
 .submission-link {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  flex: 1;
+  flex-direction: column;
+  gap: 0.2rem;
   color: inherit;
   text-decoration: none;
 }
