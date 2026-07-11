@@ -115,7 +115,9 @@ function formatDate(iso: string) {
   <div class="plan-page">
     <div class="plan-header">
       <div>
-        <h2 v-if="editingWeek">編輯 {{ formatDate(editingWeek.createdAt) }} 建立的週次</h2>
+        <h2 v-if="editingWeek">
+          編輯{{ editingWeek.deadline ? `截止 ${formatDate(editingWeek.deadline)} 的` : '這一' }}週次
+        </h2>
         <h2 v-else>規劃下週題目</h2>
         <button v-if="editingWeek" class="cancel-edit-btn" @click="cancelEdit">取消編輯，改為新增下一週</button>
       </div>
@@ -148,7 +150,7 @@ function formatDate(iso: string) {
       <div class="footer-row">
         <span>已選 {{ selectedCount }} 題</span>
         <label class="deadline-label">
-          截止日期（僅顯示用）
+          截止日期
           <input v-model="deadline" type="date" />
         </label>
       </div>

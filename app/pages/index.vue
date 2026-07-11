@@ -49,15 +49,23 @@ function formatDate(iso: string) {
 
     <template v-else>
       <div class="week-switcher">
-        <label for="week-select">週次</label>
-        <select id="week-select" v-model="selectedWeekId">
-          <option v-for="w in weeks" :key="w.id" :value="w.id">
-            {{ formatDate(w.createdAt) }} 建立{{ w.deadline ? ` · 截止 ${formatDate(w.deadline)}` : '' }}
-            <template v-if="weeks && w.id === weeks[0].id"> (最新)</template>
-          </option>
-        </select>
-        <NuxtLink v-if="week" :to="`/plan?edit=${encodeURIComponent(week.id)}`" class="edit-link">編輯這一週</NuxtLink>
-        <button class="refresh-btn" :disabled="pending" @click="refresh()">重新整理</button>
+        <div class="week-tabs" role="tablist" aria-label="週次">
+          <button
+            v-for="w in weeks"
+            :key="w.id"
+            role="tab"
+            :aria-selected="w.id === selectedWeekId"
+            class="week-tab"
+            :class="{ active: w.id === selectedWeekId }"
+            @click="selectedWeekId = w.id"
+          >
+            {{ w.deadline ? `截止 ${formatDate(w.deadline)}` : '未設截止日' }}
+          </button>
+        </div>
+        <div class="week-actions">
+          <NuxtLink v-if="week" :to="`/plan?edit=${encodeURIComponent(week.id)}`" class="edit-link">編輯這一週</NuxtLink>
+          <button class="refresh-btn" :disabled="pending" @click="refresh()">重新整理</button>
+        </div>
       </div>
 
       <div v-if="staleSince" class="stale-banner">
@@ -114,23 +122,47 @@ function formatDate(iso: string) {
 .week-switcher {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 1.25rem;
 }
 
-.week-switcher label {
-  font-size: 0.85rem;
-  color: var(--cs-text-secondary);
+.week-tabs {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  flex: 1;
+  min-width: 0;
 }
 
-.week-switcher select {
-  flex: 1;
-  padding: 0.45rem 0.6rem;
+.week-tab {
+  flex-shrink: 0;
+  padding: 0.4rem 0.8rem;
   background: var(--cs-bg);
-  color: var(--cs-text);
+  color: var(--cs-text-secondary);
   border: 1px solid var(--cs-border);
-  border-radius: var(--cs-radius);
-  font-size: 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.week-tab:hover {
+  border-color: #ccc;
+}
+
+.week-tab.active {
+  background: var(--cs-text);
+  color: var(--cs-bg);
+  border-color: var(--cs-text);
+  font-weight: 600;
+}
+
+.week-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 .edit-link {

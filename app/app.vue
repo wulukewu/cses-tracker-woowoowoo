@@ -2,7 +2,10 @@
   <div class="app-shell">
     <NuxtRouteAnnouncer />
     <header class="top-nav">
-      <span class="brand">CSES Tracker</span>
+      <NuxtLink to="/" class="brand">
+        <img src="/favicon.svg" alt="" width="22" height="22" class="brand-logo" />
+        <span>CSES Tracker</span>
+      </NuxtLink>
       <nav>
         <NuxtLink to="/" exact-active-class="active">進度總覽</NuxtLink>
         <NuxtLink to="/plan" exact-active-class="active">規劃下週</NuxtLink>
@@ -58,9 +61,18 @@ a {
 }
 
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 600;
   font-size: 1rem;
   color: var(--cs-text);
+  text-decoration: none;
+}
+
+.brand-logo {
+  border-radius: 6px;
+  display: block;
 }
 
 .top-nav nav {
