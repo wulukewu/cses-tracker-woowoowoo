@@ -127,14 +127,8 @@ const problemInsights = computed(() => {
 
 function problemMeta(problemId: number) {
   const stats = problemStats.value?.[String(problemId)]
-  const insight = problemInsights.value.get(problemId)
-  const parts: string[] = []
-  if (stats) {
-    parts.push(`全站 ${stats.solvedBy.toLocaleString()} / ${stats.attemptedBy.toLocaleString()} 解出（${stats.successRate}%）`)
-  }
-  if (insight?.firstSolverName) parts.push(`最先解出：${insight.firstSolverName}`)
-  if (insight?.fastestName) parts.push(`跑最快：${insight.fastestName}`)
-  return parts.join(' · ')
+  if (!stats) return ''
+  return `全站 ${stats.solvedBy.toLocaleString()} / ${stats.attemptedBy.toLocaleString()} 解出（${stats.successRate}%）`
 }
 
 interface CellInfo {
@@ -142,20 +136,32 @@ interface CellInfo {
   waCount: number
   locked: boolean
   clickable: boolean
+  isFirstSolver: boolean
+  isFastest: boolean
 }
 
-const emptyCell: CellInfo = { solved: false, waCount: 0, locked: false, clickable: false }
+const emptyCell: CellInfo = {
+  solved: false,
+  waCount: 0,
+  locked: false,
+  clickable: false,
+  isFirstSolver: false,
+  isFastest: false,
+}
 
 function cellInfo(userIndex: number, problemId: number): CellInfo {
   const solved = isSolved(userIndex, problemId)
   const userName = users.value[userIndex]?.name
   const summary = submissions.value?.[String(problemId)]?.[userName]
+  const insight = problemInsights.value.get(problemId)
   if (!summary) return { ...emptyCell, solved }
   return {
     solved,
     waCount: summary.waCount,
     locked: !summary.unlocked,
     clickable: solved && summary.unlocked,
+    isFirstSolver: insight?.firstSolverName === userName,
+    isFastest: insight?.fastestName === userName,
   }
 }
 
@@ -275,6 +281,8 @@ function formatDate(iso: string) {
                 >
                   <span class="mark-symbol">✓</span>
                   <span v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</span>
+                  <span v-if="cellInfo(i, p.id).isFastest" class="corner-dot fastest-dot" title="這題目前執行最快"></span>
+                  <span v-if="cellInfo(i, p.id).isFirstSolver" class="corner-dot first-dot" title="最先解出這題"></span>
                 </button>
                 <span
                   v-else
@@ -536,6 +544,7 @@ function formatDate(iso: string) {
 }
 
 .mark {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -582,6 +591,25 @@ function formatDate(iso: string) {
   color: var(--cs-text-muted);
   cursor: help;
   flex-shrink: 0;
+}
+
+.corner-dot {
+  position: absolute;
+  top: -5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  border: 1.5px solid var(--cs-bg);
+}
+
+.first-dot {
+  right: -7px;
+  background: #d4a017;
+}
+
+.fastest-dot {
+  left: -7px;
+  background: #2f6fed;
 }
 
 .modal-overlay {
