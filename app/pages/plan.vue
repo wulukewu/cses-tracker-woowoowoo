@@ -116,12 +116,12 @@ function formatDate(iso: string) {
     <div class="plan-header">
       <div>
         <h2 v-if="editingWeek">
-          編輯{{ editingWeek.deadline ? `截止 ${formatDate(editingWeek.deadline)} 的` : '這一' }}週次
+          編輯這次{{ editingWeek.deadline ? `（${formatDate(editingWeek.deadline)}）` : '' }}
         </h2>
-        <h2 v-else>規劃下週題目</h2>
-        <button v-if="editingWeek" class="cancel-edit-btn" @click="cancelEdit">取消編輯，改為新增下一週</button>
+        <h2 v-else>規劃下次題目</h2>
+        <button v-if="editingWeek" class="cancel-edit-btn" @click="cancelEdit">取消編輯，改為新增下一次</button>
       </div>
-      <button class="export-btn" @click="exportWeeks">匯出所有週次資料</button>
+      <button class="export-btn" @click="exportWeeks">匯出所有資料</button>
     </div>
 
     <input v-model="search" class="search-input" type="text" placeholder="搜尋題目名稱..." />
@@ -155,9 +155,9 @@ function formatDate(iso: string) {
         </label>
       </div>
       <button class="save-btn" :disabled="saving || selectedCount === 0" @click="save">
-        {{ saving ? '儲存中...' : editingWeek ? '更新這一週' : '存檔' }}
+        {{ saving ? '儲存中...' : editingWeek ? '更新這次' : '存檔' }}
       </button>
-      <p v-if="saveSuccess" class="save-success">{{ editingWeek ? '已更新這一週！' : '已儲存新的一週！' }}</p>
+      <p v-if="saveSuccess" class="save-success">{{ editingWeek ? '已更新這次！' : '已儲存新的一次！' }}</p>
       <p v-if="saveError" class="save-error">{{ saveError }}</p>
     </div>
   </div>

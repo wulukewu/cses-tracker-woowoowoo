@@ -8,7 +8,7 @@
       </NuxtLink>
       <nav>
         <NuxtLink to="/" exact-active-class="active">進度總覽</NuxtLink>
-        <NuxtLink to="/plan" exact-active-class="active">規劃下週</NuxtLink>
+        <NuxtLink to="/plan" exact-active-class="active">規劃下次</NuxtLink>
       </nav>
     </header>
     <main class="app-main">
