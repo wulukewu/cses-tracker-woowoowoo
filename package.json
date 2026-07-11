@@ -1,0 +1,19 @@
+{
+  "name": "cses-tracker-woowoowoo",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^10.7.9",
+    "cheerio": "^1.2.0",
+    "nuxt": "^4.4.8",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
+  }
+}
