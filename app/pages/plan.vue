@@ -278,7 +278,6 @@ function formatDate(iso: string) {
   padding: 0;
   color: var(--cs-text-secondary);
   font-size: 0.82rem;
-  text-decoration: underline;
   cursor: pointer;
 }
 
@@ -288,7 +287,6 @@ function formatDate(iso: string) {
   padding: 0;
   color: #b3261e;
   font-size: 0.82rem;
-  text-decoration: underline;
   cursor: pointer;
 }
 
