@@ -196,7 +196,25 @@ function formatDate(iso: string) {
                 >
                   <span class="mark-symbol">{{ cellSymbol(cellInfo(i, p.id)) }}</span>
                   <span v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</span>
-                  <span v-if="cellInfo(i, p.id).locked" class="lock-hint" title="分身帳號還沒解過這題，需要手動解一下才能看到送出紀錄">🔒</span>
+                  <svg
+                    v-if="cellInfo(i, p.id).locked"
+                    class="lock-hint"
+                    viewBox="0 0 16 16"
+                    width="12"
+                    height="12"
+                    aria-hidden="true"
+                  >
+                    <title>分身帳號還沒解過這題，需要手動解一下才能看到送出紀錄</title>
+                    <path
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2"
+                    />
+                    <rect x="3.5" y="7" width="9" height="7" rx="1.4" fill="currentColor" />
+                  </svg>
                 </span>
               </td>
             </tr>
@@ -436,10 +454,6 @@ function formatDate(iso: string) {
   cursor: pointer;
 }
 
-.mark.clickable:hover .mark-symbol {
-  text-decoration: underline;
-}
-
 .wa-badge {
   display: inline-flex;
   align-items: center;
@@ -456,8 +470,10 @@ function formatDate(iso: string) {
 }
 
 .lock-hint {
-  margin-left: 0.3rem;
+  margin-left: 0.1rem;
+  color: var(--cs-text-muted);
   cursor: help;
+  flex-shrink: 0;
 }
 
 .modal-overlay {
