@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio'
+import type { SubmissionEntry, SubmissionSummary } from '~~/shared/types'
 
 export class CsesSessionExpiredError extends Error {
   constructor() {
@@ -46,4 +47,72 @@ export async function fetchSolvedTaskIds(csesId: string, sessionCookie: string):
   })
 
   return solved
+}
+
+/**
+ * Fetches a user's submission history for a single task via CSES's queue page,
+ * filtered to that user. CSES only renders this page once the *scraper's own*
+ * account has solved the task itself (otherwise it 404s — reflected as
+ * `unlocked: false`). The filter must be the CSES username, not the numeric
+ * user id (the id silently matches zero rows).
+ *
+ * Only page 1 is fetched (newest submissions first); a user with more than
+ * ~50 submissions on one task could have an older first-AC missed.
+ */
+export async function fetchSubmissionSummary(
+  taskId: number,
+  username: string,
+  sessionCookie: string,
+): Promise<SubmissionSummary> {
+  const res = await fetch(
+    `https://cses.fi/problemset/queue/${taskId}/1/?user=${encodeURIComponent(username)}`,
+    {
+      headers: {
+        cookie: sessionCookie,
+        'user-agent': 'Mozilla/5.0 (cses-tracker)',
+      },
+    },
+  )
+
+  if (res.status === 404) {
+    return { unlocked: false, waCount: 0, firstAcTime: null, submissions: [] }
+  }
+
+  const html = await res.text()
+  const $ = cheerio.load(html)
+
+  const rows = $('table.full-width tr').filter((_, el) => $(el).find('th').length === 0)
+
+  type ParsedRow = { time: string; verdict: 'AC' | 'FAIL' | 'CE' }
+  const newestFirst: ParsedRow[] = []
+  rows.each((_, el) => {
+    const tds = $(el).find('td')
+    if (tds.length < 6) return
+    const time = $(tds[0]).text().trim()
+    const classes = ($(tds[5]).attr('class') || '').split(/\s+/)
+    const verdict: ParsedRow['verdict'] = classes.includes('full')
+      ? 'AC'
+      : classes.includes('skipped')
+        ? 'CE'
+        : 'FAIL'
+    newestFirst.push({ time, verdict })
+  })
+
+  const chronological = [...newestFirst].reverse()
+
+  let waCount = 0
+  let firstAcTime: string | null = null
+  const submissions: SubmissionEntry[] = []
+  for (const row of chronological) {
+    if (row.verdict === 'CE') continue
+    if (row.verdict === 'AC') {
+      firstAcTime = row.time
+      submissions.push({ time: row.time, verdict: 'AC' })
+      break
+    }
+    waCount++
+    submissions.push({ time: row.time, verdict: 'FAIL' })
+  }
+
+  return { unlocked: true, waCount, firstAcTime, submissions }
 }
