@@ -30,6 +30,17 @@ export async function saveWeek(week: Week): Promise<void> {
   await store.setJSON(week.id, week)
 }
 
+export async function deleteWeek(id: string): Promise<void> {
+  const store = weeksStore()
+  await store.delete(id)
+}
+
+export async function deleteAllWeeks(): Promise<void> {
+  const store = weeksStore()
+  const { blobs } = await store.list()
+  await Promise.all(blobs.map((b) => store.delete(b.key)))
+}
+
 export async function getStaleSince(): Promise<string | null> {
   const store = metaStore()
   const value = await store.get('staleSince', { type: 'text' })
