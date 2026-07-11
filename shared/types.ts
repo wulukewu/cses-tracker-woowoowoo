@@ -30,6 +30,9 @@ export interface ProgressResponse {
 export interface SubmissionEntry {
   time: string
   verdict: 'AC' | 'FAIL'
+  lang: string
+  execTime: string
+  codeSize: string
   /** CSES's own submission page (shows the accepted source code); only ever set for AC. */
   detailUrl?: string | null
 }
