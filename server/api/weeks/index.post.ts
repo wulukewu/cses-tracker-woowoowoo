@@ -1,4 +1,5 @@
 import { saveWeek } from '~~/server/utils/blobs'
+import { shortId } from '~~/server/utils/id'
 import type { Week, WeekProblem } from '~~/shared/types'
 
 export default defineEventHandler(async (event) => {
@@ -8,10 +9,9 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'problems is required' })
   }
 
-  const createdAt = new Date().toISOString()
   const week: Week = {
-    id: createdAt,
-    createdAt,
+    id: shortId(),
+    createdAt: new Date().toISOString(),
     deadline: body.deadline ?? null,
     problems: body.problems,
   }
