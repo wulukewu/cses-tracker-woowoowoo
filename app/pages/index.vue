@@ -231,8 +231,14 @@ function formatDate(iso: string) {
         </div>
         <ul v-if="modalSummary?.submissions.length" class="submission-list">
           <li v-for="(s, idx) in modalSummary.submissions" :key="idx" class="submission-row" :class="s.verdict === 'AC' ? 'ac' : 'fail'">
-            <span class="submission-time">{{ s.time }}</span>
-            <span class="submission-verdict">{{ s.verdict === 'AC' ? '✓' : '✗' }}</span>
+            <a v-if="s.detailUrl" :href="s.detailUrl" target="_blank" rel="noopener" class="submission-link">
+              <span class="submission-time">{{ s.time }}</span>
+              <span class="submission-verdict">✓</span>
+            </a>
+            <template v-else>
+              <span class="submission-time">{{ s.time }}</span>
+              <span class="submission-verdict">{{ s.verdict === 'AC' ? '✓' : '✗' }}</span>
+            </template>
           </li>
         </ul>
         <p v-else class="empty-state">沒有抓到送出紀錄。</p>
@@ -551,5 +557,19 @@ function formatDate(iso: string) {
 
 .submission-row.fail .submission-verdict {
   color: #c0392b;
+}
+
+.submission-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  color: inherit;
+  text-decoration: none;
+}
+
+.submission-link:hover .submission-time {
+  text-decoration: underline;
 }
 </style>

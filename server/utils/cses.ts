@@ -83,7 +83,7 @@ export async function fetchSubmissionSummary(
 
   const rows = $('table.full-width tr').filter((_, el) => $(el).find('th').length === 0)
 
-  type ParsedRow = { time: string; verdict: 'AC' | 'FAIL' | 'CE' }
+  type ParsedRow = { time: string; verdict: 'AC' | 'FAIL' | 'CE'; detailUrl: string | null }
   const newestFirst: ParsedRow[] = []
   rows.each((_, el) => {
     const tds = $(el).find('td')
@@ -95,7 +95,10 @@ export async function fetchSubmissionSummary(
       : classes.includes('skipped')
         ? 'CE'
         : 'FAIL'
-    newestFirst.push({ time, verdict })
+    // Only AC rows carry a "details" link (to CSES's public hacking/results page for that entry).
+    const detailHref = $(el).find('a.details-link').attr('href') || null
+    const detailUrl = detailHref ? `https://cses.fi${detailHref}` : null
+    newestFirst.push({ time, verdict, detailUrl })
   })
 
   const chronological = [...newestFirst].reverse()
@@ -107,7 +110,7 @@ export async function fetchSubmissionSummary(
     if (row.verdict === 'CE') continue
     if (row.verdict === 'AC') {
       firstAcTime = row.time
-      submissions.push({ time: row.time, verdict: 'AC' })
+      submissions.push({ time: row.time, verdict: 'AC', detailUrl: row.detailUrl })
       break
     }
     waCount++
