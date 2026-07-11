@@ -34,6 +34,18 @@ watchEffect(() => {
   }
 })
 
+// CSES's own display order for each problem, keyed by id — selecting
+// checkboxes populates `selected` in click order, but saved weeks should
+// list problems the same way CSES (and the main screen) does.
+const catalogOrder = computed(() => {
+  const map = new Map<number, number>()
+  let i = 0
+  for (const c of categories.value ?? []) {
+    for (const p of c.problems) map.set(p.id, i++)
+  }
+  return map
+})
+
 const usedIds = computed(() => {
   const set = new Set<number>()
   for (const w of weeks.value ?? []) {
@@ -135,7 +147,9 @@ async function save() {
   saveSuccess.value = false
   try {
     const body = {
-      problems: Array.from(selected.value.values()),
+      problems: Array.from(selected.value.values()).sort(
+        (a, b) => (catalogOrder.value.get(a.id) ?? 0) - (catalogOrder.value.get(b.id) ?? 0),
+      ),
       deadline: deadline.value || null,
     }
 

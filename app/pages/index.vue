@@ -19,6 +19,18 @@ const categoryByProblemId = computed(() => {
   return map
 })
 
+// CSES's own display order for each problem, keyed by id — used to sort a
+// week's problems within a category regardless of the order they were
+// picked in while planning (see plan.vue's `selected` map).
+const catalogOrder = computed(() => {
+  const map = new Map<number, number>()
+  let i = 0
+  for (const c of categories.value ?? []) {
+    for (const p of c.problems) map.set(p.id, i++)
+  }
+  return map
+})
+
 const selectedWeekId = ref<string | null>(null)
 
 watchEffect(() => {
@@ -238,6 +250,9 @@ const groupedProblems = computed(() => {
     const name = categoryByProblemId.value.get(p.id) ?? '其他'
     if (!groups.has(name)) groups.set(name, [])
     groups.get(name)!.push(p)
+  }
+  for (const group of groups.values()) {
+    group.sort((a, b) => (catalogOrder.value.get(a.id) ?? 0) - (catalogOrder.value.get(b.id) ?? 0))
   }
   const order = (categories.value ?? []).map((c) => c.name)
   const ordered = order.filter((name) => groups.has(name)).map((name) => ({ name, problems: groups.get(name)! }))
