@@ -9,6 +9,7 @@ const TTL_MS = 6 * 60 * 60 * 1000
 export default defineEventHandler(async (event): Promise<SubmissionsResponse> => {
   const query = getQuery(event)
   const weekId = typeof query.week === 'string' ? query.week : undefined
+  const force = query.force === 'true' || query.force === '1'
 
   const week = weekId ? await getWeek(weekId) : (await listWeeks())[0] ?? null
   if (!week) return {}
@@ -22,8 +23,11 @@ export default defineEventHandler(async (event): Promise<SubmissionsResponse> =>
     week.problems.map(async (problem) => {
       const perUser = await Promise.all(
         USERS.map(async (user) => {
-          const summary = await cachedBlob(`submissions:${problem.id}:${user.name}`, TTL_MS, () =>
-            fetchSubmissionSummary(problem.id, user.name, sessionCookie),
+          const summary = await cachedBlob(
+            `submissions:${problem.id}:${user.name}`,
+            TTL_MS,
+            () => fetchSubmissionSummary(problem.id, user.name, sessionCookie),
+            { force },
           )
           return [user.name, summary] as const
         }),
