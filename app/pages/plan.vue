@@ -203,8 +203,10 @@ function formatDate(iso: string) {
                 :checked="selected.has(p.id)"
                 @change="toggle(p)"
               />
-              {{ p.name }}
-              <span v-if="usedIds.has(p.id)" class="used-tag">已用過</span>
+              <span class="problem-label-text">
+                {{ p.name }}
+                <span v-if="usedIds.has(p.id)" class="used-tag">已用過</span>
+              </span>
             </label>
           </li>
         </ul>
@@ -368,11 +370,20 @@ function formatDate(iso: string) {
 
 .categories label {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   padding: 0.25rem 0;
   font-size: 0.88rem;
   color: var(--cs-text);
+}
+
+.categories label input {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.problem-label-text {
+  min-width: 0;
 }
 
 .categories label.used {
@@ -380,6 +391,9 @@ function formatDate(iso: string) {
 }
 
 .used-tag {
+  display: inline-block;
+  white-space: nowrap;
+  margin-left: 0.3rem;
   font-size: 0.72rem;
   color: var(--cs-text-muted);
 }
