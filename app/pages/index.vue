@@ -1,7 +1,16 @@
 <script setup lang="ts">
-import type { ProgressResponse, Week } from '~~/shared/types'
+import type { ProblemCategory, ProgressResponse, Week } from '~~/shared/types'
 
 const { data: weeks } = await useFetch<Week[]>('/api/weeks')
+const { data: categories } = await useFetch<ProblemCategory[]>('/api/problems')
+
+const categoryByProblemId = computed(() => {
+  const map = new Map<number, string>()
+  for (const c of categories.value ?? []) {
+    for (const p of c.problems) map.set(p.id, c.name)
+  }
+  return map
+})
 
 const selectedWeekId = ref<string | null>(null)
 
@@ -36,6 +45,20 @@ function isSolved(index: number, problemId: number) {
   return solvedSets.value[index]?.has(problemId) ?? false
 }
 
+const groupedProblems = computed(() => {
+  if (!week.value) return []
+  const groups = new Map<string, typeof week.value.problems>()
+  for (const p of week.value.problems) {
+    const name = categoryByProblemId.value.get(p.id) ?? '其他'
+    if (!groups.has(name)) groups.set(name, [])
+    groups.get(name)!.push(p)
+  }
+  const order = (categories.value ?? []).map((c) => c.name)
+  const ordered = order.filter((name) => groups.has(name)).map((name) => ({ name, problems: groups.get(name)! }))
+  if (groups.has('其他')) ordered.push({ name: '其他', problems: groups.get('其他')! })
+  return ordered
+})
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' })
 }
@@ -44,12 +67,12 @@ function formatDate(iso: string) {
 <template>
   <div>
     <div v-if="!weeks || weeks.length === 0" class="empty-state">
-      還沒有任何週次資料，先到「規劃下週」建立第一組題目吧。
+      還沒有任何資料，先到「規劃下次」建立第一組題目吧。
     </div>
 
     <template v-else>
       <div class="week-switcher">
-        <div class="week-tabs" role="tablist" aria-label="週次">
+        <div class="week-tabs" role="tablist" aria-label="次別">
           <button
             v-for="w in weeks"
             :key="w.id"
@@ -59,11 +82,11 @@ function formatDate(iso: string) {
             :class="{ active: w.id === selectedWeekId }"
             @click="selectedWeekId = w.id"
           >
-            {{ w.deadline ? `截止 ${formatDate(w.deadline)}` : '未設截止日' }}
+            {{ w.deadline ? formatDate(w.deadline) : '未設定日期' }}
           </button>
         </div>
         <div class="week-actions">
-          <NuxtLink v-if="week" :to="`/plan?edit=${encodeURIComponent(week.id)}`" class="edit-link">編輯這一週</NuxtLink>
+          <NuxtLink v-if="week" :to="`/plan?edit=${encodeURIComponent(week.id)}`" class="edit-link">編輯這次</NuxtLink>
           <button class="refresh-btn" :disabled="pending" @click="refresh()">重新整理</button>
         </div>
       </div>
@@ -95,8 +118,11 @@ function formatDate(iso: string) {
               <th v-for="u in users" :key="u.csesId" class="col-user">{{ u.name }}</th>
             </tr>
           </thead>
-          <tbody>
-            <tr v-for="p in week.problems" :key="p.id">
+          <tbody v-for="group in groupedProblems" :key="group.name">
+            <tr class="category-row">
+              <td :colspan="1 + users.length">{{ group.name }}</td>
+            </tr>
+            <tr v-for="p in group.problems" :key="p.id">
               <td class="col-problem">
                 <a :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
               </td>
@@ -270,8 +296,15 @@ function formatDate(iso: string) {
   border-bottom: 1px solid var(--cs-border-subtle);
 }
 
-.problem-table tbody tr:last-child td {
+.problem-table tbody:last-child tr:last-child td {
   border-bottom: none;
+}
+
+.category-row td {
+  background: var(--cs-bg-subtle);
+  color: var(--cs-text-secondary);
+  font-weight: 600;
+  font-size: 0.8rem;
 }
 
 .col-problem {
