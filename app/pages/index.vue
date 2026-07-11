@@ -221,6 +221,20 @@ function closeProfile() {
   profileUserIndex.value = null
 }
 
+// Without this, scrolling past the end of a modal's own list chains into
+// the page behind it — the fixed overlay stays put but the body scrolls,
+// which shows up as the page's own scrollbar (detached from the card)
+// moving instead of the modal's.
+const anyModalOpen = computed(() => Boolean((modalProblem.value && modalUserName.value) || profileUser.value))
+
+watch(anyModalOpen, (open) => {
+  if (import.meta.client) document.body.style.overflow = open ? 'hidden' : ''
+})
+
+onUnmounted(() => {
+  if (import.meta.client) document.body.style.overflow = ''
+})
+
 function toggleCategory(name: string) {
   const next = new Set(expandedCategories.value)
   if (next.has(name)) next.delete(name)
@@ -788,6 +802,7 @@ function formatDate(iso: string) {
   width: 100%;
   max-height: 80vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 1.25rem;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
