@@ -20,12 +20,14 @@ watchEffect(() => {
   }
 })
 
+const forceRefresh = ref(false)
+
 const {
   data: progress,
   pending,
   refresh,
 } = await useFetch<ProgressResponse>('/api/progress', {
-  query: { week: selectedWeekId },
+  query: { week: selectedWeekId, force: forceRefresh },
   watch: [selectedWeekId],
 })
 
@@ -45,10 +47,23 @@ function isSolved(index: number, problemId: number) {
   return solvedSets.value[index]?.has(problemId) ?? false
 }
 
-const { data: submissions } = await useFetch<SubmissionsResponse>('/api/submissions', {
-  query: { week: selectedWeekId },
+const { data: submissions, refresh: refreshSubmissions } = await useFetch<SubmissionsResponse>('/api/submissions', {
+  query: { week: selectedWeekId, force: forceRefresh },
   watch: [selectedWeekId],
 })
+
+const refreshing = ref(false)
+
+async function refreshAll() {
+  refreshing.value = true
+  forceRefresh.value = true
+  try {
+    await Promise.all([refresh(), refreshSubmissions()])
+  } finally {
+    forceRefresh.value = false
+    refreshing.value = false
+  }
+}
 
 interface CellInfo {
   solved: boolean
@@ -138,7 +153,7 @@ function formatDate(iso: string) {
         </div>
         <div class="week-actions">
           <NuxtLink v-if="week" :to="`/plan?edit=${encodeURIComponent(week.id)}`" class="edit-link">編輯這次</NuxtLink>
-          <button class="refresh-btn" :disabled="pending" @click="refresh()">重新整理</button>
+          <button class="refresh-btn" :disabled="pending || refreshing" @click="refreshAll()">重新整理</button>
         </div>
       </div>
 

@@ -7,6 +7,7 @@ import { getWeek, listWeeks, getStaleSince, setStaleSince } from '~~/server/util
 export default defineEventHandler(async (event): Promise<ProgressResponse> => {
   const query = getQuery(event)
   const weekId = typeof query.week === 'string' ? query.week : undefined
+  const force = query.force === 'true' || query.force === '1'
 
   const week = weekId ? await getWeek(weekId) : (await listWeeks())[0] ?? null
 
@@ -18,8 +19,10 @@ export default defineEventHandler(async (event): Promise<ProgressResponse> => {
 
   for (const user of USERS) {
     try {
-      const solvedIds = await cached(`solved:${user.csesId}`, () =>
-        fetchSolvedTaskIds(user.csesId, sessionCookie),
+      const solvedIds = await cached(
+        `solved:${user.csesId}`,
+        () => fetchSolvedTaskIds(user.csesId, sessionCookie),
+        { force },
       )
       users.push({ name: user.name, csesId: user.csesId, solvedIds })
     } catch (err) {

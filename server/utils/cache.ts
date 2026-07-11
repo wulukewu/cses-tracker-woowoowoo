@@ -7,10 +7,12 @@ interface CacheEntry<T> {
 
 const store = new Map<string, CacheEntry<unknown>>()
 
-export async function cached<T>(key: string, fn: () => Promise<T>): Promise<T> {
-  const hit = store.get(key)
-  if (hit && hit.expiresAt > Date.now()) {
-    return hit.value as T
+export async function cached<T>(key: string, fn: () => Promise<T>, options?: { force?: boolean }): Promise<T> {
+  if (!options?.force) {
+    const hit = store.get(key)
+    if (hit && hit.expiresAt > Date.now()) {
+      return hit.value as T
+    }
   }
   const value = await fn()
   store.set(key, { value, expiresAt: Date.now() + CACHE_TTL_MS })
