@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProblemCategory, ProgressResponse, Week } from '~~/shared/types'
+import type { ProblemCategory, ProgressResponse, SubmissionsResponse, Week, WeekProblem } from '~~/shared/types'
 
 const { data: weeks } = await useFetch<Week[]>('/api/weeks')
 const { data: categories } = await useFetch<ProblemCategory[]>('/api/problems')
@@ -43,6 +43,51 @@ function solvedCountFor(index: number) {
 
 function isSolved(index: number, problemId: number) {
   return solvedSets.value[index]?.has(problemId) ?? false
+}
+
+const { data: submissions } = await useFetch<SubmissionsResponse>('/api/submissions', {
+  query: { week: selectedWeekId },
+  watch: [selectedWeekId],
+})
+
+interface CellInfo {
+  solved: boolean
+  waCount: number
+  locked: boolean
+  clickable: boolean
+}
+
+const emptyCell: CellInfo = { solved: false, waCount: 0, locked: false, clickable: false }
+
+function cellInfo(userIndex: number, problemId: number): CellInfo {
+  const solved = isSolved(userIndex, problemId)
+  const userName = users.value[userIndex]?.name
+  const summary = submissions.value?.[String(problemId)]?.[userName]
+  if (!summary) return { ...emptyCell, solved }
+  return {
+    solved,
+    waCount: summary.waCount,
+    locked: !summary.unlocked,
+    clickable: solved && summary.unlocked,
+  }
+}
+
+const modalProblem = ref<WeekProblem | null>(null)
+const modalUserName = ref<string | null>(null)
+
+const modalSummary = computed(() => {
+  if (!modalProblem.value || !modalUserName.value) return null
+  return submissions.value?.[String(modalProblem.value.id)]?.[modalUserName.value] ?? null
+})
+
+function openModal(problem: WeekProblem, userName: string) {
+  modalProblem.value = problem
+  modalUserName.value = userName
+}
+
+function closeModal() {
+  modalProblem.value = null
+  modalUserName.value = null
 }
 
 const groupedProblems = computed(() => {
@@ -127,14 +172,42 @@ function formatDate(iso: string) {
                 <a :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
               </td>
               <td v-for="(u, i) in users" :key="u.csesId" class="col-user">
-                <span v-if="isSolved(i, p.id)" class="mark solved" aria-label="已解">✓</span>
-                <span v-else class="mark" aria-label="未解">–</span>
+                <button
+                  v-if="cellInfo(i, p.id).clickable"
+                  type="button"
+                  class="mark solved clickable"
+                  :aria-label="`已解，含送出紀錄，點擊查看`"
+                  @click="openModal(p, u.name)"
+                >
+                  ✓<sup v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</sup>
+                </button>
+                <span v-else class="mark" :class="{ solved: cellInfo(i, p.id).solved }" :aria-label="cellInfo(i, p.id).solved ? '已解' : '未解'">
+                  {{ cellInfo(i, p.id).solved ? '✓' : '–' }}
+                  <sup v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</sup>
+                  <span v-if="cellInfo(i, p.id).locked" class="lock-hint" title="分身帳號還沒解過這題，需要手動解一下才能看到送出紀錄">🔒</span>
+                </span>
               </td>
             </tr>
           </tbody>
         </table>
       </section>
     </template>
+
+    <div v-if="modalProblem && modalUserName" class="modal-overlay" @click.self="closeModal">
+      <div class="modal-card" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <h2>{{ modalUserName }} · {{ modalProblem.name }}</h2>
+          <button type="button" class="modal-close" aria-label="關閉" @click="closeModal">✕</button>
+        </div>
+        <ul v-if="modalSummary?.submissions.length" class="submission-list">
+          <li v-for="(s, idx) in modalSummary.submissions" :key="idx" class="submission-row" :class="s.verdict === 'AC' ? 'ac' : 'fail'">
+            <span class="submission-time">{{ s.time }}</span>
+            <span class="submission-verdict">{{ s.verdict === 'AC' ? 'AC' : '未通過' }}</span>
+          </li>
+        </ul>
+        <p v-else class="empty-state">沒有抓到送出紀錄。</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -326,10 +399,110 @@ function formatDate(iso: string) {
 
 .mark {
   color: var(--cs-text-muted);
+  font: inherit;
+  background: none;
+  border: none;
+  padding: 0;
 }
 
 .mark.solved {
   color: var(--cs-accent);
   font-weight: 600;
+}
+
+.mark.clickable {
+  cursor: pointer;
+}
+
+.mark.clickable:hover {
+  text-decoration: underline;
+}
+
+.wa-badge {
+  color: #c0392b;
+  font-weight: 700;
+  font-size: 0.7rem;
+  margin-left: 0.1rem;
+}
+
+.lock-hint {
+  margin-left: 0.3rem;
+  cursor: help;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 100;
+}
+
+.modal-card {
+  background: var(--cs-bg);
+  border-radius: var(--cs-radius);
+  max-width: 420px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 1.25rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.modal-header h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--cs-text-secondary);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0.25rem;
+}
+
+.submission-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.88rem;
+}
+
+.submission-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--cs-border-subtle);
+}
+
+.submission-row:last-child {
+  border-bottom: none;
+}
+
+.submission-verdict {
+  font-weight: 600;
+}
+
+.submission-row.ac .submission-verdict {
+  color: var(--cs-accent);
+}
+
+.submission-row.fail .submission-verdict {
+  color: #c0392b;
 }
 </style>
