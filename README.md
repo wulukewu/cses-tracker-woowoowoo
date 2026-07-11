@@ -9,6 +9,16 @@
 - CSES 全題庫清單：`server/data/problems.json`（從 `/problemset/list` 手動抓取產生的靜態快照，題目變動不頻繁，需要更新時重新抓取覆蓋此檔即可）
 - 週次資料（題目 + 截止日期）：Netlify Blobs，即時讀寫
 - 進度資料：即時向 CSES 個人統計頁抓取解題狀態，不落地儲存，API 內建 7 分鐘記憶體快取
+- 前端邏輯拆成 `app/composables/*`（資料抓取 + 衍生狀態）與 `app/components/home`、`app/components/plan`（純 UI），`app/pages/*.vue` 只負責組裝
+
+## 測試
+
+```bash
+npm run test        # 跑一次
+npm run test:watch  # watch 模式
+```
+
+目前涵蓋 `server/utils/cses.ts`（爬蟲的 HTML 解析邏輯，含 session 過期、CE 過濾、WA 計數、鎖定狀態等邊界情況）與 `server/utils/cache.ts`/`id.ts`。前端元件目前沒有測試，改動後建議跑 `npx netlify-cli dev` 手動過一次。
 
 ## 本機開發
 

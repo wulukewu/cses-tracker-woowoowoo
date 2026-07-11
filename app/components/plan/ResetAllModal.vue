@@ -1,0 +1,126 @@
+<script setup lang="ts">
+defineProps<{
+  weeksCount: number
+  resetPhrase: string
+  resetConfirmText: string
+  resetting: boolean
+}>()
+
+const emit = defineEmits<{
+  close: []
+  confirm: []
+  'update:resetConfirmText': [value: string]
+}>()
+</script>
+
+<template>
+  <div class="modal-overlay" @click.self="emit('close')">
+    <div class="modal-card">
+      <h2>重置所有次別</h2>
+      <p>
+        這會刪除全部 {{ weeksCount }} 個次別的題目與截止日期，無法復原。建議先按「匯出所有資料」備份。
+      </p>
+      <p>
+        請輸入「<strong>{{ resetPhrase }}</strong>」以確認：
+      </p>
+      <input
+        :value="resetConfirmText"
+        type="text"
+        class="reset-confirm-input"
+        autocomplete="off"
+        @input="emit('update:resetConfirmText', ($event.target as HTMLInputElement).value)"
+      />
+      <div class="modal-actions">
+        <button class="cancel-btn" @click="emit('close')">取消</button>
+        <button
+          class="danger-btn"
+          :disabled="resetConfirmText !== resetPhrase || resetting"
+          @click="emit('confirm')"
+        >
+          {{ resetting ? '刪除中...' : '確認刪除全部' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 100;
+}
+
+.modal-card {
+  background: var(--cs-bg);
+  border-radius: var(--cs-radius);
+  max-width: 420px;
+  width: 100%;
+  padding: 1.25rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-card h2 {
+  font-size: 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.modal-card p {
+  font-size: 0.85rem;
+  color: var(--cs-text-secondary);
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+}
+
+.reset-confirm-input {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  background: var(--cs-bg);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  color: var(--cs-text);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.cancel-btn {
+  padding: 0.5rem 0.9rem;
+  background: var(--cs-bg);
+  color: var(--cs-text);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.cancel-btn:hover {
+  border-color: #ccc;
+}
+
+.danger-btn {
+  padding: 0.5rem 0.9rem;
+  background: #b3261e;
+  color: #fff;
+  border: none;
+  border-radius: var(--cs-radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.danger-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+</style>
