@@ -40,18 +40,15 @@ const emit = defineEmits<{
 <style scoped>
 .week-switcher {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0.6rem;
   margin-bottom: 1.25rem;
 }
 
 .week-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
-  overflow-x: auto;
-  flex: 1;
-  min-width: 0;
 }
 
 .week-tab {
@@ -80,8 +77,8 @@ const emit = defineEmits<{
 .week-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.75rem;
-  flex-shrink: 0;
 }
 
 .edit-link {
