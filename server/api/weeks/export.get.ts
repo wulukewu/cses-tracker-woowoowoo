@@ -4,14 +4,16 @@ export default defineEventHandler(async (event) => {
   const weeks = await listWeeks()
   const rawNotes = await listNotes()
 
-  // 深度過濾：移除所有空的或僅含空白的個人筆記，若整題為空則不保留該題
-  const notes: Record<string, Record<string, string>> = {}
+  // 深度過濾：移除所有空的或僅含空白的個人筆記且未卡題的項目，若整題為空則不保留該題
+  const notes: Record<string, Record<string, any>> = {}
   for (const [problemId, contentMap] of Object.entries(rawNotes)) {
     if (contentMap && typeof contentMap === 'object') {
-      const cleanMap: Record<string, string> = {}
-      for (const [username, content] of Object.entries(contentMap)) {
-        if (content && content.trim() !== '') {
-          cleanMap[username] = content
+      const cleanMap: Record<string, any> = {}
+      for (const [username, val] of Object.entries(contentMap)) {
+        const content = val?.content ?? ''
+        const stuck = Boolean(val?.stuck)
+        if (content.trim() !== '' || stuck) {
+          cleanMap[username] = { content, stuck }
         }
       }
       if (Object.keys(cleanMap).length > 0) {

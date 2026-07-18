@@ -4,6 +4,7 @@ import type {
   ProgressResponse,
   SubmissionsResponse,
   Week,
+  UserNote,
 } from '~~/shared/types'
 
 export interface CellInfo {
@@ -69,7 +70,7 @@ export async function useHomeProgress() {
     watch: [selectedWeekId],
   })
 
-  const { data: notes, refresh: refreshNotes } = await useFetch<Record<string, string>>('/api/notes')
+  const { data: notes, refresh: refreshNotes } = await useFetch<Record<string, Record<string, UserNote>>>('/api/notes')
 
   const week = computed(() => progress.value?.week ?? null)
   const users = computed(() => progress.value?.users ?? [])

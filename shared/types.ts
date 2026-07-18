@@ -58,3 +58,9 @@ export interface ProblemStats {
 
 /** `problemStats[problemId]` */
 export type ProblemStatsResponse = Record<string, ProblemStats>
+
+export interface UserNote {
+  content: string
+  stuck: boolean
+}
+

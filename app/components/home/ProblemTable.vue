@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UserProgress, WeekProblem } from '~~/shared/types'
+import type { UserProgress, WeekProblem, UserNote } from '~~/shared/types'
 import type { CellInfo } from '~/composables/useHomeProgress'
 import { cellSymbol } from '~/composables/useHomeProgress'
 
@@ -8,7 +8,7 @@ const props = defineProps<{
   groupedProblems: { name: string; problems: WeekProblem[] }[]
   cellInfo: (userIndex: number, problemId: number) => CellInfo
   problemMeta: (problemId: number) => string
-  notes: Record<string, Record<string, string>>
+  notes: Record<string, Record<string, UserNote>>
 }>()
 
 const emit = defineEmits<{
@@ -17,7 +17,11 @@ const emit = defineEmits<{
 }>()
 
 function hasNote(problemId: number, userName: string) {
-  return Boolean(props.notes?.[String(problemId)]?.[userName]?.trim())
+  return Boolean(props.notes?.[String(problemId)]?.[userName]?.content?.trim())
+}
+
+function hasStuck(problemId: number, userName: string) {
+  return Boolean(props.notes?.[String(problemId)]?.[userName]?.stuck)
 }
 </script>
 
@@ -57,7 +61,8 @@ function hasNote(problemId: number, userName: string) {
               :class="{
                 solved: cellInfo(i, p.id).solved,
                 attempted: cellInfo(i, p.id).waCount > 0,
-                'has-note': hasNote(p.id, u.name)
+                'has-note': hasNote(p.id, u.name),
+                stuck: hasStuck(p.id, u.name)
               }"
               :aria-label="cellInfo(i, p.id).solved ? '已解，點擊查看紀錄與筆記' : cellInfo(i, p.id).waCount ? '嘗試過但未過，點擊查看與編輯筆記' : '未嘗試，點擊查看與編輯筆記'"
               @click="emit('openModal', p, u.name)"
@@ -69,6 +74,13 @@ function hasNote(problemId: number, userName: string) {
               
               <!-- 筆記高亮底線 (取代雜亂的 icon) -->
               <span v-if="hasNote(p.id, u.name)" class="note-indicator-bar" title="有個人解題筆記"></span>
+
+              <!-- 卡題警示角標 (左上角) -->
+              <span v-if="hasStuck(p.id, u.name)" class="stuck-warning-badge" :title="`${u.name} 卡題標記`">
+                <svg viewBox="0 0 24 24" width="8" height="8" class="stuck-warning-svg" aria-hidden="true">
+                  <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+              </span>
 
               <!-- 最快/最先角標 -->
               <span v-if="cellInfo(i, p.id).isFirstSolver || cellInfo(i, p.id).isFastest" class="corner-dots">
@@ -381,5 +393,32 @@ function hasNote(problemId: number, userName: string) {
 
 .fastest-dot {
   background: #2f6fed;
+}
+
+.stuck-warning-badge {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff3e0;
+  border: 1px solid #ffb74d;
+  color: #e65100;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  z-index: 2;
+  animation: badgePop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stuck-warning-svg {
+  flex-shrink: 0;
+}
+
+@keyframes badgePop {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 </style>
