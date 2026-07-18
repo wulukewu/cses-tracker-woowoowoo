@@ -64,14 +64,12 @@ export async function useHomeProgress() {
 
   const forceRefresh = ref(false)
 
-  const {
-    data: progress,
-    pending,
-    refresh,
-  } = await useFetch<ProgressResponse>('/api/progress', {
+  const { data: progress, pending, refresh } = await useFetch<ProgressResponse>('/api/progress', {
     query: { week: selectedWeekId, force: forceRefresh },
     watch: [selectedWeekId],
   })
+
+  const { data: notes, refresh: refreshNotes } = await useFetch<Record<string, string>>('/api/notes')
 
   const week = computed(() => progress.value?.week ?? null)
   const users = computed(() => progress.value?.users ?? [])
@@ -108,7 +106,7 @@ export async function useHomeProgress() {
     refreshing.value = true
     forceRefresh.value = true
     try {
-      await Promise.all([refresh(), refreshSubmissions(), refreshProblemStats()])
+      await Promise.all([refresh(), refreshSubmissions(), refreshProblemStats(), refreshNotes()])
     } finally {
       forceRefresh.value = false
       refreshing.value = false
@@ -218,5 +216,7 @@ export async function useHomeProgress() {
     cellInfo,
     totalProblemCount,
     groupedProblems,
+    notes,
+    refreshNotes,
   }
 }

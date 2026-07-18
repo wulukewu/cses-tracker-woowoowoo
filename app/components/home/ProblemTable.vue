@@ -13,6 +13,7 @@ defineProps<{
 const emit = defineEmits<{
   openProfile: [index: number]
   openModal: [problem: WeekProblem, userName: string]
+  openNote: [problem: WeekProblem]
 }>()
 </script>
 
@@ -33,7 +34,19 @@ const emit = defineEmits<{
         </tr>
         <tr v-for="p in group.problems" :key="p.id">
           <td class="col-problem">
-            <a class="problem-name" :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
+            <div class="problem-title-row">
+              <a class="problem-name" :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
+              <button
+                type="button"
+                class="note-trigger-btn"
+                title="查看/編輯筆記"
+                @click="emit('openNote', p)"
+              >
+                <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" class="note-icon-svg">
+                  <path fill="currentColor" d="M3 2v12h10V4.5L10.5 2H3zm7.5 1L12 4.5H10.5V3zM4 4h5v1H4V4zm0 3h8v1H4V7zm0 3h8v1H4v-1z"/>
+                </svg>
+              </button>
+            </div>
             <span v-if="problemMeta(p.id)" class="problem-meta">{{ problemMeta(p.id) }}</span>
           </td>
           <td v-for="(u, i) in users" :key="u.csesId" class="col-user">
@@ -262,5 +275,34 @@ const emit = defineEmits<{
 
 .fastest-dot {
   background: #2f6fed;
+}
+
+.problem-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.note-trigger-btn {
+  background: none;
+  border: none;
+  padding: 0.2rem;
+  border-radius: 4px;
+  color: var(--cs-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.note-trigger-btn:hover {
+  background: var(--cs-border-subtle);
+  color: var(--cs-accent);
+}
+
+.note-icon-svg {
+  display: block;
 }
 </style>
