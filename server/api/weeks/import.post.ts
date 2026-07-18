@@ -1,4 +1,4 @@
-import { saveWeek, deleteAllWeeks } from '~~/server/utils/blobs'
+import { saveWeek, deleteAllWeeks, saveNote, deleteAllNotes } from '~~/server/utils/blobs'
 import type { Week } from '~~/shared/types'
 
 export default defineEventHandler(async (event) => {
@@ -6,15 +6,25 @@ export default defineEventHandler(async (event) => {
   const mode = query.mode
   const body = await readBody<any>(event)
 
-  if (!Array.isArray(body)) {
+  let weeks: any[] = []
+  let notes: Record<string, string> = {}
+  let isNewFormat = false
+
+  if (body && !Array.isArray(body) && Array.isArray(body.weeks)) {
+    weeks = body.weeks
+    notes = body.notes || {}
+    isNewFormat = true
+  } else if (Array.isArray(body)) {
+    weeks = body
+  } else {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Invalid payload: expected an array of weeks',
+      statusMessage: 'Invalid payload: expected an array of weeks or an object with weeks and notes',
     })
   }
 
   // 驗證結構是否符合 Week 介面
-  for (const item of body) {
+  for (const item of weeks) {
     if (!item.id || !item.createdAt || !Array.isArray(item.problems)) {
       throw createError({
         statusCode: 400,
@@ -31,16 +41,36 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  if (mode === 'overwrite') {
-    await deleteAllWeeks()
+  // 驗證 notes 結構
+  if (notes && typeof notes !== 'object') {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid notes structure in import payload',
+    })
   }
 
-  for (const week of body) {
+  if (mode === 'overwrite') {
+    await deleteAllWeeks()
+    if (isNewFormat) {
+      await deleteAllNotes()
+    }
+  }
+
+  for (const week of weeks) {
     await saveWeek(week as Week)
+  }
+
+  if (isNewFormat && notes) {
+    for (const [id, content] of Object.entries(notes)) {
+      if (typeof content === 'string') {
+        await saveNote(id, content)
+      }
+    }
   }
 
   return {
     success: true,
-    importedCount: body.length,
+    importedCount: weeks.length,
+    importedNotesCount: isNewFormat ? Object.keys(notes).length : 0,
   }
 })

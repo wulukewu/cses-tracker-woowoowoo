@@ -18,6 +18,7 @@ const {
   cellInfo,
   totalProblemCount,
   groupedProblems,
+  notes,
 } = await useHomeProgress()
 
 const {
@@ -33,6 +34,21 @@ const {
 
 const modalProblem = ref<WeekProblem | null>(null)
 const modalUserName = ref<string | null>(null)
+const selectedNoteProblem = ref<WeekProblem | null>(null)
+
+function openNoteModal(problem: WeekProblem) {
+  selectedNoteProblem.value = problem
+}
+
+function handleSaveNote(username: string, content: string) {
+  if (notes.value && selectedNoteProblem.value) {
+    const pid = String(selectedNoteProblem.value.id)
+    if (!notes.value[pid]) {
+      notes.value[pid] = {}
+    }
+    notes.value[pid][username] = content
+  }
+}
 
 const modalSummary = computed(() => {
   if (!modalProblem.value || !modalUserName.value) return null
@@ -53,7 +69,11 @@ function closeModal() {
 // the page behind it — the fixed overlay stays put but the body scrolls,
 // which shows up as the page's own scrollbar (detached from the card)
 // moving instead of the modal's.
-const anyModalOpen = computed(() => Boolean((modalProblem.value && modalUserName.value) || profileUser.value))
+const anyModalOpen = computed(() => Boolean(
+  (modalProblem.value && modalUserName.value) || 
+  profileUser.value || 
+  selectedNoteProblem.value
+))
 
 watch(anyModalOpen, (open) => {
   if (import.meta.client) document.body.style.overflow = open ? 'hidden' : ''
@@ -95,6 +115,7 @@ onUnmounted(() => {
         :problem-meta="problemMeta"
         @open-profile="openProfile"
         @open-modal="openModal"
+        @open-note="openNoteModal"
       />
     </template>
 
@@ -104,6 +125,14 @@ onUnmounted(() => {
       :user-name="modalUserName"
       :summary="modalSummary"
       @close="closeModal"
+    />
+
+    <HomeProblemNoteModal
+      v-if="selectedNoteProblem"
+      :problem="selectedNoteProblem"
+      :notes="notes?.[String(selectedNoteProblem.id)] || {}"
+      @close="selectedNoteProblem = null"
+      @save="handleSaveNote"
     />
 
     <HomeUserProfileModal
