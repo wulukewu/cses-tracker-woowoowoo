@@ -5,12 +5,13 @@ export default defineEventHandler(async (event) => {
   if (!id) {
     throw createError({ statusCode: 400, statusMessage: 'id is required' })
   }
-  const body = await readBody<{ username: string; content: string }>(event)
+  const body = await readBody<{ username: string; content?: string; stuck?: boolean }>(event)
   const username = body?.username
   if (!username) {
     throw createError({ statusCode: 400, statusMessage: 'username is required' })
   }
   const content = body?.content ?? ''
-  await saveNote(id, username, content)
+  const stuck = Boolean(body?.stuck)
+  await saveNote(id, username, content, stuck)
   return { success: true }
 })

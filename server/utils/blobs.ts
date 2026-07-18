@@ -1,5 +1,5 @@
 import { getStore } from './netlifyBlobs'
-import type { Week } from '~~/shared/types'
+import type { Week, UserNote } from '~~/shared/types'
 
 function weeksStore() {
   return getStore('weeks')
@@ -75,46 +75,62 @@ const DEFAULT_NOTES: Record<string, Record<string, string>> = {
   "1744": { "lukewu": "題目 : a*b長方形 切成最少數量的正方形\n想法 : 跟最大公因數有關嗎 感覺" }
 }
 
-export async function listNotes(): Promise<Record<string, Record<string, string>>> {
+export function normalizeNotes(raw: Record<string, any>): Record<string, UserNote> {
+  const normalized: Record<string, UserNote> = {}
+  for (const [username, val] of Object.entries(raw)) {
+    if (typeof val === 'string') {
+      normalized[username] = { content: val, stuck: false }
+    } else {
+      normalized[username] = {
+        content: val?.content ?? '',
+        stuck: Boolean(val?.stuck),
+      }
+    }
+  }
+  return normalized
+}
+
+export async function listNotes(): Promise<Record<string, Record<string, UserNote>>> {
   const store = notesStore()
   const { blobs } = await store.list()
   
   if (blobs.length === 0) {
+    const normalizedDefault: Record<string, Record<string, UserNote>> = {}
     for (const [id, contentMap] of Object.entries(DEFAULT_NOTES)) {
-      await store.setJSON(id, contentMap)
+      const normalized = normalizeNotes(contentMap)
+      await store.setJSON(id, normalized)
+      normalizedDefault[id] = normalized
     }
-    return DEFAULT_NOTES
+    return normalizedDefault
   }
 
-  const result: Record<string, Record<string, string>> = {}
+  const result: Record<string, Record<string, UserNote>> = {}
   await Promise.all(
     blobs.map(async (b) => {
       const contentMap = await store.get(b.key, { type: 'json' })
       if (contentMap !== null) {
-        result[b.key] = contentMap as Record<string, string>
+        result[b.key] = normalizeNotes(contentMap as Record<string, any>)
       }
     })
   )
   return result
 }
 
-export async function getNote(problemId: string): Promise<Record<string, string>> {
+export async function getNote(problemId: string): Promise<Record<string, UserNote>> {
   const store = notesStore()
   const val = await store.get(problemId, { type: 'json' })
-  if (val === null) {
-    return DEFAULT_NOTES[problemId] || {}
-  }
-  return val as Record<string, string>
+  const raw = val === null ? (DEFAULT_NOTES[problemId] || {}) : val
+  return normalizeNotes(raw as Record<string, any>)
 }
 
-export async function saveNote(problemId: string, username: string, content: string): Promise<void> {
+export async function saveNote(problemId: string, username: string, content: string, stuck: boolean = false): Promise<void> {
   const store = notesStore()
   const val = await getNote(problemId)
   
-  if (!content || content.trim() === '') {
+  if ((!content || content.trim() === '') && !stuck) {
     delete val[username]
   } else {
-    val[username] = content
+    val[username] = { content, stuck }
   }
   
   if (Object.keys(val).length === 0) {

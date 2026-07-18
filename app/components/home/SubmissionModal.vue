@@ -7,16 +7,19 @@ const props = defineProps<{
   userName: string
   summary: SubmissionSummary | null
   initialNoteContent: string
+  initialStuck: boolean
   locked: boolean
 }>()
 
 const emit = defineEmits<{
   close: []
-  saveNote: [username: string, content: string]
+  saveNote: [username: string, content: string, stuck: boolean]
 }>()
 
 const editedContent = ref('')
 const lastSavedContent = ref('')
+const editedStuck = ref(false)
+const lastSavedStuck = ref(false)
 const syncStatus = ref<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
 const reversedSubmissions = computed(() => {
@@ -27,6 +30,8 @@ const reversedSubmissions = computed(() => {
 watch([() => props.problem.id, () => props.userName], () => {
   editedContent.value = props.initialNoteContent || ''
   lastSavedContent.value = props.initialNoteContent || ''
+  editedStuck.value = props.initialStuck || false
+  lastSavedStuck.value = props.initialStuck || false
   syncStatus.value = 'idle'
 }, { immediate: true })
 
@@ -34,12 +39,13 @@ let saveTimeout: any = null
 
 // 執行背景儲存 API 呼叫
 async function performSave() {
-  if (editedContent.value === lastSavedContent.value) {
+  if (editedContent.value === lastSavedContent.value && editedStuck.value === lastSavedStuck.value) {
     syncStatus.value = 'saved'
     return
   }
 
   const contentToSave = editedContent.value
+  const stuckToSave = editedStuck.value
   syncStatus.value = 'saving'
   try {
     const { error } = await useFetch(`/api/notes/${props.problem.id}`, {
@@ -47,6 +53,7 @@ async function performSave() {
       body: {
         username: props.userName,
         content: contentToSave,
+        stuck: stuckToSave,
       },
     })
     if (error.value) {
@@ -54,21 +61,21 @@ async function performSave() {
     } else {
       syncStatus.value = 'saved'
       lastSavedContent.value = contentToSave
-      emit('saveNote', props.userName, contentToSave)
+      lastSavedStuck.value = stuckToSave
+      emit('saveNote', props.userName, contentToSave, stuckToSave)
     }
   } catch (err) {
     syncStatus.value = 'error'
   }
 }
 
-// 監聽輸入內容的異動，只要與最後一次儲存的內容不一致，就立刻進入同步準備
-watch(editedContent, (newVal) => {
-  if (newVal !== lastSavedContent.value) {
+// 監聽輸入內容或卡題狀態的異動
+watch([editedContent, editedStuck], ([newContent, newStuck]) => {
+  if (newContent !== lastSavedContent.value || newStuck !== lastSavedStuck.value) {
     syncStatus.value = 'saving'
     if (saveTimeout) clearTimeout(saveTimeout)
-    saveTimeout = setTimeout(performSave, 1000) // 停止打字 1 秒後自動儲存
+    saveTimeout = setTimeout(performSave, 1000) // 異動 1 秒後自動儲存
   } else {
-    // 若內容恢復到與最後一次儲存一致，則回到已同步狀態
     syncStatus.value = 'saved'
   }
 })
@@ -200,8 +207,21 @@ onUnmounted(() => {
           <h3 class="col-title">解題筆記</h3>
           <div class="col-content">
             <div class="note-edit-container">
-              <div class="editor-info">
-                您正在編輯 {{ userName }} 的解題想法。
+              <div class="note-edit-header-row">
+                <div class="editor-info">
+                  您正在編輯 {{ userName }} 的解題想法。
+                </div>
+                <label class="stuck-checkbox-label">
+                  <input
+                    type="checkbox"
+                    v-model="editedStuck"
+                    class="stuck-checkbox"
+                  />
+                  <svg viewBox="0 0 24 24" width="14" height="14" class="stuck-checkbox-warning-icon" aria-hidden="true">
+                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                  </svg>
+                  <span>標記為卡題</span>
+                </label>
               </div>
               <textarea
                 v-model="editedContent"
@@ -584,5 +604,51 @@ onUnmounted(() => {
   color: var(--cs-text-muted);
   margin: 0;
   max-width: 240px;
+}
+
+.note-edit-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stuck-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--cs-text-secondary);
+  cursor: pointer;
+  user-select: none;
+  background: var(--cs-bg-subtle);
+  border: 1px solid var(--cs-border);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.stuck-checkbox-label:hover {
+  background: #fff8e1;
+  border-color: #ffe082;
+  color: #b45309;
+}
+
+.stuck-checkbox-label:has(input:checked) {
+  background: #fff3e0;
+  border-color: #ffb74d;
+  color: #e65100;
+}
+
+.stuck-checkbox {
+  accent-color: #e65100;
+  cursor: pointer;
+}
+
+.stuck-checkbox-warning-icon {
+  color: #ff9800;
+  flex-shrink: 0;
 }
 </style>

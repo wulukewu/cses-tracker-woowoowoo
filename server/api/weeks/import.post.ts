@@ -63,14 +63,18 @@ export default defineEventHandler(async (event) => {
   if (isNewFormat && notes) {
     for (const [problemId, val] of Object.entries(notes)) {
       if (val && typeof val === 'object') {
-        for (const [username, content] of Object.entries(val)) {
-          if (typeof content === 'string') {
-            await saveNote(problemId, username, content)
+        for (const [username, noteVal] of Object.entries(val)) {
+          if (typeof noteVal === 'string') {
+            await saveNote(problemId, username, noteVal, false)
+          } else if (noteVal && typeof noteVal === 'object') {
+            const content = (noteVal as any).content ?? ''
+            const stuck = Boolean((noteVal as any).stuck)
+            await saveNote(problemId, username, content, stuck)
           }
         }
       } else if (typeof val === 'string') {
         // 向後相容舊格式：若為純字串，預設歸屬為 'lukewu'
-        await saveNote(problemId, 'lukewu', val)
+        await saveNote(problemId, 'lukewu', val, false)
       }
     }
   }

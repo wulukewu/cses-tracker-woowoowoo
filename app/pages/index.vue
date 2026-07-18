@@ -35,7 +35,7 @@ const {
 const modalProblem = ref<WeekProblem | null>(null)
 const modalUserName = ref<string | null>(null)
 
-function handleSaveNote(username: string, content: string) {
+function handleSaveNote(username: string, content: string, stuck: boolean) {
   if (notes.value && modalProblem.value) {
     const pid = String(modalProblem.value.id)
     const newNotes = { ...notes.value }
@@ -44,7 +44,7 @@ function handleSaveNote(username: string, content: string) {
     }
     newNotes[pid] = {
       ...newNotes[pid],
-      [username]: content
+      [username]: { content, stuck }
     }
     notes.value = newNotes
   }
@@ -130,7 +130,8 @@ onUnmounted(() => {
       :problem="modalProblem"
       :user-name="modalUserName"
       :summary="modalSummary"
-      :initial-note-content="notes?.[String(modalProblem.id)]?.[modalUserName] || ''"
+      :initial-note-content="notes?.[String(modalProblem.id)]?.[modalUserName]?.content || ''"
+      :initial-stuck="notes?.[String(modalProblem.id)]?.[modalUserName]?.stuck || false"
       :locked="modalLocked"
       @close="closeModal"
       @save-note="handleSaveNote"
