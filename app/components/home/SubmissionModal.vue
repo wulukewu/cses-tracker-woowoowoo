@@ -7,6 +7,7 @@ const props = defineProps<{
   userName: string
   summary: SubmissionSummary | null
   initialNoteContent: string
+  locked: boolean
 }>()
 
 const emit = defineEmits<{
@@ -144,32 +145,53 @@ onUnmounted(() => {
       <div class="modal-body-split">
         <!-- 左欄：送出紀錄 -->
         <div class="split-col left-col">
-          <h3 class="col-title">送出紀錄 ({{ summary?.submissions?.length || 0 }})</h3>
+          <h3 class="col-title">送出紀錄 ({{ locked ? 0 : (summary?.submissions?.length || 0) }})</h3>
           <div class="col-content">
-            <ul v-if="reversedSubmissions.length" class="submission-list">
-              <li
-                v-for="(s, idx) in reversedSubmissions"
-                :key="idx"
-                class="submission-row"
-                :class="s.verdict === 'AC' ? 'ac' : 'fail'"
-              >
-                <a v-if="s.detailUrl" :href="s.detailUrl" target="_blank" rel="noopener" class="submission-link">
-                  <span class="submission-main">
-                    <span class="submission-time">{{ s.time }}</span>
-                    <span class="submission-verdict">✓</span>
-                  </span>
-                  <span class="submission-meta">{{ s.lang }} · {{ s.execTime }} · {{ s.codeSize }}</span>
-                </a>
-                <template v-else>
-                  <span class="submission-main">
-                    <span class="submission-time">{{ s.time }}</span>
-                    <span class="submission-verdict">{{ s.verdict === 'AC' ? '✓' : '✗' }}</span>
-                  </span>
-                  <span class="submission-meta">{{ s.lang }} · {{ s.execTime }} · {{ s.codeSize }}</span>
-                </template>
-              </li>
-            </ul>
-            <p v-else class="empty-state">沒有抓到提交紀錄。</p>
+            <!-- 鎖定狀態提示 -->
+            <div v-if="locked" class="locked-state-col">
+              <svg class="locked-icon-large" viewBox="0 0 16 16" width="36" height="36">
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2"
+                />
+                <rect x="3.5" y="7" width="9" height="7" rx="1.4" fill="currentColor" />
+              </svg>
+              <h4 class="locked-title">尚未解鎖紀錄</h4>
+              <p class="locked-desc">
+                追蹤用的分身帳號尚未在 CSES 通過此題，因此無法載入提交紀錄。請使用分身帳號通過本題後，再行重新整理。
+              </p>
+            </div>
+            
+            <template v-else>
+              <ul v-if="reversedSubmissions.length" class="submission-list">
+                <li
+                  v-for="(s, idx) in reversedSubmissions"
+                  :key="idx"
+                  class="submission-row"
+                  :class="s.verdict === 'AC' ? 'ac' : 'fail'"
+                >
+                  <a v-if="s.detailUrl" :href="s.detailUrl" target="_blank" rel="noopener" class="submission-link">
+                    <span class="submission-main">
+                      <span class="submission-time">{{ s.time }}</span>
+                      <span class="submission-verdict">✓</span>
+                    </span>
+                    <span class="submission-meta">{{ s.lang }} · {{ s.execTime }} · {{ s.codeSize }}</span>
+                  </a>
+                  <template v-else>
+                    <span class="submission-main">
+                      <span class="submission-time">{{ s.time }}</span>
+                      <span class="submission-verdict">{{ s.verdict === 'AC' ? '✓' : '✗' }}</span>
+                    </span>
+                    <span class="submission-meta">{{ s.lang }} · {{ s.execTime }} · {{ s.codeSize }}</span>
+                  </template>
+                </li>
+              </ul>
+              <p v-else class="empty-state">沒有抓到提交紀錄。</p>
+            </template>
           </div>
         </div>
 
@@ -529,5 +551,38 @@ onUnmounted(() => {
   text-align: center;
   color: var(--cs-text-muted);
   font-size: 0.85rem;
+}
+
+.locked-state-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  min-height: 250px;
+  padding: 2rem 1rem;
+  color: var(--cs-text-secondary);
+}
+
+.locked-icon-large {
+  color: var(--cs-text-muted);
+  margin-bottom: 0.75rem;
+  opacity: 0.85;
+}
+
+.locked-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cs-text);
+  margin: 0 0 0.4rem 0;
+}
+
+.locked-desc {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--cs-text-muted);
+  margin: 0;
+  max-width: 240px;
 }
 </style>

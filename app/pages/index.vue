@@ -55,6 +55,13 @@ const modalSummary = computed(() => {
   return submissions.value?.[String(modalProblem.value.id)]?.[modalUserName.value] ?? null
 })
 
+const modalLocked = computed(() => {
+  if (!modalProblem.value || !modalUserName.value) return false
+  const uIdx = users.value.findIndex(u => u.name === modalUserName.value)
+  if (uIdx === -1) return false
+  return cellInfo(uIdx, modalProblem.value.id).locked
+})
+
 function openModal(problem: WeekProblem, userName: string) {
   modalProblem.value = problem
   modalUserName.value = userName
@@ -124,6 +131,7 @@ onUnmounted(() => {
       :user-name="modalUserName"
       :summary="modalSummary"
       :initial-note-content="notes?.[String(modalProblem.id)]?.[modalUserName] || ''"
+      :locked="modalLocked"
       @close="closeModal"
       @save-note="handleSaveNote"
     />
