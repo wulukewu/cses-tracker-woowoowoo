@@ -8,8 +8,17 @@ function createLocalStore(storeName: string) {
     return encodeURIComponent(key)
   }
 
+  // 偵測是否在 Netlify (AWS Lambda) 雲端執行期環境
+  const isNetlifyRuntime = Boolean(
+    process.env.NETLIFY === 'true' ||
+    process.env.NETLIFY === '1' ||
+    process.env.LAMBDA_TASK_ROOT ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    process.cwd().startsWith('/var/task')
+  )
+
   // 如果在 Netlify 環境，寫入到 /tmp，否則寫入專案的 .data/blobs
-  const baseDir = (process.env.NETLIFY === 'true' || process.env.NETLIFY === '1')
+  const baseDir = isNetlifyRuntime
     ? path.join('/tmp', 'netlify-blobs', storeName)
     : path.join(process.cwd(), '.data', 'blobs', storeName)
 
@@ -77,24 +86,13 @@ function createLocalStore(storeName: string) {
 }
 
 export function getStore(storeName: string): any {
-  const isNetlify = process.env.NETLIFY === 'true' || process.env.NETLIFY === '1'
-  const hasLocalCreds = Boolean(
-    process.env.NETLIFY_BLOBS_API_URL ||
-    (process.env.NETLIFY_SITE_ID && process.env.NETLIFY_AUTH_TOKEN)
-  )
-
   const local = createLocalStore(storeName)
-
-  // 如果根本不符合 Netlify 條件，直接回傳本地商店
-  if (!isNetlify && !hasLocalCreds) {
-    return local
-  }
 
   let netlifyStore: any = null
   try {
     netlifyStore = netlifyGetStore(storeName)
   } catch (err: any) {
-    console.error(`[netlify-blobs] getStore initialization failed for ${storeName}:`, err)
+    // 當在本地開發或沒有環境變數時，直接回傳本地商店
     return local
   }
 
