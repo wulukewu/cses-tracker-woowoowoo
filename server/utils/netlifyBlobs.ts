@@ -8,8 +8,10 @@ function createLocalStore(storeName: string) {
     return encodeURIComponent(key)
   }
 
-  // 本地 storage 目錄：專案根目錄下的 .data/blobs/[storeName]
-  const baseDir = path.join(process.cwd(), '.data', 'blobs', storeName)
+  // 如果在 Netlify 環境，寫入到 /tmp，否則寫入專案的 .data/blobs
+  const baseDir = (process.env.NETLIFY === 'true' || process.env.NETLIFY === '1')
+    ? path.join('/tmp', 'netlify-blobs', storeName)
+    : path.join(process.cwd(), '.data', 'blobs', storeName)
 
   const ensureDir = () => {
     if (!fs.existsSync(baseDir)) {
@@ -81,17 +83,51 @@ export function getStore(storeName: string): any {
     (process.env.NETLIFY_SITE_ID && process.env.NETLIFY_AUTH_TOKEN)
   )
 
-  // 如果不在 Netlify 雲端環境，且沒有相關 CLI 憑證變數，就直接使用本地 Fallback Store
+  const local = createLocalStore(storeName)
+
+  // 如果根本不符合 Netlify 條件，直接回傳本地商店
   if (!isNetlify && !hasLocalCreds) {
-    return createLocalStore(storeName)
+    return local
   }
 
+  let netlifyStore: any = null
   try {
-    return netlifyGetStore(storeName)
+    netlifyStore = netlifyGetStore(storeName)
   } catch (err: any) {
-    if (err?.name === 'MissingBlobsEnvironmentError' || err?.message?.includes('Netlify Blobs')) {
-      return createLocalStore(storeName)
+    console.error(`[netlify-blobs] getStore initialization failed for ${storeName}:`, err)
+    return local
+  }
+
+  // 封裝以確保任何執行期錯誤（如 deploy preview 無寫入權限 403）都能降級回本地商店
+  let useFallback = false
+
+  const safeOp = async (opName: string, ...args: any[]) => {
+    if (!useFallback && netlifyStore) {
+      try {
+        return await netlifyStore[opName](...args)
+      } catch (err: any) {
+        console.error(`[netlify-blobs] Operation ${opName} failed on Netlify store ${storeName}, falling back to local:`, err)
+        useFallback = true
+      }
     }
-    throw err
+    return await (local as any)[opName](...args)
+  }
+
+  return {
+    async get(key: string, options?: any) {
+      return safeOp('get', key, options)
+    },
+    async set(key: string, value: any) {
+      return safeOp('set', key, value)
+    },
+    async setJSON(key: string, value: any) {
+      return safeOp('setJSON', key, value)
+    },
+    async delete(key: string) {
+      return safeOp('delete', key)
+    },
+    async list() {
+      return safeOp('list')
+    }
   }
 }
