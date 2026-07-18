@@ -190,12 +190,6 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-
-      <footer class="modal-footer">
-        <span class="user-hint-text">
-          本欄展示 {{ userName }} 於此題之送出紀錄與解題思維，提供同伴間對照學習。
-        </span>
-      </footer>
     </div>
   </div>
 </template>
@@ -402,7 +396,7 @@ onUnmounted(() => {
   display: flex;
   flex: 1;
   overflow: hidden;
-  height: calc(100% - 100px); /* 扣除 header 與 footer */
+  height: calc(100% - 56px); /* 僅扣除 header */
 }
 
 .split-col {
@@ -535,20 +529,5 @@ onUnmounted(() => {
   text-align: center;
   color: var(--cs-text-muted);
   font-size: 0.85rem;
-}
-
-.modal-footer {
-  padding: 0.75rem 1.5rem;
-  border-top: 1px solid var(--cs-border-subtle);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--cs-bg-subtle);
-}
-
-.user-hint-text {
-  font-size: 0.75rem;
-  color: var(--cs-text-secondary);
-  line-height: 1.4;
 }
 </style>
