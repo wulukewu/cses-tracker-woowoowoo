@@ -38,10 +38,15 @@ const modalUserName = ref<string | null>(null)
 function handleSaveNote(username: string, content: string) {
   if (notes.value && modalProblem.value) {
     const pid = String(modalProblem.value.id)
-    if (!notes.value[pid]) {
-      notes.value[pid] = {}
+    const newNotes = { ...notes.value }
+    if (!newNotes[pid]) {
+      newNotes[pid] = {}
     }
-    notes.value[pid][username] = content
+    newNotes[pid] = {
+      ...newNotes[pid],
+      [username]: content
+    }
+    notes.value = newNotes
   }
 }
 
