@@ -1,4 +1,4 @@
-import { getStore } from '@netlify/blobs'
+import { getStore } from './netlifyBlobs'
 import type { Week } from '~~/shared/types'
 
 function weeksStore() {
