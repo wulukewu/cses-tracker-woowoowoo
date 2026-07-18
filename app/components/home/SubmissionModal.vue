@@ -15,58 +15,60 @@ const emit = defineEmits<{
 }>()
 
 const editedContent = ref('')
+const lastSavedContent = ref('')
 const syncStatus = ref<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
 const reversedSubmissions = computed(() => {
   return [...(props.summary?.submissions ?? [])].reverse()
 })
 
-// 用於追蹤 initial 載入，防止一打開 Modal 還沒打字就觸發 saving 狀態
-let isInitialLoad = true
-
-watch(() => props.initialNoteContent, (newVal) => {
-  editedContent.value = newVal || ''
-  // 每次從外部傳入 initial 值時，將狀態設為 idle
+// 初始化：只有在 Modal 開啟、切換題目或切換使用者時，才載入初始值
+watch([() => props.problem.id, () => props.userName], () => {
+  editedContent.value = props.initialNoteContent || ''
+  lastSavedContent.value = props.initialNoteContent || ''
   syncStatus.value = 'idle'
-  isInitialLoad = true
 }, { immediate: true })
 
 let saveTimeout: any = null
 
 // 執行背景儲存 API 呼叫
 async function performSave() {
+  if (editedContent.value === lastSavedContent.value) {
+    syncStatus.value = 'saved'
+    return
+  }
+
+  const contentToSave = editedContent.value
   syncStatus.value = 'saving'
   try {
     const { error } = await useFetch(`/api/notes/${props.problem.id}`, {
       method: 'PUT',
       body: {
         username: props.userName,
-        content: editedContent.value,
+        content: contentToSave,
       },
     })
     if (error.value) {
       syncStatus.value = 'error'
     } else {
       syncStatus.value = 'saved'
-      emit('saveNote', props.userName, editedContent.value)
+      lastSavedContent.value = contentToSave
+      emit('saveNote', props.userName, contentToSave)
     }
   } catch (err) {
     syncStatus.value = 'error'
   }
 }
 
-// 監聽輸入內容的異動
+// 監聽輸入內容的異動，只要與最後一次儲存的內容不一致，就立刻進入同步準備
 watch(editedContent, (newVal) => {
-  if (isInitialLoad) {
-    isInitialLoad = false
-    return
-  }
-
-  // 內容確實有改變才進行同步
-  if (newVal !== (props.initialNoteContent || '')) {
+  if (newVal !== lastSavedContent.value) {
     syncStatus.value = 'saving'
     if (saveTimeout) clearTimeout(saveTimeout)
     saveTimeout = setTimeout(performSave, 1000) // 停止打字 1 秒後自動儲存
+  } else {
+    // 若內容恢復到與最後一次儲存一致，則回到已同步狀態
+    syncStatus.value = 'saved'
   }
 })
 
@@ -153,19 +155,18 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- 右欄：解題筆記 (Auto-save) -->
+        <!-- 右欄：解題筆記 -->
         <div class="split-col right-col">
           <h3 class="col-title">解題筆記</h3>
           <div class="col-content">
             <div class="note-edit-container">
               <div class="editor-info">
-                您正在編輯 {{ userName }} 的解題想法。系統會在您停止輸入時在背景自動同步。
+                您正在編輯 {{ userName }} 的解題想法。
               </div>
               <textarea
                 v-model="editedContent"
                 class="note-textarea"
                 placeholder="例如：題目大意、實作想法、遇到的坑與 DP 轉移方程式..."
-                :disabled="syncStatus === 'saving' && false"
               ></textarea>
             </div>
           </div>
