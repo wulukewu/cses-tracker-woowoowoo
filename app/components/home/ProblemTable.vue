@@ -28,7 +28,7 @@ function hasNote(problemId: number, userName: string) {
         <tr>
           <th class="col-problem">題目</th>
           <th v-for="(u, i) in users" :key="u.csesId" class="col-user">
-            <button type="button" class="user-name-btn" @click="emit('openProfile', i)">{{ u.name }}</button>
+            <button type="button" class="user-name-btn" :title="u.name" @click="emit('openProfile', i)">{{ u.name }}</button>
           </th>
         </tr>
       </thead>
@@ -116,6 +116,7 @@ function hasNote(problemId: number, userName: string) {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.88rem;
+  table-layout: fixed;
 }
 
 .problem-table thead tr {
@@ -208,7 +209,7 @@ function hasNote(problemId: number, userName: string) {
 }
 
 .col-user {
-  width: 100px;
+  width: 120px;
   text-align: center;
   padding: 0.5rem !important; /* 縮減 padding 讓格子卡片有更大發揮空間 */
 }
@@ -221,6 +222,11 @@ function hasNote(problemId: number, userName: string) {
   border: none;
   padding: 0;
   cursor: pointer;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .user-name-btn:hover {
