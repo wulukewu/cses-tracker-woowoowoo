@@ -211,16 +211,14 @@ onUnmounted(() => {
                 <div class="editor-info">
                   您正在編輯 {{ userName }} 的解題想法。
                 </div>
-                <label class="stuck-checkbox-label">
+                <label class="stuck-toggle-label">
+                  <span class="stuck-toggle-text">卡題標記</span>
                   <input
                     type="checkbox"
                     v-model="editedStuck"
-                    class="stuck-checkbox"
+                    class="stuck-toggle-input"
                   />
-                  <svg viewBox="0 0 24 24" width="14" height="14" class="stuck-checkbox-warning-icon" aria-hidden="true">
-                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                  </svg>
-                  <span>標記為卡題</span>
+                  <span class="stuck-toggle-switch"></span>
                 </label>
               </div>
               <textarea
@@ -612,43 +610,61 @@ onUnmounted(() => {
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+  padding: 0.5rem 0.75rem;
+  background: var(--cs-bg-subtle);
+  border: 1px solid var(--cs-border-subtle);
+  border-radius: 6px;
 }
 
-.stuck-checkbox-label {
+.stuck-toggle-label {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--cs-text-secondary);
+  gap: 0.5rem;
   cursor: pointer;
   user-select: none;
-  background: var(--cs-bg-subtle);
-  border: 1px solid var(--cs-border);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: all 0.15s ease;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--cs-text-secondary);
 }
 
-.stuck-checkbox-label:hover {
-  background: #fff8e1;
-  border-color: #ffe082;
-  color: #b45309;
+.stuck-toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.stuck-checkbox-label:has(input:checked) {
-  background: #fff3e0;
-  border-color: #ffb74d;
-  color: #e65100;
+.stuck-toggle-switch {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  background-color: var(--cs-border);
+  border-radius: 99px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.stuck-checkbox {
-  accent-color: #e65100;
-  cursor: pointer;
+.stuck-toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--cs-bg);
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.stuck-checkbox-warning-icon {
-  color: #ff9800;
-  flex-shrink: 0;
+.stuck-toggle-input:checked + .stuck-toggle-switch {
+  background-color: #ff9800;
+}
+
+.stuck-toggle-input:checked + .stuck-toggle-switch::after {
+  transform: translateX(14px);
+}
+
+.stuck-toggle-label:hover .stuck-toggle-switch {
+  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.15);
 }
 </style>
