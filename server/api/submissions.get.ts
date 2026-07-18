@@ -17,24 +17,29 @@ export default defineEventHandler(async (event): Promise<SubmissionsResponse> =>
   const config = useRuntimeConfig()
   const sessionCookie = config.csesSessionCookie
 
-  const result: SubmissionsResponse = {}
-
-  await Promise.all(
-    week.problems.map(async (problem) => {
-      const perUser = await Promise.all(
-        USERS.map(async (user) => {
-          const summary = await cachedBlob(
-            `submissions:${problem.id}:${user.name}`,
-            TTL_MS,
-            () => fetchSubmissionSummary(problem.id, user.name, sessionCookie),
-            { force },
+  return await cachedBlob(
+    `submissions-week:${week.id}`,
+    TTL_MS,
+    async () => {
+      const result: SubmissionsResponse = {}
+      await Promise.all(
+        week.problems.map(async (problem) => {
+          const perUser = await Promise.all(
+            USERS.map(async (user) => {
+              const summary = await cachedBlob(
+                `submissions:${problem.id}:${user.name}`,
+                TTL_MS,
+                () => fetchSubmissionSummary(problem.id, user.name, sessionCookie),
+                { force },
+              )
+              return [user.name, summary] as const
+            }),
           )
-          return [user.name, summary] as const
+          result[String(problem.id)] = Object.fromEntries(perUser)
         }),
       )
-      result[String(problem.id)] = Object.fromEntries(perUser)
-    }),
+      return result
+    },
+    { force, event },
   )
-
-  return result
 })
