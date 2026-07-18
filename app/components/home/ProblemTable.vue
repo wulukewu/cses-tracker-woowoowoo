@@ -210,7 +210,7 @@ function hasNote(problemId: number, userName: string) {
 
 .col-user {
   width: 120px;
-  text-align: center;
+  text-align: center !important; /* 強制置中以覆蓋 th text-align: left */
   padding: 0.5rem !important; /* 縮減 padding 讓格子卡片有更大發揮空間 */
 }
 
@@ -223,10 +223,12 @@ function hasNote(problemId: number, userName: string) {
   padding: 0;
   cursor: pointer;
   max-width: 100%;
+  width: 100%;
+  text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  display: inline-block;
+  display: block;
 }
 
 .user-name-btn:hover {
