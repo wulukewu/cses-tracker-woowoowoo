@@ -79,6 +79,15 @@ async function tryClose() {
   emit('close')
 }
 
+const tooltipText = computed(() => {
+  switch (syncStatus.value) {
+    case 'saving': return '同步中...'
+    case 'saved': return '已同步'
+    case 'error': return '同步失敗，請檢查網路'
+    default: return '已同步'
+  }
+})
+
 onUnmounted(() => {
   if (saveTimeout) clearTimeout(saveTimeout)
 })
@@ -95,16 +104,10 @@ onUnmounted(() => {
         
         <div class="header-actions">
           <!-- 自動儲存雲端同步狀態顯示器 (無 emoji) -->
-          <div class="sync-indicator" :class="syncStatus">
+          <div class="sync-indicator" :class="syncStatus" :title="tooltipText">
             <svg viewBox="0 0 24 24" width="16" height="16" class="sync-cloud-icon" aria-hidden="true">
               <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/>
             </svg>
-            <span class="sync-text">
-              <template v-if="syncStatus === 'saving'">同步中...</template>
-              <template v-else-if="syncStatus === 'saved'">已同步</template>
-              <template v-else-if="syncStatus === 'error'">同步失敗</template>
-              <template v-else>已就緒</template>
-            </span>
           </div>
 
           <button
@@ -275,44 +278,64 @@ onUnmounted(() => {
 .sync-indicator {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.78rem;
-  color: var(--cs-text-secondary);
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--cs-text-muted); /* 預設為灰色 */
   background: var(--cs-bg-subtle);
   border: 1px solid var(--cs-border-subtle);
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: help;
 }
 
 .sync-cloud-icon {
   flex-shrink: 0;
 }
 
-/* 同步中：呼吸動畫 */
+/* 同步中：綠色雲朵 + 浮動呼吸動畫 */
 .sync-indicator.saving {
-  color: var(--cs-text-secondary);
-  animation: pulse 1.5s infinite ease-in-out;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
-
-/* 已同步：綠色 */
-.sync-indicator.saved {
   color: var(--cs-accent);
   background: var(--cs-accent-bg);
   border-color: rgba(10, 143, 92, 0.15);
+  animation: floatPulse 1.6s infinite ease-in-out;
 }
 
-/* 同步失敗：紅色 */
+@keyframes floatPulse {
+  0% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(-2px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+}
+
+/* 已同步（未變更）：保持低調灰色 */
+.sync-indicator.saved {
+  color: var(--cs-text-muted);
+  background: var(--cs-bg-subtle);
+  border-color: var(--cs-border-subtle);
+}
+
+/* 同步失敗：紅色雲朵 + 抖動提示 */
 .sync-indicator.error {
   color: #de3b3b;
   background: #fdf2f2;
   border-color: #fbd5d5;
+  animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(1px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-1px, 0, 0); }
+  40%, 60% { transform: translate3d(1px, 0, 0); }
 }
 
 /* 左右分欄版面 */
