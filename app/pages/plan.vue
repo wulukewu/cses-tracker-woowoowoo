@@ -29,6 +29,8 @@ const {
 } = await useWeekPlanner()
 
 const fileInput = ref<HTMLInputElement | null>(null)
+const showImportModal = ref(false)
+const selectedImportData = ref<any[]>([])
 
 function triggerImport() {
   fileInput.value?.click()
@@ -41,34 +43,40 @@ async function handleImportFile(event: Event) {
 
   // 重置 file input 值，確保選擇相同檔案也能觸發 change 事件
   target.value = ''
+  saveError.value = ''
+  saveSuccess.value = false
 
   try {
     const text = await file.text()
     const weeksData = JSON.parse(text)
 
     if (!Array.isArray(weeksData)) {
-      alert('無效的檔案格式：預期應為次別陣列。')
-      return
+      saveError.value = '無效的檔案格式：預期應為次別陣列。'
+      selectedImportData.value = []
+    } else {
+      selectedImportData.value = weeksData
     }
-
-    const confirmOverwrite = window.confirm(
-      '是否在匯入前先「重置並清除」目前所有的次別資料？\n\n' +
-      '【確定】將清除所有資料並完全覆寫。\n' +
-      '【取消】將使用合併模式（僅新增或更新有變動的次別）。'
-    )
-
-    const mode = confirmOverwrite ? 'overwrite' : 'merge'
-
-    if (mode === 'overwrite') {
-      const doubleCheck = window.confirm('警告：這將永久刪除您目前所有的次別資料，確定要覆蓋嗎？')
-      if (!doubleCheck) return
-    }
-
-    await importWeeksData(weeksData, mode)
-    alert('資料匯入成功！')
   } catch (err: any) {
-    alert(`匯入失敗: ${err.message || err}`)
+    saveError.value = `檔案解析失敗：${err.message || err}`
+    selectedImportData.value = []
   }
+
+  showImportModal.value = true
+}
+
+async function confirmImport(mode: 'merge' | 'overwrite') {
+  try {
+    await importWeeksData(selectedImportData.value, mode)
+  } catch (err) {
+    // 錯誤已被儲存於 saveError 中，會自動顯示在 Modal 上
+  }
+}
+
+function closeImportModal() {
+  showImportModal.value = false
+  selectedImportData.value = []
+  saveError.value = ''
+  saveSuccess.value = false
 }
 </script>
 
@@ -123,6 +131,16 @@ async function handleImportFile(event: Event) {
       @close="closeResetModal"
       @confirm="confirmResetAll"
       @update:reset-confirm-text="resetConfirmText = $event"
+    />
+
+    <PlanImportModal
+      v-if="showImportModal"
+      :weeks-data="selectedImportData"
+      :saving="saving"
+      :save-error="saveError"
+      :save-success="saveSuccess"
+      @close="closeImportModal"
+      @confirm="confirmImport"
     />
   </div>
 </template>
