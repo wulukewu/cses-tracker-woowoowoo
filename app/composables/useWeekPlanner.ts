@@ -175,6 +175,25 @@ export async function useWeekPlanner() {
     window.open('/api/weeks/export', '_blank')
   }
 
+  async function importWeeksData(weeksData: Week[], mode: 'merge' | 'overwrite') {
+    saving.value = true
+    saveError.value = ''
+    saveSuccess.value = false
+    try {
+      await $fetch(`/api/weeks/import?mode=${mode}`, {
+        method: 'POST',
+        body: weeksData,
+      })
+      saveSuccess.value = true
+      await refreshWeeks()
+    } catch (err: any) {
+      saveError.value = err?.data?.statusMessage || '匯入失敗'
+      throw err
+    } finally {
+      saving.value = false
+    }
+  }
+
   return {
     weeks,
     editingWeek,
@@ -201,5 +220,6 @@ export async function useWeekPlanner() {
     confirmResetAll,
     save,
     exportWeeks,
+    importWeeksData,
   }
 }

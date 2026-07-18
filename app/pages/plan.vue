@@ -25,7 +25,51 @@ const {
   confirmResetAll,
   save,
   exportWeeks,
+  importWeeksData,
 } = await useWeekPlanner()
+
+const fileInput = ref<HTMLInputElement | null>(null)
+
+function triggerImport() {
+  fileInput.value?.click()
+}
+
+async function handleImportFile(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  // 重置 file input 值，確保選擇相同檔案也能觸發 change 事件
+  target.value = ''
+
+  try {
+    const text = await file.text()
+    const weeksData = JSON.parse(text)
+
+    if (!Array.isArray(weeksData)) {
+      alert('無效的檔案格式：預期應為次別陣列。')
+      return
+    }
+
+    const confirmOverwrite = window.confirm(
+      '是否在匯入前先「重置並清除」目前所有的次別資料？\n\n' +
+      '【確定】將清除所有資料並完全覆寫。\n' +
+      '【取消】將使用合併模式（僅新增或更新有變動的次別）。'
+    )
+
+    const mode = confirmOverwrite ? 'overwrite' : 'merge'
+
+    if (mode === 'overwrite') {
+      const doubleCheck = window.confirm('警告：這將永久刪除您目前所有的次別資料，確定要覆蓋嗎？')
+      if (!doubleCheck) return
+    }
+
+    await importWeeksData(weeksData, mode)
+    alert('資料匯入成功！')
+  } catch (err: any) {
+    alert(`匯入失敗: ${err.message || err}`)
+  }
+}
 </script>
 
 <template>
@@ -45,6 +89,8 @@ const {
       </div>
       <div class="header-actions">
         <button class="export-btn" @click="exportWeeks">匯出所有資料</button>
+        <button class="import-btn" @click="triggerImport">匯入資料</button>
+        <input ref="fileInput" type="file" accept=".json" style="display: none" @change="handleImportFile" />
         <button class="reset-btn" @click="openResetModal">重置所有次別</button>
       </div>
     </div>
@@ -131,7 +177,8 @@ const {
   gap: 0.6rem;
 }
 
-.export-btn {
+.export-btn,
+.import-btn {
   padding: 0.45rem 0.8rem;
   background: var(--cs-bg);
   color: var(--cs-text);
@@ -142,7 +189,8 @@ const {
   white-space: nowrap;
 }
 
-.export-btn:hover {
+.export-btn:hover,
+.import-btn:hover {
   border-color: #ccc;
 }
 
