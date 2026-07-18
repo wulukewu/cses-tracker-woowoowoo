@@ -107,9 +107,27 @@ onUnmounted(() => {
         <div class="header-actions">
           <!-- 自動儲存雲端同步狀態顯示器 (無 emoji) -->
           <div class="sync-indicator" :class="syncStatus" :title="tooltipText">
-            <svg viewBox="0 0 24 24" width="16" height="16" class="sync-cloud-icon" aria-hidden="true">
-              <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/>
-            </svg>
+            <div class="sync-wrapper">
+              <svg viewBox="0 0 24 24" width="16" height="16" class="sync-cloud-icon" aria-hidden="true">
+                <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/>
+              </svg>
+              
+              <!-- 狀態角標 -->
+              <div v-if="syncStatus !== 'idle'" class="status-badge-wrap">
+                <!-- saving: loading 旋轉圈 -->
+                <svg v-if="syncStatus === 'saving'" class="spinner-svg" viewBox="0 0 50 50" width="8" height="8">
+                  <circle class="spinner-path" cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="10"></circle>
+                </svg>
+                <!-- saved: 綠色打勾 -->
+                <svg v-else-if="syncStatus === 'saved'" viewBox="0 0 24 24" width="8" height="8" class="checkmark-svg">
+                  <path fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M20 6L9 17l-5-5"/>
+                </svg>
+                <!-- error: 紅色驚嘆號 -->
+                <svg v-else-if="syncStatus === 'error'" viewBox="0 0 24 24" width="8" height="8" class="error-svg">
+                  <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+              </div>
+            </div>
           </div>
 
           <button
@@ -280,56 +298,96 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  color: var(--cs-text-muted); /* 預設為灰色 */
+  color: var(--cs-text-muted); /* 預設灰色 */
   background: var(--cs-bg-subtle);
   border: 1px solid var(--cs-border-subtle);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: help;
 }
 
-.sync-cloud-icon {
-  flex-shrink: 0;
+.sync-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* 同步中：綠色雲朵 + 浮動呼吸動畫 */
+.sync-cloud-icon {
+  flex-shrink: 0;
+  transition: color 0.25s ease;
+}
+
+/* 狀態角標 wrapper */
+.status-badge-wrap {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--cs-bg);
+  border: 1px solid var(--cs-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  animation: badgePop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes badgePop {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* saving (同步中)：黃色，雲朵與 spinner */
 .sync-indicator.saving {
+  color: #b45309; /* 深黃色 */
+  background: #fef3c7; /* 淡黃色背景 */
+  border-color: #fde68a;
+}
+
+.sync-indicator.saving .status-badge-wrap {
+  border-color: #fde68a;
+}
+
+.spinner-svg {
+  animation: rotate 1s linear infinite;
+}
+
+.spinner-path {
+  stroke-dasharray: 90, 150;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+}
+
+@keyframes rotate {
+  100% { transform: rotate(360deg); }
+}
+
+/* saved (已同步)：綠色，雲朵與打勾 */
+.sync-indicator.saved {
   color: var(--cs-accent);
   background: var(--cs-accent-bg);
   border-color: rgba(10, 143, 92, 0.15);
-  animation: floatPulse 1.6s infinite ease-in-out;
 }
 
-@keyframes floatPulse {
-  0% {
-    transform: translateY(0);
-    opacity: 0.7;
-  }
-  50% {
-    transform: translateY(-2px);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 0.7;
-  }
+.sync-indicator.saved .status-badge-wrap {
+  border-color: rgba(10, 143, 92, 0.15);
 }
 
-/* 已同步（未變更）：保持低調灰色 */
-.sync-indicator.saved {
-  color: var(--cs-text-muted);
-  background: var(--cs-bg-subtle);
-  border-color: var(--cs-border-subtle);
-}
-
-/* 同步失敗：紅色雲朵 + 抖動提示 */
+/* error (同步失敗)：紅色，雲朵與驚嘆號 */
 .sync-indicator.error {
   color: #de3b3b;
   background: #fdf2f2;
   border-color: #fbd5d5;
   animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.sync-indicator.error .status-badge-wrap {
+  border-color: #fbd5d5;
 }
 
 @keyframes shake {
