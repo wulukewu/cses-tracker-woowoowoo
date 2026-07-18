@@ -16,6 +16,11 @@ const activeUser = ref('lukewu')
 const isEditing = ref(false)
 const editedContent = ref('')
 const isSaving = ref(false)
+const errorMessage = ref('')
+
+// 確認彈窗狀態
+const showConfirmDialog = ref(false)
+const pendingTabUser = ref('')
 
 // 瀏覽器初始化讀取 localStorage
 onMounted(() => {
@@ -32,40 +37,56 @@ const currentNoteContent = computed(() => {
   return props.notes?.[activeUser.value] || ''
 })
 
-// 當切換 Tab 時，若在編輯狀態下也順便更新編輯內容，若在唯讀狀態則只做資料同步
+// 監聽 activeUser 與 currentNoteContent 變化
 watch([activeUser, currentNoteContent], () => {
   if (!isEditing.value) {
     editedContent.value = currentNoteContent.value
   }
 }, { immediate: true })
 
+// 檢查是否有修改但未儲存
+const hasUnsavedChanges = computed(() => {
+  return isEditing.value && editedContent.value !== currentNoteContent.value
+})
+
 function selectUser(username: string) {
-  if (isEditing.value) {
-    // 編輯中若切換 Tab，詢問是否放棄修改
-    if (editedContent.value !== currentNoteContent.value) {
-      if (!confirm('您的修改尚未儲存，確定要切換使用者並放棄修改嗎？')) {
-        return
-      }
-    }
+  if (hasUnsavedChanges.value) {
+    pendingTabUser.value = username
+    showConfirmDialog.value = true
+  } else {
+    activeUser.value = username
     isEditing.value = false
+    errorMessage.value = ''
+    if (import.meta.client) {
+      localStorage.setItem('cses-tracker-username', username)
+    }
   }
-  activeUser.value = username
+}
+
+function confirmDiscard() {
+  isEditing.value = false
+  errorMessage.value = ''
+  activeUser.value = pendingTabUser.value
+  showConfirmDialog.value = false
   if (import.meta.client) {
-    localStorage.setItem('cses-tracker-username', username)
+    localStorage.setItem('cses-tracker-username', pendingTabUser.value)
   }
 }
 
 function startEdit() {
   editedContent.value = currentNoteContent.value
   isEditing.value = true
+  errorMessage.value = ''
 }
 
 function cancelEdit() {
   isEditing.value = false
+  errorMessage.value = ''
 }
 
 async function handleSave() {
   isSaving.value = true
+  errorMessage.value = ''
   try {
     const { error } = await useFetch(`/api/notes/${props.problem.id}`, {
       method: 'PUT',
@@ -75,13 +96,13 @@ async function handleSave() {
       },
     })
     if (error.value) {
-      alert('儲存失敗，請重試')
+      errorMessage.value = '儲存失敗，請重試'
     } else {
       emit('save', activeUser.value, editedContent.value)
       isEditing.value = false
     }
   } catch (err) {
-    alert('儲存失敗，請重試')
+    errorMessage.value = '儲存失敗，請重試'
   } finally {
     isSaving.value = false
   }
@@ -155,6 +176,19 @@ async function handleSave() {
       </div>
 
       <div class="modal-body">
+        <!-- 儲存失敗的自訂 Banner 提示 -->
+        <div v-if="errorMessage" class="error-banner">
+          <span class="error-message-text">{{ errorMessage }}</span>
+          <button type="button" class="error-close-btn" @click="errorMessage = ''">
+            <svg viewBox="0 0 16 16" width="12" height="12">
+              <path
+                fill="currentColor"
+                d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"
+              />
+            </svg>
+          </button>
+        </div>
+
         <div v-if="!isEditing" class="note-view-container">
           <div v-if="currentNoteContent.trim()" class="note-display">
             {{ currentNoteContent }}
@@ -190,6 +224,24 @@ async function handleSave() {
         </button>
       </footer>
     </div>
+
+    <!-- 自訂確認 Dialog Overlay (僅在 Modal 內部疊加) -->
+    <div v-if="showConfirmDialog" class="confirm-dialog-overlay" @click.self="showConfirmDialog = false">
+      <div class="confirm-card">
+        <h3 class="confirm-title">確定要放棄修改嗎？</h3>
+        <p class="confirm-text">
+          您對 {{ activeUser }} 的筆記進行了修改，但尚未儲存。切換使用者將會遺失目前編輯的所有內容。
+        </p>
+        <div class="confirm-actions">
+          <button type="button" class="confirm-btn discard-btn" @click="confirmDiscard">
+            放棄修改
+          </button>
+          <button type="button" class="confirm-btn keep-btn" @click="showConfirmDialog = false">
+            繼續編輯
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -220,6 +272,7 @@ async function handleSave() {
   flex-direction: column;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   animation: modalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
 @keyframes modalEnter {
@@ -364,6 +417,45 @@ async function handleSave() {
   min-height: 250px;
 }
 
+.error-banner {
+  background: #fdf2f2;
+  border: 1px solid #fbd5d5;
+  color: #de3b3b;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: bannerEnter 0.2s ease;
+}
+
+@keyframes bannerEnter {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.error-message-text {
+  font-weight: 500;
+}
+
+.error-close-btn {
+  background: none;
+  border: none;
+  color: #de3b3b;
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-close-btn:hover {
+  background: rgba(222, 59, 59, 0.08);
+}
+
 .note-view-container {
   height: 100%;
 }
@@ -447,10 +539,93 @@ async function handleSave() {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
-  white-shrink: 0;
+  flex-shrink: 0;
 }
 
 .footer-close-btn:hover {
+  background: var(--cs-border-subtle);
+  color: var(--cs-text);
+}
+
+/* 確認 Dialog 的樣式 */
+.confirm-dialog-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(22, 23, 26, 0.3);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  z-index: 1100;
+  padding: 1rem;
+}
+
+.confirm-card {
+  background: var(--cs-bg);
+  border: 1px solid var(--cs-border);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 380px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  animation: confirmEnter 0.15s ease;
+}
+
+@keyframes confirmEnter {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.confirm-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--cs-text);
+}
+
+.confirm-text {
+  margin: 0 0 1.25rem 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--cs-text-secondary);
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.confirm-btn {
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.discard-btn {
+  background: #de3b3b;
+  color: white;
+}
+
+.discard-btn:hover {
+  background: #cb3131;
+}
+
+.keep-btn {
+  background: var(--cs-bg-subtle);
+  border-color: var(--cs-border);
+  color: var(--cs-text-secondary);
+}
+
+.keep-btn:hover {
   background: var(--cs-border-subtle);
   color: var(--cs-text);
 }
