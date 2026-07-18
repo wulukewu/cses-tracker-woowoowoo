@@ -219,5 +219,6 @@ export async function useHomeProgress() {
     groupedProblems,
     notes,
     refreshNotes,
+    progress,
   }
 }

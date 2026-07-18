@@ -3,11 +3,19 @@ export interface WeekProblem {
   name: string
 }
 
+export interface WeekTodo {
+  id: string
+  content: string
+  completed: boolean
+  assignee?: string
+}
+
 export interface Week {
   id: string
   createdAt: string
   deadline: string | null
   problems: WeekProblem[]
+  todos?: WeekTodo[]
 }
 
 export interface ProblemCategory {
