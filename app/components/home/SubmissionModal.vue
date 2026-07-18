@@ -1,13 +1,18 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { SubmissionSummary, WeekProblem } from '~~/shared/types'
 
-defineProps<{
+const props = defineProps<{
   problem: WeekProblem
   userName: string
   summary: SubmissionSummary | null
 }>()
 
 const emit = defineEmits<{ close: [] }>()
+
+const reversedSubmissions = computed(() => {
+  return [...(props.summary?.submissions ?? [])].reverse()
+})
 </script>
 
 <template>
@@ -17,8 +22,8 @@ const emit = defineEmits<{ close: [] }>()
         <h2>{{ userName }} · {{ problem.name }}</h2>
         <button type="button" class="modal-close" aria-label="關閉" @click="emit('close')">✕</button>
       </div>
-      <ul v-if="summary?.submissions.length" class="submission-list">
-        <li v-for="(s, idx) in summary.submissions" :key="idx" class="submission-row" :class="s.verdict === 'AC' ? 'ac' : 'fail'">
+      <ul v-if="reversedSubmissions.length" class="submission-list">
+        <li v-for="(s, idx) in reversedSubmissions" :key="idx" class="submission-row" :class="s.verdict === 'AC' ? 'ac' : 'fail'">
           <a v-if="s.detailUrl" :href="s.detailUrl" target="_blank" rel="noopener" class="submission-link">
             <span class="submission-main">
               <span class="submission-time">{{ s.time }}</span>
