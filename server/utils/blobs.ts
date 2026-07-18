@@ -110,8 +110,18 @@ export async function getNote(problemId: string): Promise<Record<string, string>
 export async function saveNote(problemId: string, username: string, content: string): Promise<void> {
   const store = notesStore()
   const val = await getNote(problemId)
-  val[username] = content
-  await store.setJSON(problemId, val)
+  
+  if (!content || content.trim() === '') {
+    delete val[username]
+  } else {
+    val[username] = content
+  }
+  
+  if (Object.keys(val).length === 0) {
+    await store.delete(problemId)
+  } else {
+    await store.setJSON(problemId, val)
+  }
 }
 
 export async function deleteNote(problemId: string): Promise<void> {
