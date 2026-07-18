@@ -48,13 +48,20 @@ async function handleImportFile(event: Event) {
 
   try {
     const text = await file.text()
-    const weeksData = JSON.parse(text)
+    const rawData = JSON.parse(text)
 
-    if (!Array.isArray(weeksData)) {
-      saveError.value = '無效的檔案格式：預期應為次別陣列。'
+    let isValid = false
+    if (Array.isArray(rawData)) {
+      isValid = true
+    } else if (rawData && typeof rawData === 'object' && Array.isArray(rawData.weeks)) {
+      isValid = true
+    }
+
+    if (!isValid) {
+      saveError.value = '無效的檔案格式：預期應為次別陣列或包含次別的物件。'
       selectedImportData.value = []
     } else {
-      selectedImportData.value = weeksData
+      selectedImportData.value = rawData
     }
   } catch (err: any) {
     saveError.value = `檔案解析失敗：${err.message || err}`
@@ -135,7 +142,7 @@ function closeImportModal() {
 
     <PlanImportModal
       v-if="showImportModal"
-      :weeks-data="selectedImportData"
+      :weeks-data="Array.isArray(selectedImportData) ? selectedImportData : (selectedImportData?.weeks || [])"
       :saving="saving"
       :save-error="saveError"
       :save-success="saveSuccess"

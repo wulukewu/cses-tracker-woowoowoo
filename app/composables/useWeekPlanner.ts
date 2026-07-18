@@ -175,7 +175,7 @@ export async function useWeekPlanner() {
     window.open('/api/weeks/export', '_blank')
   }
 
-  async function importWeeksData(weeksData: Week[], mode: 'merge' | 'overwrite') {
+  async function importWeeksData(weeksData: any, mode: 'merge' | 'overwrite') {
     saving.value = true
     saveError.value = ''
     saveSuccess.value = false
