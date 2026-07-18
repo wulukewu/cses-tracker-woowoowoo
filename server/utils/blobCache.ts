@@ -1,4 +1,4 @@
-import { getStore } from '@netlify/blobs'
+import { getStore } from './netlifyBlobs'
 
 interface CacheEntry<T> {
   value: T
