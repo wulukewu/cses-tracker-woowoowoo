@@ -3,18 +3,22 @@ import type { UserProgress, WeekProblem } from '~~/shared/types'
 import type { CellInfo } from '~/composables/useHomeProgress'
 import { cellSymbol } from '~/composables/useHomeProgress'
 
-defineProps<{
+const props = defineProps<{
   users: UserProgress[]
   groupedProblems: { name: string; problems: WeekProblem[] }[]
   cellInfo: (userIndex: number, problemId: number) => CellInfo
   problemMeta: (problemId: number) => string
+  notes: Record<string, Record<string, string>>
 }>()
 
 const emit = defineEmits<{
   openProfile: [index: number]
   openModal: [problem: WeekProblem, userName: string]
-  openNote: [problem: WeekProblem]
 }>()
+
+function hasNote(problemId: number, userName: string) {
+  return Boolean(props.notes?.[String(problemId)]?.[userName]?.trim())
+}
 </script>
 
 <template>
@@ -36,48 +40,43 @@ const emit = defineEmits<{
           <td class="col-problem">
             <div class="problem-title-row">
               <a class="problem-name" :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
-              <button
-                type="button"
-                class="note-trigger-btn"
-                title="查看/編輯筆記"
-                @click="emit('openNote', p)"
-              >
-                <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" class="note-icon-svg">
-                  <path fill="currentColor" d="M3 2v12h10V4.5L10.5 2H3zm7.5 1L12 4.5H10.5V3zM4 4h5v1H4V4zm0 3h8v1H4V7zm0 3h8v1H4v-1z"/>
-                </svg>
-              </button>
             </div>
             <span v-if="problemMeta(p.id)" class="problem-meta">{{ problemMeta(p.id) }}</span>
           </td>
           <td v-for="(u, i) in users" :key="u.csesId" class="col-user">
+            <!-- 所有的進度狀態格都改為 clickable 按鈕，以便看/寫筆記與提交明細 -->
             <button
-              v-if="cellInfo(i, p.id).clickable"
               type="button"
-              class="mark solved clickable"
-              aria-label="已解，含送出紀錄，點擊查看"
+              class="mark-cell-btn"
+              :class="{
+                solved: cellInfo(i, p.id).solved,
+                attempted: cellInfo(i, p.id).waCount > 0,
+                'has-note': hasNote(p.id, u.name)
+              }"
+              :aria-label="cellInfo(i, p.id).solved ? '已解，點擊查看明細/筆記' : cellInfo(i, p.id).waCount ? '嘗試過但未解出，點擊查看/編輯筆記' : '未嘗試，點擊查看/編輯筆記'"
               @click="emit('openModal', p, u.name)"
             >
-              <span class="mark-symbol">✓</span>
+              <span class="mark-symbol">{{ cellSymbol(cellInfo(i, p.id)) }}</span>
               <span v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</span>
+              
+              <!-- 微型筆記 SVG 指示器 (無 emoji) -->
+              <svg v-if="hasNote(p.id, u.name)" viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" class="mini-note-icon">
+                <path fill="currentColor" d="M3 2v12h10V4.5L10.5 2H3zm7.5 1L12 4.5H10.5V3zM4 4h5v1H4V4zm0 3h8v1H4V7zm0 3h8v1H4v-1z"/>
+              </svg>
+
+              <!-- 最快/最先角標 -->
               <span v-if="cellInfo(i, p.id).isFirstSolver || cellInfo(i, p.id).isFastest" class="corner-dots">
                 <span v-if="cellInfo(i, p.id).isFirstSolver" class="corner-dot first-dot" data-tooltip="最先解出這題"></span>
                 <span v-if="cellInfo(i, p.id).isFastest" class="corner-dot fastest-dot" data-tooltip="這題目前執行最快"></span>
               </span>
-            </button>
-            <span
-              v-else
-              class="mark"
-              :class="{ solved: cellInfo(i, p.id).solved, attempted: cellInfo(i, p.id).waCount > 0 }"
-              :aria-label="cellInfo(i, p.id).solved ? '已解' : cellInfo(i, p.id).waCount ? '嘗試過但未解出' : '未解'"
-            >
-              <span class="mark-symbol">{{ cellSymbol(cellInfo(i, p.id)) }}</span>
-              <span v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</span>
+
+              <!-- 鎖標記 -->
               <svg
                 v-if="cellInfo(i, p.id).locked"
                 class="lock-hint"
                 viewBox="0 0 16 16"
-                width="12"
-                height="12"
+                width="10"
+                height="10"
                 aria-hidden="true"
               >
                 <title>分身帳號還沒解過這題，需要手動解一下才能看到送出紀錄</title>
@@ -91,7 +90,7 @@ const emit = defineEmits<{
                 />
                 <rect x="3.5" y="7" width="9" height="7" rx="1.4" fill="currentColor" />
               </svg>
-            </span>
+            </button>
           </td>
         </tr>
       </tbody>
@@ -144,6 +143,12 @@ const emit = defineEmits<{
   width: auto;
 }
 
+.problem-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .problem-name {
   display: block;
   text-decoration: none;
@@ -180,32 +185,61 @@ const emit = defineEmits<{
   text-decoration: underline;
 }
 
-.mark {
+/* 狀態單元格按鈕統一設計 */
+.mark-cell-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  justify-content: center;
+  gap: 0.25rem;
   color: var(--cs-text-muted);
   font: inherit;
   background: none;
   border: none;
-  padding: 0;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.mark-cell-btn:hover {
+  background: var(--cs-border-subtle);
+  color: var(--cs-text);
+}
+
+.mark-cell-btn.solved {
+  color: var(--cs-accent);
+}
+
+.mark-cell-btn.attempted {
+  color: #c0392b;
+}
+
+/* 當格子有寫筆記時，增加一個很淡的背景底色提示 */
+.mark-cell-btn.has-note {
+  background: rgba(10, 143, 92, 0.05);
+}
+
+.mark-cell-btn.has-note.attempted {
+  background: rgba(192, 57, 43, 0.05);
+}
+
+.mark-cell-btn.has-note:hover {
+  background: var(--cs-border-subtle);
 }
 
 .mark-symbol {
   font-weight: 600;
 }
 
-.mark.solved {
+.mini-note-icon {
+  color: var(--cs-text-muted);
+  flex-shrink: 0;
+}
+
+.mark-cell-btn.solved .mini-note-icon {
   color: var(--cs-accent);
-}
-
-.mark.attempted {
-  color: #c0392b;
-}
-
-.mark.clickable {
-  cursor: pointer;
+  opacity: 0.7;
 }
 
 .wa-badge {
@@ -275,34 +309,5 @@ const emit = defineEmits<{
 
 .fastest-dot {
   background: #2f6fed;
-}
-
-.problem-title-row {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.note-trigger-btn {
-  background: none;
-  border: none;
-  padding: 0.2rem;
-  border-radius: 4px;
-  color: var(--cs-text-muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.note-trigger-btn:hover {
-  background: var(--cs-border-subtle);
-  color: var(--cs-accent);
-}
-
-.note-icon-svg {
-  display: block;
 }
 </style>
