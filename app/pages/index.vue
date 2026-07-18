@@ -34,15 +34,10 @@ const {
 
 const modalProblem = ref<WeekProblem | null>(null)
 const modalUserName = ref<string | null>(null)
-const selectedNoteProblem = ref<WeekProblem | null>(null)
-
-function openNoteModal(problem: WeekProblem) {
-  selectedNoteProblem.value = problem
-}
 
 function handleSaveNote(username: string, content: string) {
-  if (notes.value && selectedNoteProblem.value) {
-    const pid = String(selectedNoteProblem.value.id)
+  if (notes.value && modalProblem.value) {
+    const pid = String(modalProblem.value.id)
     if (!notes.value[pid]) {
       notes.value[pid] = {}
     }
@@ -71,8 +66,7 @@ function closeModal() {
 // moving instead of the modal's.
 const anyModalOpen = computed(() => Boolean(
   (modalProblem.value && modalUserName.value) || 
-  profileUser.value || 
-  selectedNoteProblem.value
+  profileUser.value
 ))
 
 watch(anyModalOpen, (open) => {
@@ -113,9 +107,9 @@ onUnmounted(() => {
         :grouped-problems="groupedProblems"
         :cell-info="cellInfo"
         :problem-meta="problemMeta"
+        :notes="notes || {}"
         @open-profile="openProfile"
         @open-modal="openModal"
-        @open-note="openNoteModal"
       />
     </template>
 
@@ -124,15 +118,9 @@ onUnmounted(() => {
       :problem="modalProblem"
       :user-name="modalUserName"
       :summary="modalSummary"
+      :initial-note-content="notes?.[String(modalProblem.id)]?.[modalUserName] || ''"
       @close="closeModal"
-    />
-
-    <HomeProblemNoteModal
-      v-if="selectedNoteProblem"
-      :problem="selectedNoteProblem"
-      :notes="notes?.[String(selectedNoteProblem.id)] || {}"
-      @close="selectedNoteProblem = null"
-      @save="handleSaveNote"
+      @save-note="handleSaveNote"
     />
 
     <HomeUserProfileModal
