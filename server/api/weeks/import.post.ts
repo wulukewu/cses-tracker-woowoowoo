@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<any>(event)
 
   let weeks: any[] = []
-  let notes: Record<string, string> = {}
+  let notes: Record<string, any> = {}
   let isNewFormat = false
 
   if (body && !Array.isArray(body) && Array.isArray(body.weeks)) {
@@ -61,9 +61,16 @@ export default defineEventHandler(async (event) => {
   }
 
   if (isNewFormat && notes) {
-    for (const [id, content] of Object.entries(notes)) {
-      if (typeof content === 'string') {
-        await saveNote(id, content)
+    for (const [problemId, val] of Object.entries(notes)) {
+      if (val && typeof val === 'object') {
+        for (const [username, content] of Object.entries(val)) {
+          if (typeof content === 'string') {
+            await saveNote(problemId, username, content)
+          }
+        }
+      } else if (typeof val === 'string') {
+        // 向後相容舊格式：若為純字串，預設歸屬為 'lukewu'
+        await saveNote(problemId, 'lukewu', val)
       }
     }
   }
