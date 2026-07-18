@@ -39,6 +39,22 @@ export default defineEventHandler(async (event) => {
         })
       }
     }
+    if (item.todos !== undefined) {
+      if (!Array.isArray(item.todos)) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: `Invalid todos structure inside week: ${JSON.stringify(item.todos)}`,
+        })
+      }
+      for (const t of item.todos) {
+        if (!t.id || typeof t.content !== 'string' || typeof t.completed !== 'boolean') {
+          throw createError({
+            statusCode: 400,
+            statusMessage: `Invalid todo item inside week todos: ${JSON.stringify(t)}`,
+          })
+        }
+      }
+    }
   }
 
   // 驗證 notes 結構

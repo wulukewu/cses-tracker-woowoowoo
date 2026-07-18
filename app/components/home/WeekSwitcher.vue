@@ -12,7 +12,19 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:selectedWeekId': [id: string]
   refresh: []
+  openTodos: []
 }>()
+
+const todoSummary = computed(() => {
+  if (!props.week?.todos || props.week.todos.length === 0) return null
+  const total = props.week.todos.length
+  const completed = props.week.todos.filter((t) => t.completed).length
+  return {
+    total,
+    completed,
+    allDone: completed === total,
+  }
+})
 
 const scrollEl = ref<HTMLElement | null>(null)
 const canScrollLeft = ref(false)
@@ -66,8 +78,13 @@ watch(
       </div>
     </div>
     <div class="week-actions">
-      <NuxtLink v-if="week" :to="`/plan?edit=${encodeURIComponent(week.id)}`" class="edit-link">編輯這次</NuxtLink>
-      <button class="refresh-btn" :disabled="pending || refreshing" @click="emit('refresh')">重新整理</button>
+      <button v-if="week" class="action-btn todos-btn" @click="emit('openTodos')">
+        當週作業<span v-if="todoSummary" class="todo-badge" :class="{ 'all-done': todoSummary.allDone }">
+          {{ todoSummary.allDone ? '✓' : `${todoSummary.completed}/${todoSummary.total}` }}
+        </span>
+      </button>
+      <NuxtLink v-if="week" :to="`/plan?edit=${encodeURIComponent(week.id)}`" class="action-btn edit-btn">編輯這次</NuxtLink>
+      <button class="action-btn refresh-btn" :disabled="pending || refreshing" @click="emit('refresh')">重新整理</button>
     </div>
   </div>
 </template>
@@ -153,38 +170,61 @@ watch(
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 
-.edit-link {
-  font-size: 0.85rem;
-  color: var(--cs-text-secondary);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.edit-link:hover {
-  color: var(--cs-text);
-  text-decoration: underline;
-}
-
-.refresh-btn {
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   padding: 0.45rem 0.8rem;
   background: var(--cs-bg);
-  color: var(--cs-text);
+  color: var(--cs-text-secondary);
   border: 1px solid var(--cs-border);
   border-radius: var(--cs-radius);
   cursor: pointer;
   font-size: 0.85rem;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1.2;
 }
 
-.refresh-btn:hover:not(:disabled) {
+.action-btn:hover:not(:disabled) {
   border-color: #ccc;
+  color: var(--cs-text);
+  background: var(--cs-bg-subtle);
 }
 
-.refresh-btn:disabled {
+.action-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.action-btn:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* 特殊樣式點綴 */
+.todos-btn {
+  color: var(--cs-text);
+  font-weight: 500;
+}
+
+.todo-badge {
+  background: var(--cs-border-subtle);
+  color: var(--cs-text-secondary);
+  font-size: 0.72rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.todo-badge.all-done {
+  background: var(--cs-accent-bg);
+  color: var(--cs-accent);
 }
 </style>

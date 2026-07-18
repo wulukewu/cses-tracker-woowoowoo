@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { WeekProblem } from '~~/shared/types'
+import type { WeekProblem, WeekTodo } from '~~/shared/types'
 
 const {
   weeks,
@@ -19,6 +19,7 @@ const {
   totalProblemCount,
   groupedProblems,
   notes,
+  progress,
 } = await useHomeProgress()
 
 const {
@@ -34,6 +35,7 @@ const {
 
 const modalProblem = ref<WeekProblem | null>(null)
 const modalUserName = ref<string | null>(null)
+const showTodos = ref(false)
 
 function handleSaveNote(username: string, content: string, stuck: boolean) {
   if (notes.value && modalProblem.value) {
@@ -72,13 +74,61 @@ function closeModal() {
   modalUserName.value = null
 }
 
+async function handleUpdateTodos(newTodos: WeekTodo[]) {
+  if (!week.value) return
+  const targetWeekId = week.value.id
+
+  // 樂觀更新 weeks
+  if (weeks.value) {
+    const w = weeks.value.find((x) => x.id === targetWeekId)
+    if (w) w.todos = newTodos
+  }
+  // 樂觀更新 progress (對整個 progress.value 重新賦值以確保 shallowRef 觸發響應)
+  if (progress.value && progress.value.week && progress.value.week.id === targetWeekId) {
+    progress.value = {
+      ...progress.value,
+      week: {
+        ...progress.value.week,
+        todos: newTodos
+      }
+    }
+  }
+
+  try {
+    const updatedWeek = await $fetch<any>(`/api/weeks/${encodeURIComponent(targetWeekId)}`, {
+      method: 'PATCH',
+      body: { todos: newTodos },
+    })
+
+    // 用後端返回的真實資料再次確認更新，防止背景 refresh 等 Race Condition 蓋過去
+    if (updatedWeek) {
+      if (progress.value && progress.value.week && progress.value.week.id === targetWeekId) {
+        progress.value = {
+          ...progress.value,
+          week: {
+            ...progress.value.week,
+            todos: updatedWeek.todos || []
+          }
+        }
+      }
+      if (weeks.value) {
+        const w = weeks.value.find((x) => x.id === targetWeekId)
+        if (w) w.todos = updatedWeek.todos || []
+      }
+    }
+  } catch (err) {
+    console.error('更新待辦作業失敗:', err)
+  }
+}
+
 // Without this, scrolling past the end of a modal's own list chains into
 // the page behind it — the fixed overlay stays put but the body scrolls,
 // which shows up as the page's own scrollbar (detached from the card)
 // moving instead of the modal's.
 const anyModalOpen = computed(() => Boolean(
   (modalProblem.value && modalUserName.value) || 
-  profileUser.value
+  profileUser.value ||
+  showTodos.value
 ))
 
 watch(anyModalOpen, (open) => {
@@ -105,6 +155,7 @@ onUnmounted(() => {
         :refreshing="refreshing"
         @update:selected-week-id="selectedWeekId = $event"
         @refresh="refreshAll"
+        @open-todos="showTodos = true"
       />
 
       <div v-if="staleSince" class="stale-banner">
@@ -147,6 +198,13 @@ onUnmounted(() => {
       :solved-set="profileSolvedSet"
       @close="closeProfile"
       @toggle-category="toggleCategory"
+    />
+
+    <HomeWeekTodosModal
+      v-if="showTodos && week"
+      :week="week"
+      @close="showTodos = false"
+      @update-todos="handleUpdateTodos"
     />
   </div>
 </template>
