@@ -152,7 +152,7 @@ onUnmounted(() => {
 
         <!-- 右欄：解題筆記 (Auto-save) -->
         <div class="split-col right-col">
-          <h3 class="col-title">解題筆記 (自動儲存)</h3>
+          <h3 class="col-title">解題筆記</h3>
           <div class="col-content">
             <div class="note-edit-container">
               <div class="editor-info">
