@@ -34,35 +34,41 @@ function hasNote(problemId: number, userName: string) {
       </thead>
       <tbody v-for="group in groupedProblems" :key="group.name">
         <tr class="category-row">
-          <td :colspan="1 + users.length">{{ group.name }}</td>
+          <td :colspan="1 + users.length">
+            <div class="category-title-wrap">
+              <span class="category-indicator"></span>
+              <span class="category-name">{{ group.name }}</span>
+            </div>
+          </td>
         </tr>
         <tr v-for="p in group.problems" :key="p.id">
           <td class="col-problem">
             <div class="problem-title-row">
+              <span class="problem-id-tag">#{{ p.id }}</span>
               <a class="problem-name" :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
             </div>
             <span v-if="problemMeta(p.id)" class="problem-meta">{{ problemMeta(p.id) }}</span>
           </td>
           <td v-for="(u, i) in users" :key="u.csesId" class="col-user">
-            <!-- 所有的進度狀態格都改為 clickable 按鈕，以便看/寫筆記與提交明細 -->
+            <!-- 狀態卡片按鈕 -->
             <button
               type="button"
-              class="mark-cell-btn"
+              class="mark-cell-card"
               :class="{
                 solved: cellInfo(i, p.id).solved,
                 attempted: cellInfo(i, p.id).waCount > 0,
                 'has-note': hasNote(p.id, u.name)
               }"
-              :aria-label="cellInfo(i, p.id).solved ? '已解，點擊查看明細/筆記' : cellInfo(i, p.id).waCount ? '嘗試過但未解出，點擊查看/編輯筆記' : '未嘗試，點擊查看/編輯筆記'"
+              :aria-label="cellInfo(i, p.id).solved ? '已解，點擊查看紀錄與筆記' : cellInfo(i, p.id).waCount ? '嘗試過但未過，點擊查看與編輯筆記' : '未嘗試，點擊查看與編輯筆記'"
               @click="emit('openModal', p, u.name)"
             >
-              <span class="mark-symbol">{{ cellSymbol(cellInfo(i, p.id)) }}</span>
-              <span v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</span>
+              <div class="cell-main-content">
+                <span class="mark-symbol">{{ cellSymbol(cellInfo(i, p.id)) }}</span>
+                <span v-if="cellInfo(i, p.id).waCount" class="wa-badge">{{ cellInfo(i, p.id).waCount }}</span>
+              </div>
               
-              <!-- 微型筆記 SVG 指示器 (無 emoji) -->
-              <svg v-if="hasNote(p.id, u.name)" viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" class="mini-note-icon">
-                <path fill="currentColor" d="M3 2v12h10V4.5L10.5 2H3zm7.5 1L12 4.5H10.5V3zM4 4h5v1H4V4zm0 3h8v1H4V7zm0 3h8v1H4v-1z"/>
-              </svg>
+              <!-- 筆記高亮底線 (取代雜亂的 icon) -->
+              <span v-if="hasNote(p.id, u.name)" class="note-indicator-bar" title="有個人解題筆記"></span>
 
               <!-- 最快/最先角標 -->
               <span v-if="cellInfo(i, p.id).isFirstSolver || cellInfo(i, p.id).isFastest" class="corner-dots">
@@ -103,12 +109,13 @@ function hasNote(problemId: number, userName: string) {
   border: 1px solid var(--cs-border);
   border-radius: var(--cs-radius);
   overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
 }
 
 .problem-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .problem-table thead tr {
@@ -118,25 +125,45 @@ function hasNote(problemId: number, userName: string) {
 
 .problem-table th {
   text-align: left;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--cs-text-secondary);
-  padding: 0.6rem 0.9rem;
+  padding: 0.75rem 1rem;
 }
 
 .problem-table td {
-  padding: 0.55rem 0.9rem;
+  padding: 0.65rem 1rem;
   border-bottom: 1px solid var(--cs-border-subtle);
+  vertical-align: middle;
 }
 
 .problem-table tbody:last-child tr:last-child td {
   border-bottom: none;
 }
 
+/* 分類列優化 */
 .category-row td {
-  background: var(--cs-bg-subtle);
-  color: var(--cs-text-secondary);
+  background: #fbfbfb;
+  padding: 0.5rem 1rem;
+}
+
+.category-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.category-indicator {
+  width: 3px;
+  height: 12px;
+  background: var(--cs-accent);
+  border-radius: 99px;
+}
+
+.category-name {
+  color: var(--cs-text);
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
 }
 
 .col-problem {
@@ -146,28 +173,44 @@ function hasNote(problemId: number, userName: string) {
 .problem-title-row {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.5rem;
+}
+
+.problem-id-tag {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--cs-text-secondary);
+  background: var(--cs-bg-subtle);
+  border: 1px solid var(--cs-border);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .problem-name {
   display: block;
   text-decoration: none;
+  font-weight: 500;
+  color: var(--cs-text);
 }
 
 .problem-name:hover {
+  color: var(--cs-accent);
   text-decoration: underline;
 }
 
 .problem-meta {
   display: block;
-  margin-top: 0.15rem;
+  margin-top: 0.2rem;
   font-size: 0.72rem;
-  color: var(--cs-text-muted);
+  color: var(--cs-text-secondary);
+  opacity: 0.85;
 }
 
 .col-user {
-  width: 90px;
+  width: 100px;
   text-align: center;
+  padding: 0.5rem !important; /* 縮減 padding 讓格子卡片有更大發揮空間 */
 }
 
 .user-name-btn {
@@ -185,61 +228,79 @@ function hasNote(problemId: number, userName: string) {
   text-decoration: underline;
 }
 
-/* 狀態單元格按鈕統一設計 */
-.mark-cell-btn {
+/* 狀態格子卡片式設計 */
+.mark-cell-card {
   position: relative;
-  display: inline-flex;
+  width: 100%;
+  min-height: 2.5rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
+  gap: 0.15rem;
+  border: 1px solid var(--cs-border-subtle);
+  background: var(--cs-bg-subtle);
   color: var(--cs-text-muted);
-  font: inherit;
-  background: none;
-  border: none;
-  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
   cursor: pointer;
-  border-radius: 4px;
+  padding: 0.4rem;
+  font-family: inherit;
   transition: all 0.15s ease;
 }
 
-.mark-cell-btn:hover {
-  background: var(--cs-border-subtle);
-  color: var(--cs-text);
+/* 未嘗試 hover 狀態 */
+.mark-cell-card:hover {
+  border-color: var(--cs-border);
+  background: #f5f5f5;
+  color: var(--cs-text-secondary);
 }
 
-.mark-cell-btn.solved {
+/* 已解出 AC 狀態 */
+.mark-cell-card.solved {
+  background: rgba(10, 143, 92, 0.05);
+  border-color: rgba(10, 143, 92, 0.12);
   color: var(--cs-accent);
 }
 
-.mark-cell-btn.attempted {
+.mark-cell-card.solved:hover {
+  background: rgba(10, 143, 92, 0.08);
+  border-color: rgba(10, 143, 92, 0.2);
+}
+
+/* 嘗試過但未過 WA 狀態 */
+.mark-cell-card.attempted {
+  background: rgba(192, 57, 43, 0.04);
+  border-color: rgba(192, 57, 43, 0.1);
   color: #c0392b;
 }
 
-/* 當格子有寫筆記時，增加一個很淡的背景底色提示 */
-.mark-cell-btn.has-note {
-  background: rgba(10, 143, 92, 0.05);
+.mark-cell-card.attempted:hover {
+  background: rgba(192, 57, 43, 0.07);
+  border-color: rgba(192, 57, 43, 0.18);
 }
 
-.mark-cell-btn.has-note.attempted {
-  background: rgba(192, 57, 43, 0.05);
+/* 筆記指示底線 (極簡高級) */
+.note-indicator-bar {
+  position: absolute;
+  bottom: 0;
+  left: 15%;
+  width: 70%;
+  height: 2px;
+  background: var(--cs-accent);
+  border-radius: 99px;
+  opacity: 0.85;
 }
 
-.mark-cell-btn.has-note:hover {
-  background: var(--cs-border-subtle);
+.cell-main-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
 }
 
 .mark-symbol {
-  font-weight: 600;
-}
-
-.mini-note-icon {
-  color: var(--cs-text-muted);
-  flex-shrink: 0;
-}
-
-.mark-cell-btn.solved .mini-note-icon {
-  color: var(--cs-accent);
-  opacity: 0.7;
+  font-weight: 700;
+  font-size: 0.9rem;
 }
 
 .wa-badge {
@@ -253,31 +314,34 @@ function hasNote(problemId: number, userName: string) {
   background: #fbe9e7;
   color: #c0392b;
   font-weight: 700;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   line-height: 1;
 }
 
 .lock-hint {
-  margin-left: 0.1rem;
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
   color: var(--cs-text-muted);
   cursor: help;
   flex-shrink: 0;
+  opacity: 0.7;
 }
 
 .corner-dots {
   position: absolute;
-  top: -5px;
-  right: -6px;
+  top: -4px;
+  right: -4px;
   display: flex;
-  gap: 3px;
+  gap: 2px;
 }
 
 .corner-dot {
   position: relative;
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 999px;
-  border: 1.5px solid var(--cs-bg);
+  border: 1px solid var(--cs-bg);
   cursor: default;
 }
 
