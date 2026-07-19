@@ -39,7 +39,13 @@ const cellInfoMap = computed(() => {
         <tr>
           <th class="col-problem">題目</th>
           <th v-for="(u, i) in users" :key="u.csesId" class="col-user">
-            <button type="button" class="user-name-btn" :title="u.name" @click="emit('openProfile', i)">{{ u.name }}</button>
+            <button
+              type="button"
+              class="user-name-btn cf-handle"
+              :style="{ color: handleStyle(u.name).color }"
+              :title="`${handleStyle(u.name).title} · ${handleStyle(u.name).rating}`"
+              @click="emit('openProfile', i)"
+            >{{ u.name }}</button>
           </th>
         </tr>
       </thead>
