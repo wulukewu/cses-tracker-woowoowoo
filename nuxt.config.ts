@@ -17,7 +17,7 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: 'Codeforces — CSES 練功房',
+      title: 'CSES Tracker — 三人週賽練功房',
       link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
     },
   },

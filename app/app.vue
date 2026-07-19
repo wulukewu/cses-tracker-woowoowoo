@@ -2,95 +2,94 @@
   <div class="app-shell">
     <NuxtRouteAnnouncer />
 
-    <header class="cf-header">
-      <div class="cf-topbar">
-        <NuxtLink to="/" class="cf-logo" aria-label="Codeforces">
-          <svg class="cf-logo-bars" width="30" height="26" viewBox="0 0 30 30" aria-hidden="true">
-            <rect x="1" y="15" width="7" height="13" rx="1.5" fill="#e63329" />
-            <rect x="11.5" y="8" width="7" height="20" rx="1.5" fill="#f5b301" />
-            <rect x="22" y="2" width="7" height="26" rx="1.5" fill="#2a71d0" />
+    <div class="cf-container">
+      <header class="cf-topbar">
+        <NuxtLink to="/" class="cf-logo" aria-label="CSES Tracker">
+          <svg class="cf-logo-bars" width="46" height="34" viewBox="0 0 46 34" aria-hidden="true">
+            <rect x="0" y="18" width="9" height="16" rx="1" fill="#f7b500" />
+            <rect x="12" y="10" width="9" height="24" rx="1" fill="#e6532d" />
+            <rect x="24" y="2" width="9" height="32" rx="1" fill="#3b5998" />
           </svg>
-          <span class="cf-wordmark">CODEFORCES</span>
+          <span class="cf-wordmark"><span class="wm-a">CSES</span><span class="wm-b">Tracker</span></span>
         </NuxtLink>
         <div class="cf-topbar-right">
-          <span class="cf-sponsor">unofficial skin · CSES 練功房</span>
-          <span class="cf-auth">
-            <span class="cf-lang">🌐 En</span>
-            <span class="cf-sep">|</span>
-            <span class="cf-enter">Enter</span>
-            <span class="cf-sep">|</span>
-            <span class="cf-register">Register</span>
-          </span>
+          <span class="cf-lang">En&nbsp;|&nbsp;Ru</span>
+          <span class="cf-auth"><span class="cf-authlink">Enter</span> | <span class="cf-authlink">Register</span></span>
         </div>
-      </div>
+      </header>
 
-      <nav class="cf-menu">
-        <div class="cf-menu-inner">
-          <NuxtLink to="/" exact-active-class="active">Home</NuxtLink>
-          <NuxtLink to="/round" active-class="active">賽況</NuxtLink>
-          <NuxtLink to="/plan" active-class="active">規劃</NuxtLink>
-          <a href="https://cses.fi/problemset/" target="_blank" rel="noopener" class="cf-menu-ext">Problemset ↗</a>
+      <nav class="cf-menu-box">
+        <ul class="cf-menu-list">
+          <li><NuxtLink to="/" exact-active-class="current">Home</NuxtLink></li>
+          <li><NuxtLink to="/round" active-class="current">賽況</NuxtLink></li>
+          <li><NuxtLink to="/plan" active-class="current">規劃</NuxtLink></li>
+          <li><a href="https://cses.fi/problemset/" target="_blank" rel="noopener">Problemset</a></li>
+        </ul>
+        <div class="cf-menu-search">
+          <input type="text" aria-label="search" disabled />
         </div>
       </nav>
-    </header>
 
-    <div class="app-main">
-      <div class="app-content">
-        <NuxtPage />
+      <div class="app-main">
+        <div class="app-content">
+          <NuxtPage />
+        </div>
+        <div class="cf-sidebar-col">
+          <LayoutCfSidebar />
+        </div>
       </div>
-      <div class="cf-sidebar-col">
-        <LayoutCfSidebar />
-      </div>
+
+      <footer class="cf-footer">
+        CSES Tracker &mdash; 三人週賽練功房 &nbsp;·&nbsp; lukewu &nbsp;·&nbsp; zyo &nbsp;·&nbsp; Weeeeeeeeeeeee00
+      </footer>
     </div>
-
-    <footer class="cf-footer">
-      <span>Codeforces (unofficial CSES skin)</span>
-      <span class="cf-footer-sep">·</span>
-      <span>Made for 三人練功房 by lukewu · zyo · Weeeeeeeeeeeee00</span>
-    </footer>
   </div>
 </template>
 
 <style>
 :root {
-  /* surfaces */
   --cs-bg: #ffffff;
-  --cs-bg-subtle: #f6f8fb;
-  --cs-border: #d4d9e0;
-  --cs-border-subtle: #e8ebf0;
-  --cs-text: #1b1b1b;
-  --cs-text-secondary: #555b64;
-  --cs-text-muted: #9aa0a8;
-  --cs-accent: #009000;          /* Codeforces "accepted" green */
-  --cs-accent-bg: #e6f3e6;
-  --cs-radius: 5px;
+  --cs-bg-subtle: #f8f8f8;
+  --cs-border: #b9b9b9;
+  --cs-border-subtle: #e1e1e1;
+  --cs-text: #000000;
+  --cs-text-secondary: #555555;
+  --cs-text-muted: #888888;
+  --cs-accent: #008000;          /* Codeforces "accepted" green */
+  --cs-accent-bg: #e9f3e9;
+  --cs-radius: 6px;
 
-  /* Codeforces-specific */
-  --cf-body-bg: #e1e8ee;
-  --cf-box-border: #d1d7de;
-  --cf-caption-bg: #eaf1f9;
-  --cf-link: #0e63b4;
-  --cf-row-alt: #f7f7f7;
+  --cf-blue: #3b5998;
+  --cf-link: #3b5998;
+  --cf-border: #b9b9b9;
+  --cf-sep: #e1e1e1;
+  --cf-cell: #f8f8f8;
 }
 
 * {
   box-sizing: border-box;
 }
 
-html {
-  background: var(--cf-body-bg);
+html,
+body {
+  background: #ffffff;
 }
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-  background: var(--cf-body-bg);
+  font-family: Verdana, Arial, 'Helvetica Neue', sans-serif;
   color: var(--cs-text);
-  font-size: 15px;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 a {
   color: var(--cf-link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 .app-shell {
@@ -99,27 +98,32 @@ a {
   flex-direction: column;
 }
 
-/* ---------- Header: top bar ---------- */
-.cf-header {
-  background: var(--cs-bg);
-  border-bottom: 3px solid #3b5998;
+.cf-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
+/* ---------- Top bar (logo + auth) ---------- */
 .cf-topbar {
-  max-width: 1150px;
-  margin: 0 auto;
-  padding: 0.9rem 1.25rem 0.7rem;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
+  padding: 1rem 0.25rem 0.85rem;
   flex-wrap: wrap;
 }
 
 .cf-logo {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.7rem;
+}
+.cf-logo:hover {
   text-decoration: none;
 }
 
@@ -128,122 +132,121 @@ a {
 }
 
 .cf-wordmark {
-  font-family: Georgia, 'Times New Roman', 'Noto Serif', serif;
+  font-family: 'Trebuchet MS', Verdana, sans-serif;
   font-weight: 700;
-  font-size: 1.85rem;
-  letter-spacing: 0.02em;
-  color: #1a1a1a;
+  font-size: 2rem;
+  letter-spacing: -0.01em;
   line-height: 1;
+}
+.wm-a {
+  color: #2a2a2a;
+}
+.wm-b {
+  color: #5b7fb0;
+  margin-left: 0.12em;
 }
 
 .cf-topbar-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.3rem;
+  gap: 0.35rem;
+  font-size: 0.82rem;
 }
-
-.cf-sponsor {
-  font-size: 0.72rem;
-  color: var(--cs-text-muted);
-}
-
-.cf-auth {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
+.cf-lang {
   color: var(--cs-text-secondary);
 }
-
-.cf-enter,
-.cf-register {
+.cf-auth {
+  color: var(--cs-text-muted);
+}
+.cf-authlink {
   color: var(--cf-link);
   cursor: default;
 }
 
-.cf-sep {
-  color: var(--cs-border);
-}
-
-/* ---------- Header: blue menu bar ---------- */
-.cf-menu {
-  background: linear-gradient(#4a70b0, #3b5998);
-}
-
-.cf-menu-inner {
-  max-width: 1150px;
-  margin: 0 auto;
-  padding: 0 1.25rem;
+/* ---------- Menu box (white rounded box, black uppercase links) ---------- */
+.cf-menu-box {
   display: flex;
-  gap: 0.15rem;
+  align-items: stretch;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cs-radius);
+  padding: 0 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.cf-menu-list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 0.5rem;
   flex-wrap: wrap;
 }
 
-.cf-menu-inner a {
-  color: #ffffff;
-  text-decoration: none;
+.cf-menu-list li {
+  display: flex;
+}
+
+.cf-menu-list a {
+  display: flex;
+  align-items: center;
+  color: #000000;
+  text-transform: uppercase;
   font-size: 0.9rem;
-  font-weight: 600;
-  padding: 0.55rem 0.9rem;
-  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  padding: 0.6rem 0.85rem;
   border-bottom: 3px solid transparent;
-  margin-bottom: -0px;
 }
 
-.cf-menu-inner a:hover {
-  background: rgba(255, 255, 255, 0.14);
+.cf-menu-list a:hover {
+  text-decoration: none;
+  color: var(--cf-blue);
 }
 
-.cf-menu-inner a.active {
-  background: rgba(255, 255, 255, 0.92);
-  color: #24428a;
-  border-bottom-color: #ffcc33;
+.cf-menu-list a.current {
+  border-bottom-color: var(--cf-blue);
+  color: #000000;
 }
 
-.cf-menu-ext {
-  margin-left: auto;
-  opacity: 0.9;
-  font-weight: 500 !important;
+.cf-menu-search {
+  display: flex;
+  align-items: center;
+  padding: 0.35rem 0.4rem;
+}
+.cf-menu-search input {
+  width: 130px;
+  height: 22px;
+  border: 1px solid var(--cf-border);
+  border-radius: 4px;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat right 6px center;
 }
 
 /* ---------- Main two-column layout ---------- */
 .app-main {
   flex: 1;
-  width: 100%;
-  max-width: 1150px;
-  margin: 0 auto;
-  padding: 1.25rem;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 290px;
+  grid-template-columns: minmax(0, 1fr) 280px;
   gap: 1.25rem;
   align-items: start;
+  padding: 0.5rem 0.25rem 1.5rem;
 }
 
 .app-content {
   min-width: 0;
 }
-
 .cf-sidebar-col {
   min-width: 0;
 }
 
 /* ---------- Footer ---------- */
 .cf-footer {
-  border-top: 1px solid var(--cf-box-border);
-  background: var(--cs-bg);
-  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--cf-sep);
+  padding: 1rem 0.25rem 1.5rem;
   text-align: center;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--cs-text-muted);
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.cf-footer-sep {
-  color: var(--cs-border);
 }
 
 @media (max-width: 900px) {

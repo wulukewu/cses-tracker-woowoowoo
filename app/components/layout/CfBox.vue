@@ -4,15 +4,13 @@ defineProps<{
   title?: string
   /** drop body padding (for tables / edge-to-edge lists) */
   flush?: boolean
-  /** center the caption with Codeforces-style em-dashes */
-  dashed?: boolean
 }>()
 </script>
 
 <template>
   <div class="cf-box">
-    <div v-if="title || $slots.title" class="cf-box-caption" :class="{ dashed }">
-      <span class="cf-box-caption-inner"><slot name="title">{{ title }}</slot></span>
+    <div v-if="title || $slots.title" class="cf-box-caption">
+      <slot name="title">{{ title }}</slot>
     </div>
     <div class="cf-box-body" :class="{ flush }">
       <slot />
@@ -25,47 +23,23 @@ defineProps<{
 
 <style scoped>
 .cf-box {
-  background: var(--cs-bg);
-  border: 1px solid var(--cf-box-border);
-  border-radius: 5px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  margin-bottom: 1.25rem;
+  background: #ffffff;
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cs-radius);
+  margin-bottom: 1.1rem;
   overflow: hidden;
 }
 
 .cf-box-caption {
-  padding: 0.5rem 1rem;
-  background: var(--cf-caption-bg);
-  border-bottom: 1px solid var(--cf-box-border);
+  padding: 0.55rem 0.5rem 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--cf-border);
   font-weight: 700;
-  font-size: 0.92rem;
-  color: var(--cs-text);
+  font-size: 1.03rem;
+  color: var(--cf-blue);
 }
-
-.cf-box-caption.dashed {
-  text-align: center;
-  position: relative;
-}
-
-.cf-box-caption.dashed .cf-box-caption-inner {
-  position: relative;
-  padding: 0 0.6rem;
-}
-
-.cf-box-caption.dashed::before,
-.cf-box-caption.dashed::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 22%;
-  border-top: 1px dashed var(--cf-box-border);
-}
-
-.cf-box-caption.dashed::before { left: 1rem; }
-.cf-box-caption.dashed::after { right: 1rem; }
 
 .cf-box-body {
-  padding: 0.85rem 1rem;
+  padding: 0.7rem 0.75rem;
 }
 
 .cf-box-body.flush {
@@ -73,9 +47,9 @@ defineProps<{
 }
 
 .cf-box-footer {
-  padding: 0.5rem 1rem;
-  background: var(--cf-caption-bg);
-  border-top: 1px solid var(--cf-box-border);
-  font-size: 0.82rem;
+  padding: 0.45rem 0.75rem;
+  background: var(--cf-cell);
+  border-top: 1px solid var(--cf-sep);
+  font-size: 0.85rem;
 }
 </style>

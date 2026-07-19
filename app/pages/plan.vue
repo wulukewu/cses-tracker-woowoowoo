@@ -161,23 +161,22 @@ function closeImportModal() {
 .cf-page-title {
   display: flex;
   align-items: baseline;
-  gap: 0.6rem;
+  gap: 0.7rem;
   margin: 0 0 1rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--cf-box-border);
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--cf-sep);
 }
 
 .cf-page-title h1 {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.7rem;
+  font-weight: 400;
   margin: 0;
-  color: #2b3a5c;
+  color: var(--cf-blue);
 }
 
 .cf-page-sub {
-  font-size: 0.85rem;
-  color: var(--cs-text-secondary);
+  font-size: 0.82rem;
+  color: var(--cs-text-muted);
 }
 
 .plan-header {
@@ -306,19 +305,18 @@ function closeImportModal() {
 }
 
 .save-btn {
-  padding: 0.55rem 1.1rem;
-  background: linear-gradient(#4a70b0, #3b5998);
+  padding: 0.5rem 1.1rem;
+  background: #3b5998;
   color: #fff;
-  border: none;
-  border-radius: var(--cs-radius);
+  border: 1px solid #2f477a;
+  border-radius: 4px;
   cursor: pointer;
   font-weight: 700;
   font-size: 0.9rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 .save-btn:hover:not(:disabled) {
-  filter: brightness(1.08);
+  background: #34508a;
 }
 
 .save-btn:disabled {
