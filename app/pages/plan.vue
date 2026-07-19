@@ -89,6 +89,11 @@ function closeImportModal() {
 
 <template>
   <div class="plan-page">
+    <div class="cf-page-title">
+      <h1>規劃下次 Round</h1>
+      <span class="cf-page-sub">挑題單 · 排待辦 · 匯入匯出</span>
+    </div>
+
     <div class="plan-header">
       <div>
         <h2 v-if="editingWeek">
@@ -153,6 +158,28 @@ function closeImportModal() {
 </template>
 
 <style scoped>
+.cf-page-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--cf-box-border);
+}
+
+.cf-page-title h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: #2b3a5c;
+}
+
+.cf-page-sub {
+  font-size: 0.85rem;
+  color: var(--cs-text-secondary);
+}
+
 .plan-header {
   display: flex;
   justify-content: space-between;
@@ -280,13 +307,18 @@ function closeImportModal() {
 
 .save-btn {
   padding: 0.55rem 1.1rem;
-  background: var(--cs-text);
-  color: var(--cs-bg);
+  background: linear-gradient(#4a70b0, #3b5998);
+  color: #fff;
   border: none;
   border-radius: var(--cs-radius);
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.9rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.save-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
 }
 
 .save-btn:disabled {

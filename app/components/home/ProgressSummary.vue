@@ -14,13 +14,19 @@ const emit = defineEmits<{ openProfile: [index: number] }>()
   <section class="progress-summary">
     <div v-for="(u, i) in users" :key="u.csesId" class="summary-item">
       <div class="summary-header">
-        <button type="button" class="user-name user-name-btn" @click="emit('openProfile', i)">{{ u.name }}</button>
+        <button
+          type="button"
+          class="user-name user-name-btn cf-handle"
+          :style="{ color: handleStyle(u.name).color }"
+          :title="`${handleStyle(u.name).title} · ${handleStyle(u.name).rating}`"
+          @click="emit('openProfile', i)"
+        >{{ u.name }}</button>
         <span class="user-count">{{ solvedCountFor(i) }} / {{ week.problems.length }}</span>
       </div>
       <div class="progress-bar-track">
         <div
           class="progress-bar-fill"
-          :style="{ width: `${week.problems.length ? (solvedCountFor(i) / week.problems.length) * 100 : 0}%` }"
+          :style="{ width: `${week.problems.length ? (solvedCountFor(i) / week.problems.length) * 100 : 0}%`, background: handleStyle(u.name).color }"
         />
       </div>
     </div>
