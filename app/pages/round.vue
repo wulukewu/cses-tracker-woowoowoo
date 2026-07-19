@@ -220,23 +220,22 @@ onUnmounted(() => {
 .cf-page-title {
   display: flex;
   align-items: baseline;
-  gap: 0.6rem;
+  gap: 0.7rem;
   margin: 0 0 1rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--cf-box-border);
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--cf-sep);
 }
 
 .cf-page-title h1 {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.7rem;
+  font-weight: 400;
   margin: 0;
-  color: #2b3a5c;
+  color: var(--cf-blue);
 }
 
 .cf-page-sub {
-  font-size: 0.85rem;
-  color: var(--cs-text-secondary);
+  font-size: 0.82rem;
+  color: var(--cs-text-muted);
 }
 
 .empty-state {
@@ -244,7 +243,7 @@ onUnmounted(() => {
   text-align: center;
   color: var(--cs-text-muted);
   background: var(--cs-bg);
-  border: 1px solid var(--cf-box-border);
+  border: 1px solid var(--cf-border);
   border-radius: var(--cs-radius);
 }
 
