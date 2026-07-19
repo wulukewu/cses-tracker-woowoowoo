@@ -1,0 +1,6 @@
+7 2
+AYBABTU
+3 4
+4 7
+---
+AYAUTBB

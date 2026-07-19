@@ -1,0 +1,9 @@
+aybabtu
+3
+bab
+abc
+ayba
+---
+YES
+NO
+YES

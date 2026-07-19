@@ -1,0 +1,8 @@
+3 4
+AAAA
+CCBB
+ABCA
+---
+BCBC
+ABCA
+CABC

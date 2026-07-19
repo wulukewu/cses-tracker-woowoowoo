@@ -1,0 +1,12 @@
+{
+  "name": "cses-tracker-woowoowoo-answer",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "submit": "node scripts/submit-all.js",
+    "discover": "node scripts/discover-user.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0"
+  }
+}

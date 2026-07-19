@@ -1,0 +1,10 @@
+5 3
+ABBBC
+ABABC
+ABBBC
+ABBBC
+CCCCC
+---
+5
+14
+9

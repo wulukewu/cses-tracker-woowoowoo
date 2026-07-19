@@ -1,0 +1,4 @@
+babaacbaab
+10
+---
+aba

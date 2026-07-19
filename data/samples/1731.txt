@@ -1,0 +1,8 @@
+ababc
+4
+ab
+abab
+c
+cb
+---
+2
