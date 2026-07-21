@@ -1,141 +1,113 @@
 <script setup lang="ts">
-import type { ProgressResponse } from '~~/shared/types'
-import { makeRng, buildInvite, buildAnnouncement } from '~/utils/postTemplates'
+import type { ProgressResponse, Week } from '~~/shared/types'
+import { makeRng, hashSeed, buildPost } from '~/utils/postTemplates'
 
-// One random seed per render, shared server→client via useState so the
-// randomised copy is identical on both sides (no hydration mismatch) but
-// fresh on every fresh load.
-const seed = useState('homeSeed', () => Math.floor(Math.random() * 2_000_000_000))
-const rng = makeRng(seed.value)
-const invite = buildInvite(rng)
-const announcement = buildAnnouncement(rng)
-const inviteHoursAgo = 1 + Math.floor(rng() * 8)
+// Weeks drive the feed (one post per week). Fetched on the server so the posts
+// are in the initial HTML; degrades to [] if the blob backend is unavailable.
+const { data: weeksData } = await useFetch<Week[]>('/api/weeks', { default: () => [] })
 
-const inviteTags = ['cses', 'weekly-round', '練功', '三人成團']
-
-// Client-only, non-blocking, degrades to null — the home page must never break
-// if the blob-backed API is unavailable. Powers the (kept) live standings.
+// Progress (solved counts) is client-only + non-blocking — powers the standings
+// without triggering a CSES scrape during SSR.
 const { data: live } = await useFetch<ProgressResponse | null>('/api/progress', {
   server: false,
   lazy: true,
   default: () => null,
 })
 
-const liveWeek = computed(() => live.value?.week ?? null)
-const liveCount = computed(() => liveWeek.value?.problems.length ?? null)
-const liveDeadline = computed(() =>
-  liveWeek.value?.deadline ? formatDate(liveWeek.value.deadline) : null,
-)
+const INV_TAGS = ['cses', 'weekly-round', '練功', '三人成團']
+const REC_TAGS = ['cses', 'recap', '週賽']
 
-const liveStandings = computed(() => {
-  const w = liveWeek.value
-  const usrs = live.value?.users
-  if (!w || !usrs) return []
-  const ids = new Set(w.problems.map((p) => p.id))
-  return usrs
-    .map((u) => ({
-      name: u.name,
-      solved: u.solvedIds.filter((id) => ids.has(id)).length,
-      total: w.problems.length,
-    }))
-    .sort((a, b) => b.solved - a.solved)
+const FALLBACK: Week = { id: 'preview', createdAt: '', deadline: null, problems: [] }
+
+const posts = computed(() => {
+  const weeks = (weeksData.value?.length ? weeksData.value : [FALLBACK])
+  const us = live.value?.users ?? []
+  return weeks.map((w, i) => {
+    const voice = i === 0 ? 'invite' : 'recap'
+    const rng = makeRng(hashSeed(`${w.id}|${i}|${voice}`))
+    const copy = buildPost(rng, voice)
+    const time = i === 0 ? `${1 + Math.floor(rng() * 8)} hours ago` : `${i} 週前`
+    const total = w.problems?.length ?? 0
+    const ids = new Set((w.problems ?? []).map((p) => p.id))
+    const standings =
+      us.length && total
+        ? us
+            .map((u) => ({
+              name: u.name,
+              solved: u.solvedIds.filter((id) => ids.has(id)).length,
+              total,
+            }))
+            .sort((a, b) => b.solved - a.solved)
+        : []
+    return {
+      id: w.id,
+      copy,
+      time,
+      count: total || null,
+      deadline: w.deadline ? formatDate(w.deadline) : null,
+      standings,
+      standingsLabel: i === 0 ? '目前賽況（即時）' : '最終賽況',
+      tags: voice === 'invite' ? INV_TAGS : REC_TAGS,
+    }
+  })
 })
 </script>
 
 <template>
   <div class="cf-home">
-    <!-- Invitation post (randomised copy) -->
-    <article class="cf-topic">
-      <div class="topic-head">
-        <span class="post-label label-round">週賽</span>
-        <h2 class="topic-title">
-          <NuxtLink to="/round">{{ invite.title }}</NuxtLink>
-        </h2>
-      </div>
+    <article v-for="post in posts" :key="post.id" class="cf-topic">
+      <h2 class="topic-title">
+        <NuxtLink to="/round">{{ post.copy.title }}</NuxtLink>
+      </h2>
 
       <div class="topic-info">
         By
         <LayoutCfHandle name="zyo" />,
         <LayoutCfHandle name="lukewu" />,
         <LayoutCfHandle name="Weeeeeeeeeeeee00" />,
-        {{ inviteHoursAgo }} hours ago
+        {{ post.time }}
       </div>
 
       <div class="topic-body">
-        <p>{{ invite.intro }}</p>
+        <p>{{ post.copy.intro }}</p>
         <p>
           我們三個——<LayoutCfHandle name="zyo" />、<LayoutCfHandle name="lukewu" />、<LayoutCfHandle
-            name="Weeeeeeeeeeeee00" />——{{ invite.lead }}
+            name="Weeeeeeeeeeeee00" />——{{ post.copy.lead }}
         </p>
-        <p>{{ invite.howItWorks }}</p>
+        <p>{{ post.copy.how }}</p>
 
-        <p class="post-meta-line">
-          <span class="meta-chip">本週 <strong>{{ liveCount ?? '題單準備中' }}</strong><template v-if="liveCount"> 題</template></span>
-          <span class="meta-chip">截止 <strong>{{ liveDeadline ?? '見賽區公告' }}</strong></span>
+        <p v-if="post.count || post.deadline">
+          本週 <strong>{{ post.count ?? '題單準備中' }}</strong><template v-if="post.count"> 題</template><template
+            v-if="post.deadline">，截止 <strong>{{ post.deadline }}</strong></template>。
         </p>
 
-        <div v-if="liveStandings.length" class="live-standings">
-          <div class="ls-caption">目前賽況（即時）</div>
-          <div v-for="s in liveStandings" :key="s.name" class="ls-row">
-            <LayoutCfHandle :name="s.name" class="ls-handle" />
-            <span class="ls-bar-track">
-              <span class="ls-bar-fill" :style="{ width: `${s.total ? (s.solved / s.total) * 100 : 0}%` }" />
-            </span>
-            <span class="ls-count">{{ s.solved }} / {{ s.total }}</span>
+        <div v-if="post.standings.length" class="standings">
+          <div class="standings-cap">{{ post.standingsLabel }}</div>
+          <div v-for="s in post.standings" :key="s.name" class="standings-row">
+            <LayoutCfHandle :name="s.name" class="st-handle" />
+            <span class="st-bar"><span class="st-fill" :style="{ width: `${s.total ? (s.solved / s.total) * 100 : 0}%` }" /></span>
+            <span class="st-count">{{ s.solved }} / {{ s.total }}</span>
           </div>
         </div>
 
         <p class="post-cta-line">
-          {{ invite.closing }}<NuxtLink to="/round" class="post-cta">進入賽區看即時賽況 »</NuxtLink>
+          {{ post.copy.closing }}<NuxtLink to="/round" class="post-cta">{{ post.copy.cta }}</NuxtLink>
         </p>
       </div>
 
       <div class="topic-tags">
-        <a v-for="t in inviteTags" :key="t" class="cf-tag">{{ t }}</a>
+        <a v-for="t in post.tags" :key="t" class="cf-tag">{{ t }}</a>
       </div>
 
       <div class="topic-footer">
         <span class="cf-vote">
           <span class="v-up">&#9650;</span>
-          <span class="v-score">+{{ invite.votes }}</span>
+          <span class="v-score">+{{ post.copy.votes }}</span>
           <span class="v-down">&#9660;</span>
         </span>
         <div class="footer-meta">
           <NuxtLink to="/round" class="read-more">Read more »</NuxtLink>
-          <span class="cf-comments">» {{ invite.comments }} comments</span>
-        </div>
-      </div>
-    </article>
-
-    <!-- Announcement post -->
-    <article class="cf-topic">
-      <div class="topic-head">
-        <span class="post-label label-news">{{ announcement.label }}</span>
-        <h2 class="topic-title small">
-          <NuxtLink to="/round">{{ announcement.title }}</NuxtLink>
-        </h2>
-      </div>
-      <div class="topic-info">
-        By <LayoutCfHandle name="lukewu" />, yesterday
-      </div>
-      <div class="topic-body">
-        <p>{{ announcement.body }}</p>
-        <p class="post-cta-line">
-          想排下一場？<NuxtLink to="/plan" class="post-cta">到「規劃」安排題單與待辦 »</NuxtLink>
-        </p>
-      </div>
-      <div class="topic-tags">
-        <a class="cf-tag">announcement</a>
-        <a class="cf-tag">notes</a>
-      </div>
-      <div class="topic-footer">
-        <span class="cf-vote">
-          <span class="v-up">&#9650;</span>
-          <span class="v-score">+{{ announcement.votes }}</span>
-          <span class="v-down">&#9660;</span>
-        </span>
-        <div class="footer-meta">
-          <span class="cf-comments">» {{ announcement.comments }} comments</span>
+          <span class="cf-comments">» {{ post.copy.comments }} comments</span>
         </div>
       </div>
     </article>
@@ -154,40 +126,11 @@ const liveStandings = computed(() => {
   border-bottom: 1px solid var(--cf-sep);
 }
 
-.topic-head {
-  display: flex;
-  align-items: baseline;
-  gap: 0.55rem;
-  flex-wrap: wrap;
-}
-
-.post-label {
-  flex-shrink: 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.1rem 0.5rem;
-  border-radius: 2px;
-  transform: translateY(-0.15rem);
-}
-.label-round {
-  background: #e7eefb;
-  color: #3b5998;
-  border: 1px solid #c9d6ef;
-}
-.label-news {
-  background: #e9f3e9;
-  color: #008000;
-  border: 1px solid #cfe6cf;
-}
-
 .topic-title {
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.35rem;
   font-size: 1.6rem;
   font-weight: 400;
   line-height: 1.25;
-}
-.topic-title.small {
-  font-size: 1.25rem;
 }
 .topic-title a {
   color: var(--cf-blue);
@@ -208,22 +151,8 @@ const liveStandings = computed(() => {
   margin: 0 0 0.8rem;
 }
 
-.post-meta-line {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.meta-chip {
-  background: var(--cf-cell);
-  border: 1px solid var(--cf-sep);
-  border-radius: 3px;
-  padding: 0.12rem 0.55rem;
-  font-size: 0.85rem;
-}
-
 .post-cta {
   color: var(--cf-link);
-  font-weight: 700;
   text-decoration: underline;
 }
 .post-cta:hover {
@@ -233,45 +162,43 @@ const liveStandings = computed(() => {
   margin-top: 0.9rem;
 }
 
-.live-standings {
-  border: 1px solid var(--cf-border);
-  border-radius: var(--cs-radius);
-  padding: 0.75rem 0.9rem;
-  margin: 0 0 0.9rem;
-  background: var(--cf-cell);
+/* Live standings — kept, but plain (no boxed decoration) */
+.standings {
+  margin: 0 0 0.8rem;
 }
-.ls-caption {
-  font-size: 0.78rem;
+.standings-cap {
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--cs-text-secondary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
-.ls-row {
+.standings-row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  margin: 0.3rem 0;
+  margin: 0.25rem 0;
   font-size: 0.85rem;
 }
-.ls-handle {
+.st-handle {
   width: 9rem;
   flex-shrink: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ls-bar-track {
+.st-bar {
   flex: 1;
+  max-width: 22rem;
   height: 8px;
   border-radius: 2px;
   background: var(--cs-border-subtle);
   overflow: hidden;
 }
-.ls-bar-fill {
+.st-fill {
   display: block;
   height: 100%;
   background: var(--cs-accent);
 }
-.ls-count {
+.st-count {
   width: 3.5rem;
   text-align: right;
   color: var(--cs-text-secondary);
