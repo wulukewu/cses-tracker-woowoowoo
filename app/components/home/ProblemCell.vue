@@ -87,7 +87,7 @@ const emit = defineEmits<{
   border: 1px solid var(--cs-border-subtle);
   background: var(--cs-bg-subtle);
   color: var(--cs-text-muted);
-  border-radius: 6px;
+  border-radius: 3px;
   cursor: pointer;
   padding: 0.4rem;
   font-family: inherit;

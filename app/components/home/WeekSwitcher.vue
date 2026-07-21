@@ -145,25 +145,25 @@ watch(
 
 .week-tab {
   flex-shrink: 0;
-  padding: 0.4rem 0.8rem;
+  padding: 0.4rem 0.85rem;
   background: var(--cs-bg);
-  color: var(--cs-text-secondary);
-  border: 1px solid var(--cs-border);
-  border-radius: 999px;
+  color: var(--cf-link);
+  border: 1px solid var(--cf-border);
+  border-radius: 4px;
   cursor: pointer;
   font-size: 0.85rem;
   white-space: nowrap;
 }
 
 .week-tab:hover {
-  border-color: #ccc;
+  background: var(--cf-cell);
 }
 
 .week-tab.active {
-  background: var(--cs-text);
-  color: var(--cs-bg);
-  border-color: var(--cs-text);
-  font-weight: 600;
+  background: var(--cf-blue);
+  color: #fff;
+  border-color: var(--cf-blue);
+  font-weight: 700;
 }
 
 .week-actions {

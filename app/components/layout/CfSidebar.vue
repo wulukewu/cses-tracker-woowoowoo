@@ -1,19 +1,60 @@
 <script setup lang="ts">
 import { USERS } from '~~/shared/users'
+import type { ProgressResponse, UserNote } from '~~/shared/types'
 
-// Ranked by the cosmetic rating so the "Top rated" box reads like Codeforces.
-const ranked = computed(() =>
-  [...USERS]
-    .map((u) => ({ ...u, style: handleStyle(u.name) }))
-    .sort((a, b) => b.style.rating - a.style.rating),
-)
+// Real data, client-only + guarded so the sidebar never breaks SSR or a
+// missing backend. No `await` — these are lazy/client-only, so setup stays
+// synchronous (this component lives in app.vue, outside the page's Suspense).
+// Falls back to a static roster when there's nothing yet.
+const { data: prog } = useFetch<ProgressResponse | null>('/api/progress', {
+  server: false,
+  lazy: true,
+  default: () => null,
+  key: 'sidebar-progress',
+})
+const { data: notesData } = useFetch<Record<string, Record<string, UserNote>>>('/api/notes', {
+  server: false,
+  lazy: true,
+  default: () => ({}),
+  key: 'sidebar-notes',
+})
 
-const recent = [
-  { user: 'zyo', action: '邀請你參加 CSES Weekly Round' },
-  { user: 'lukewu', action: '更新了 Dynamic Programming 的解題筆記' },
-  { user: 'Weeeeeeeeeeeee00', action: '通過了 Grid Paths' },
-  { user: 'zyo', action: '在 Range Queries 標記了卡題' },
-]
+// Leaderboard by real total solved count; fall back to the roster (— count).
+const standings = computed(() => {
+  const usrs = prog.value?.users
+  if (!usrs || usrs.length === 0) {
+    return USERS.map((u) => ({ name: u.name, solved: null as number | null }))
+  }
+  return [...usrs]
+    .map((u) => ({ name: u.name, solved: u.solvedIds.length }))
+    .sort((a, b) => (b.solved ?? 0) - (a.solved ?? 0))
+})
+
+// Recent actions derived from real data: stuck markers / notes / week solves.
+const recent = computed(() => {
+  const w = prog.value?.week
+  const usrs = prog.value?.users
+  const entries: { user: string; action: string }[] = []
+  if (w && usrs) {
+    const nameById = new Map(w.problems.map((p) => [p.id, p.name]))
+    for (const [pidStr, perUser] of Object.entries(notesData.value || {})) {
+      const pname = nameById.get(Number(pidStr))
+      if (!pname) continue
+      for (const [user, note] of Object.entries(perUser)) {
+        if (note.stuck) entries.push({ user, action: `在 ${pname} 標記了卡題` })
+        else if (note.content?.trim()) entries.push({ user, action: `更新了 ${pname} 的解題筆記` })
+      }
+    }
+    for (const u of usrs) {
+      const solved = w.problems.filter((p) => u.solvedIds.includes(p.id))
+      if (solved.length) {
+        const last = solved[solved.length - 1]!
+        entries.push({ user: u.name, action: `通過了 ${last.name}` })
+      }
+    }
+  }
+  return entries.slice(0, 6)
+})
 </script>
 
 <template>
@@ -27,36 +68,34 @@ const recent = [
       </div>
     </LayoutCfBox>
 
-    <LayoutCfBox title="→ Top rated" flush>
+    <LayoutCfBox title="→ 排行榜" flush>
       <table class="cf-datatable">
         <thead>
-          <tr><th class="c-rank">#</th><th class="c-user">User</th><th class="c-rating">Rating</th></tr>
+          <tr><th class="c-rank">#</th><th class="c-user">使用者</th><th class="c-rating">解題數</th></tr>
         </thead>
         <tbody>
-          <tr v-for="(u, i) in ranked" :key="u.csesId">
+          <tr v-for="(u, i) in standings" :key="u.name">
             <td class="c-rank">{{ i + 1 }}</td>
-            <td class="c-user">
-              <span class="cf-handle" :style="{ color: u.style.color }" :title="`${u.style.title} · ${u.style.rating}`">{{ u.name }}</span>
-            </td>
-            <td class="c-rating">{{ u.style.rating }}</td>
+            <td class="c-user"><LayoutCfHandle :name="u.name" /></td>
+            <td class="c-rating">{{ u.solved ?? '—' }}</td>
           </tr>
         </tbody>
       </table>
       <template #footer>
         <div class="tr-footer">
-          <NuxtLink to="/round">Standings</NuxtLink>
-          <NuxtLink to="/round">View all →</NuxtLink>
+          <NuxtLink to="/round">賽況</NuxtLink>
+          <NuxtLink to="/round">看全部 →</NuxtLink>
         </div>
       </template>
     </LayoutCfBox>
 
     <LayoutCfBox title="→ Recent actions" flush>
-      <ul class="recent-list">
+      <ul v-if="recent.length" class="recent-list">
         <li v-for="(r, i) in recent" :key="i" class="recent-item">
-          <span class="cf-handle" :style="{ color: handleStyle(r.user).color }">{{ r.user }}</span>
-          <span class="recent-action">{{ r.action }}</span>
+          <LayoutCfHandle :name="r.user" />{{ ' ' }}<span class="recent-action">{{ r.action }}</span>
         </li>
       </ul>
+      <p v-else class="recent-empty">目前尚無最新動態</p>
     </LayoutCfBox>
 
     <LayoutCfBox title="→ CSES">
@@ -135,18 +174,6 @@ const recent = [
   white-space: nowrap;
 }
 
-.cf-handle {
-  font-weight: 700;
-}
-.cf-handle:hover {
-  text-decoration: underline;
-}
-
-.tr-footer {
-  display: flex;
-  justify-content: space-between;
-}
-
 /* Recent actions */
 .recent-list {
   list-style: none;
@@ -157,13 +184,19 @@ const recent = [
 .recent-item {
   padding: 0.45rem 0.75rem;
   border-bottom: 1px solid var(--cf-sep);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 .recent-item:last-child {
   border-bottom: none;
 }
 .recent-action {
   color: var(--cs-text);
+}
+.recent-empty {
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  color: var(--cs-text-muted);
+  font-size: 0.82rem;
 }
 
 /* CSES links */

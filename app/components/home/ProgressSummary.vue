@@ -16,17 +16,15 @@ const emit = defineEmits<{ openProfile: [index: number] }>()
       <div class="summary-header">
         <button
           type="button"
-          class="user-name user-name-btn cf-handle"
-          :style="{ color: handleStyle(u.name).color }"
-          :title="`${handleStyle(u.name).title} · ${handleStyle(u.name).rating}`"
+          class="user-name-btn"
           @click="emit('openProfile', i)"
-        >{{ u.name }}</button>
+        ><LayoutCfHandle :name="u.name" /></button>
         <span class="user-count">{{ solvedCountFor(i) }} / {{ week.problems.length }}</span>
       </div>
       <div class="progress-bar-track">
         <div
           class="progress-bar-fill"
-          :style="{ width: `${week.problems.length ? (solvedCountFor(i) / week.problems.length) * 100 : 0}%`, background: handleStyle(u.name).color }"
+          :style="{ width: `${week.problems.length ? (solvedCountFor(i) / week.problems.length) * 100 : 0}%` }"
         />
       </div>
     </div>
@@ -80,7 +78,7 @@ const emit = defineEmits<{ openProfile: [index: number] }>()
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--cs-text);
+  background: var(--cs-accent);
   transition: width 0.2s ease;
 }
 </style>

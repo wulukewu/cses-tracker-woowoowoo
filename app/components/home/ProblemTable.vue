@@ -41,11 +41,9 @@ const cellInfoMap = computed(() => {
           <th v-for="(u, i) in users" :key="u.csesId" class="col-user">
             <button
               type="button"
-              class="user-name-btn cf-handle"
-              :style="{ color: handleStyle(u.name).color }"
-              :title="`${handleStyle(u.name).title} · ${handleStyle(u.name).rating}`"
+              class="user-name-btn"
               @click="emit('openProfile', i)"
-            >{{ u.name }}</button>
+            ><LayoutCfHandle :name="u.name" /></button>
           </th>
         </tr>
       </thead>
@@ -84,34 +82,33 @@ const cellInfoMap = computed(() => {
 
 <style scoped>
 .problem-table-wrap {
-  border: 1px solid var(--cs-border);
+  border: 1px solid var(--cf-border);
   border-radius: var(--cs-radius);
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
 }
 
 .problem-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   table-layout: fixed;
 }
 
 .problem-table thead tr {
-  background: var(--cs-bg-subtle);
-  border-bottom: 1px solid var(--cs-border);
+  background: var(--cf-cell);
+  border-bottom: 1px solid var(--cf-border);
 }
 
 .problem-table th {
   text-align: left;
-  font-weight: 600;
-  color: var(--cs-text-secondary);
-  padding: 0.75rem 1rem;
+  font-weight: 700;
+  color: var(--cs-text);
+  padding: 0.6rem 1rem;
 }
 
 .problem-table td {
-  padding: 0.65rem 1rem;
-  border-bottom: 1px solid var(--cs-border-subtle);
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--cf-sep);
   vertical-align: middle;
 }
 
@@ -119,10 +116,11 @@ const cellInfoMap = computed(() => {
   border-bottom: none;
 }
 
-/* 分類列優化 */
+/* Codeforces-style section header row */
 .category-row td {
-  background: #fbfbfb;
-  padding: 0.5rem 1rem;
+  background: var(--cf-cell);
+  padding: 0.4rem 1rem;
+  border-bottom: 1px solid var(--cf-sep);
 }
 
 .category-title-wrap {
@@ -134,15 +132,15 @@ const cellInfoMap = computed(() => {
 .category-indicator {
   width: 3px;
   height: 12px;
-  background: var(--cs-accent);
-  border-radius: 99px;
+  background: var(--cf-blue);
+  border-radius: 0;
 }
 
 .category-name {
-  color: var(--cs-text);
-  font-weight: 600;
-  font-size: 0.78rem;
-  letter-spacing: 0.02em;
+  color: var(--cf-blue);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
 }
 
 .col-problem {

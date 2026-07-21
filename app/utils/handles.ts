@@ -1,30 +1,34 @@
 // Codeforces-style handle colouring. Each tracked user is given a fictional
 // rating + tier purely for the skin — it doesn't feed any real logic, it just
-// drives the coloured handle look that makes the site read as Codeforces.
+// drives the coloured handle look. Everyone is a Legendary Grandmaster: the
+// whole handle is red, with the first character black (the iconic LGM look).
 
 export interface HandleStyle {
   /** cosmetic rating shown next to the handle */
   rating: number
-  /** Codeforces tier name */
+  /** tier name */
   title: string
-  /** handle colour (Codeforces official tier colours) */
+  /** handle colour */
   color: string
+  /** legendary tier → first character rendered black */
+  legendary: boolean
 }
 
-// Codeforces official tier colours, keyed by the lower bound of the band.
-const UNRATED: HandleStyle = { rating: 0, title: 'Unrated', color: '#000000' }
+const UNRATED: HandleStyle = { rating: 0, title: 'Unrated', color: '#000000', legendary: false }
+
+const LGM = (rating: number): HandleStyle => ({
+  rating,
+  title: 'Legendary Grandmaster',
+  color: '#ff0000',
+  legendary: true,
+})
 
 const HANDLES: Record<string, HandleStyle> = {
-  lukewu: { rating: 1723, title: 'Expert', color: '#0000ff' },
-  zyo: { rating: 1954, title: 'Candidate Master', color: '#aa00aa' },
-  Weeeeeeeeeeeee00: { rating: 1487, title: 'Specialist', color: '#03a89e' },
+  zyo: LGM(3550),
+  lukewu: LGM(3421),
+  Weeeeeeeeeeeee00: LGM(3187),
 }
 
 export function handleStyle(name: string): HandleStyle {
   return HANDLES[name] ?? UNRATED
-}
-
-/** short cosmetic initials for avatars */
-export function handleInitials(name: string): string {
-  return name.slice(0, 2).toUpperCase()
 }
