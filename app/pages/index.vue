@@ -1,9 +1,20 @@
 <script setup lang="ts">
 import type { ProgressResponse } from '~~/shared/types'
+import { makeRng, buildInvite, buildAnnouncement } from '~/utils/postTemplates'
 
-// Client-only, non-blocking, degrades to null. The tracker's blob-backed API
-// can 500 outside a Netlify context — the home page must never break on that,
-// it just falls back to generic copy.
+// One random seed per render, shared server→client via useState so the
+// randomised copy is identical on both sides (no hydration mismatch) but
+// fresh on every fresh load.
+const seed = useState('homeSeed', () => Math.floor(Math.random() * 2_000_000_000))
+const rng = makeRng(seed.value)
+const invite = buildInvite(rng)
+const announcement = buildAnnouncement(rng)
+const inviteHoursAgo = 1 + Math.floor(rng() * 8)
+
+const inviteTags = ['cses', 'weekly-round', '練功', '三人成團']
+
+// Client-only, non-blocking, degrades to null — the home page must never break
+// if the blob-backed API is unavailable. Powers the (kept) live standings.
 const { data: live } = await useFetch<ProgressResponse | null>('/api/progress', {
   server: false,
   lazy: true,
@@ -24,48 +35,44 @@ const liveStandings = computed(() => {
   return usrs
     .map((u) => ({
       name: u.name,
-      style: handleStyle(u.name),
       solved: u.solvedIds.filter((id) => ids.has(id)).length,
       total: w.problems.length,
     }))
     .sort((a, b) => b.solved - a.solved)
 })
-
-const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
 </script>
 
 <template>
   <div class="cf-home">
-    <!-- Invitation blog post -->
+    <!-- Invitation post (randomised copy) -->
     <article class="cf-topic">
-      <h1 class="topic-title">
-        <NuxtLink to="/round">我們三個，邀請你打一場 CSES Weekly Round</NuxtLink>
-      </h1>
+      <div class="topic-head">
+        <span class="post-label label-round">週賽</span>
+        <h2 class="topic-title">
+          <NuxtLink to="/round">{{ invite.title }}</NuxtLink>
+        </h2>
+      </div>
 
       <div class="topic-info">
         By
         <LayoutCfHandle name="zyo" />,
         <LayoutCfHandle name="lukewu" />,
         <LayoutCfHandle name="Weeeeeeeeeeeee00" />,
-        3 hours ago
+        {{ inviteHoursAgo }} hours ago
       </div>
 
       <div class="topic-body">
-        <p>各位好，</p>
+        <p>{{ invite.intro }}</p>
         <p>
           我們三個——<LayoutCfHandle name="zyo" />、<LayoutCfHandle name="lukewu" />、<LayoutCfHandle
-            name="Weeeeeeeeeeeee00" />——每週固定挑一組
-          CSES 題目，開一場自己的 mini round，互相追進度、對送出紀錄、留解題筆記。這週的位子幫你留好了，<strong>來一起打吧。</strong>
+            name="Weeeeeeeeeeeee00" />——{{ invite.lead }}
         </p>
+        <p>{{ invite.howItWorks }}</p>
 
-        <ul class="invite-facts">
-          <li>
-            本週題數：<strong>{{ liveCount ?? '一組精選' }}</strong><template v-if="liveCount"> 題</template>
-            · 主題涵蓋 DP / 圖論 / 資料結構
-          </li>
-          <li>截止時間：<strong>{{ liveDeadline ?? '見賽區公告' }}</strong></li>
-          <li>逐題勾狀態、看彼此的送出紀錄與解題筆記，卡住就標記 stuck 一起 debug</li>
-        </ul>
+        <p class="post-meta-line">
+          <span class="meta-chip">本週 <strong>{{ liveCount ?? '題單準備中' }}</strong><template v-if="liveCount"> 題</template></span>
+          <span class="meta-chip">截止 <strong>{{ liveDeadline ?? '見賽區公告' }}</strong></span>
+        </p>
 
         <div v-if="liveStandings.length" class="live-standings">
           <div class="ls-caption">目前賽況（即時）</div>
@@ -78,9 +85,9 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
           </div>
         </div>
 
-        <p>準備好了嗎？點下面進賽區看即時賽況。</p>
-
-        <NuxtLink to="/round" class="cf-btn cf-enter-btn">進入賽區（Enter round）</NuxtLink>
+        <p class="post-cta-line">
+          {{ invite.closing }}<NuxtLink to="/round" class="post-cta">進入賽區看即時賽況 »</NuxtLink>
+        </p>
       </div>
 
       <div class="topic-tags">
@@ -90,28 +97,31 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
       <div class="topic-footer">
         <span class="cf-vote">
           <span class="v-up">&#9650;</span>
-          <span class="v-score">+137</span>
+          <span class="v-score">+{{ invite.votes }}</span>
           <span class="v-down">&#9660;</span>
         </span>
         <div class="footer-meta">
           <NuxtLink to="/round" class="read-more">Read more »</NuxtLink>
-          <span class="cf-comments">» 12 comments</span>
+          <span class="cf-comments">» {{ invite.comments }} comments</span>
         </div>
       </div>
     </article>
 
     <!-- Announcement post -->
     <article class="cf-topic">
-      <h2 class="topic-title small">
-        <NuxtLink to="/round">系統公告：解題筆記與卡題標記已上線</NuxtLink>
-      </h2>
+      <div class="topic-head">
+        <span class="post-label label-news">{{ announcement.label }}</span>
+        <h2 class="topic-title small">
+          <NuxtLink to="/round">{{ announcement.title }}</NuxtLink>
+        </h2>
+      </div>
       <div class="topic-info">
-        By <span class="cf-handle" :style="{ color: handleStyle('lukewu').color }">lukewu</span>, yesterday
+        By <LayoutCfHandle name="lukewu" />, yesterday
       </div>
       <div class="topic-body">
-        <p>
-          點任一格子即可查看該人的送出紀錄，並直接寫下這題的解題筆記；卡住的話打開「卡題標記」，隊友一眼就能看到誰需要救援。到
-          <NuxtLink to="/plan">規劃</NuxtLink> 頁還能安排下一場的題單與待辦作業。
+        <p>{{ announcement.body }}</p>
+        <p class="post-cta-line">
+          想排下一場？<NuxtLink to="/plan" class="post-cta">到「規劃」安排題單與待辦 »</NuxtLink>
         </p>
       </div>
       <div class="topic-tags">
@@ -121,11 +131,11 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
       <div class="topic-footer">
         <span class="cf-vote">
           <span class="v-up">&#9650;</span>
-          <span class="v-score">+42</span>
+          <span class="v-score">+{{ announcement.votes }}</span>
           <span class="v-down">&#9660;</span>
         </span>
         <div class="footer-meta">
-          <span class="cf-comments">» 3 comments</span>
+          <span class="cf-comments">» {{ announcement.comments }} comments</span>
         </div>
       </div>
     </article>
@@ -144,14 +154,40 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
   border-bottom: 1px solid var(--cf-sep);
 }
 
+.topic-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.post-label {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+  border-radius: 2px;
+  transform: translateY(-0.15rem);
+}
+.label-round {
+  background: #e7eefb;
+  color: #3b5998;
+  border: 1px solid #c9d6ef;
+}
+.label-news {
+  background: #e9f3e9;
+  color: #008000;
+  border: 1px solid #cfe6cf;
+}
+
 .topic-title {
   margin: 0 0 0.4rem;
-  font-size: 1.7rem;
+  font-size: 1.6rem;
   font-weight: 400;
   line-height: 1.25;
 }
 .topic-title.small {
-  font-size: 1.3rem;
+  font-size: 1.25rem;
 }
 .topic-title a {
   color: var(--cf-blue);
@@ -163,36 +199,45 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
   margin-bottom: 0.9rem;
 }
 
-.cf-handle {
-  font-weight: 700;
-}
-.cf-handle:hover {
-  text-decoration: underline;
-  cursor: default;
-}
-
 .topic-body {
   font-size: 0.95rem;
   line-height: 1.65;
   color: #000;
 }
 .topic-body p {
-  margin: 0 0 0.85rem;
+  margin: 0 0 0.8rem;
 }
 
-.invite-facts {
-  margin: 0 0 1rem;
-  padding-left: 1.4rem;
+.post-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
-.invite-facts li {
-  margin: 0.3rem 0;
+.meta-chip {
+  background: var(--cf-cell);
+  border: 1px solid var(--cf-sep);
+  border-radius: 3px;
+  padding: 0.12rem 0.55rem;
+  font-size: 0.85rem;
+}
+
+.post-cta {
+  color: var(--cf-link);
+  font-weight: 700;
+  text-decoration: underline;
+}
+.post-cta:hover {
+  color: #24428a;
+}
+.post-cta-line {
+  margin-top: 0.9rem;
 }
 
 .live-standings {
   border: 1px solid var(--cf-border);
   border-radius: var(--cs-radius);
   padding: 0.75rem 0.9rem;
-  margin: 0 0 1rem;
+  margin: 0 0 0.9rem;
   background: var(--cf-cell);
 }
 .ls-caption {
@@ -231,10 +276,6 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
   text-align: right;
   color: var(--cs-text-secondary);
   flex-shrink: 0;
-}
-
-.cf-enter-btn {
-  padding: 0.35rem 1.1rem;
 }
 
 .topic-tags {
@@ -282,6 +323,9 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
   align-items: center;
   gap: 1rem;
   font-size: 0.82rem;
+}
+.read-more {
+  color: var(--cf-link);
 }
 .cf-comments {
   color: var(--cf-link);
