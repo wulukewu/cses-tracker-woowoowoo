@@ -150,7 +150,7 @@ function getInitials(username?: string) {
                 指派給：{{ u.name }}
               </option>
             </select>
-            <button type="button" class="add-todo-btn" @click="handleAddTodo">新增</button>
+            <button type="button" class="cf-btn add-todo-btn" @click="handleAddTodo">新增</button>
           </div>
         </div>
       </div>
@@ -166,7 +166,6 @@ function getInitials(username?: string) {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -176,16 +175,16 @@ function getInitials(username?: string) {
 
 .modal-card {
   background: var(--cs-bg);
-  border: 1px solid var(--cs-border);
-  border-radius: 12px;
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cs-radius);
   width: 100%;
   max-width: 480px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
   max-height: 85vh;
   overflow: hidden;
-  animation: modal-enter 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modal-enter 0.18s ease;
 }
 
 @keyframes modal-enter {
@@ -200,8 +199,8 @@ function getInitials(username?: string) {
 }
 
 .modal-header {
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid var(--cs-border-subtle);
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--cf-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -209,9 +208,9 @@ function getInitials(username?: string) {
 
 .modal-header h3 {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--cs-text);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cf-blue);
 }
 
 .close-btn {
@@ -479,26 +478,7 @@ function getInitials(username?: string) {
 }
 
 .add-todo-btn {
-  padding: 0.45rem 1.25rem;
-  background: var(--cs-text);
-  color: var(--cs-bg);
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.85rem;
-  transition: opacity 0.15s, transform 0.1s, box-shadow 0.2s;
-}
-
-.add-todo-btn:hover {
-  opacity: 0.95;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.add-todo-btn:active {
-  transform: translateY(1px);
-  box-shadow: none;
+  padding: 0.35rem 1.1rem;
 }
 
 /* Transition Group Animations */

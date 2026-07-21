@@ -80,7 +80,7 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
 
         <p>準備好了嗎？點下面進賽區看即時賽況。</p>
 
-        <NuxtLink to="/round" class="cf-enter-btn">進入賽區（Enter round）</NuxtLink>
+        <NuxtLink to="/round" class="cf-btn cf-enter-btn">進入賽區（Enter round）</NuxtLink>
       </div>
 
       <div class="topic-tags">
@@ -234,18 +234,7 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
 }
 
 .cf-enter-btn {
-  display: inline-block;
-  padding: 0.4rem 1rem;
-  background: #3b5998;
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.9rem;
-  border-radius: 4px;
-  border: 1px solid #2f477a;
-}
-.cf-enter-btn:hover {
-  background: #34508a;
-  text-decoration: none;
+  padding: 0.35rem 1.1rem;
 }
 
 .topic-tags {

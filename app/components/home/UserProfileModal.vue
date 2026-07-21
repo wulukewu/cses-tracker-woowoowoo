@@ -87,6 +87,7 @@ const emit = defineEmits<{
 
 .modal-card {
   background: var(--cs-bg);
+  border: 1px solid var(--cf-border);
   border-radius: var(--cs-radius);
   max-width: 420px;
   width: 100%;
@@ -94,7 +95,7 @@ const emit = defineEmits<{
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 1.25rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
 }
 
 .modal-header {
@@ -106,7 +107,9 @@ const emit = defineEmits<{
 }
 
 .modal-header h2 {
-  font-size: 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cf-blue);
   margin: 0;
 }
 
@@ -129,7 +132,7 @@ const emit = defineEmits<{
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--cs-text);
+  background: var(--cs-accent);
   transition: width 0.2s ease;
 }
 

@@ -31,9 +31,9 @@ const emit = defineEmits<{
         @input="emit('update:resetConfirmText', ($event.target as HTMLInputElement).value)"
       />
       <div class="modal-actions">
-        <button class="cancel-btn" @click="emit('close')">取消</button>
+        <button class="cf-btn" @click="emit('close')">取消</button>
         <button
-          class="danger-btn"
+          class="cf-btn cf-btn--danger"
           :disabled="resetConfirmText !== resetPhrase || resetting"
           @click="emit('confirm')"
         >
@@ -58,15 +58,17 @@ const emit = defineEmits<{
 
 .modal-card {
   background: var(--cs-bg);
+  border: 1px solid var(--cf-border);
   border-radius: var(--cs-radius);
   max-width: 420px;
   width: 100%;
   padding: 1.25rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
 }
 
 .modal-card h2 {
-  font-size: 1rem;
+  font-size: 1.05rem;
+  color: var(--cf-blue);
   margin: 0 0 0.75rem;
 }
 
@@ -94,33 +96,4 @@ const emit = defineEmits<{
   gap: 0.6rem;
 }
 
-.cancel-btn {
-  padding: 0.5rem 0.9rem;
-  background: var(--cs-bg);
-  color: var(--cs-text);
-  border: 1px solid var(--cs-border);
-  border-radius: var(--cs-radius);
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.cancel-btn:hover {
-  border-color: #ccc;
-}
-
-.danger-btn {
-  padding: 0.5rem 0.9rem;
-  background: #b3261e;
-  color: #fff;
-  border: none;
-  border-radius: var(--cs-radius);
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.danger-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
 </style>

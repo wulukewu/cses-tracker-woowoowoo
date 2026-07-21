@@ -249,6 +249,51 @@ a:hover {
   color: var(--cs-text-muted);
 }
 
+/* ---------- Codeforces-style button (native grey, subtle bevel) ---------- */
+.cf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: #000000;
+  background: linear-gradient(#fafafa, #e4e4e4);
+  border: 1px solid #b0b0b0;
+  border-radius: 2px;
+  padding: 0.25rem 0.8rem;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.cf-btn:hover {
+  background: linear-gradient(#f0f0f0, #dadada);
+  border-color: #9e9e9e;
+  text-decoration: none;
+  color: #000000;
+}
+
+.cf-btn:active:not(:disabled) {
+  background: #d6d6d6;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.cf-btn:disabled,
+.cf-btn[disabled] {
+  opacity: 0.5;
+  cursor: default;
+  box-shadow: none;
+}
+
+.cf-btn--danger {
+  color: #c00000;
+}
+.cf-btn--danger:hover {
+  color: #a00000;
+}
+
 @media (max-width: 900px) {
   .app-main {
     grid-template-columns: 1fr;
