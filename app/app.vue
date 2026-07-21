@@ -20,10 +20,10 @@
 
       <nav class="cf-menu-box">
         <ul class="cf-menu-list">
-          <li><NuxtLink to="/" exact-active-class="current">Home</NuxtLink></li>
+          <li><NuxtLink to="/" exact-active-class="current">首頁</NuxtLink></li>
           <li><NuxtLink to="/round" active-class="current">賽況</NuxtLink></li>
           <li><NuxtLink to="/plan" active-class="current">規劃</NuxtLink></li>
-          <li><a href="https://cses.fi/problemset/" target="_blank" rel="noopener">Problemset</a></li>
+          <li><a href="https://cses.fi/problemset/" target="_blank" rel="noopener">題庫</a></li>
         </ul>
         <div class="cf-menu-search">
           <input type="text" aria-label="search" disabled />

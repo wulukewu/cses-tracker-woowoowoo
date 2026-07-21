@@ -37,23 +37,30 @@ const emit = defineEmits<{ toggle: [problem: WeekProblem] }>()
 <style scoped>
 .categories details {
   background: var(--cs-bg);
-  border: 1px solid var(--cs-border);
+  border: 1px solid var(--cf-border);
   border-radius: var(--cs-radius);
-  margin-bottom: 0.5rem;
-  padding: 0.5rem 0.8rem;
+  margin-bottom: 0.75rem;
+  padding: 0;
+  overflow: hidden;
 }
 
 .categories summary {
   cursor: pointer;
-  font-weight: 500;
-  padding: 0.3rem 0;
-  color: var(--cs-text);
+  font-weight: 700;
+  padding: 0.5rem 0.75rem;
+  color: var(--cf-blue);
+  background: var(--cf-cell);
+  border-bottom: 1px solid transparent;
+}
+
+.categories details[open] summary {
+  border-bottom-color: var(--cf-border);
 }
 
 .categories ul {
   list-style: none;
-  margin: 0.4rem 0 0;
-  padding: 0;
+  margin: 0;
+  padding: 0.7rem 0.85rem;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 0.2rem 1rem;

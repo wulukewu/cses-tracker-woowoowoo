@@ -44,18 +44,17 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
 
       <div class="topic-info">
         By
-        <span class="cf-handle" :style="{ color: handleStyle('zyo').color }">zyo</span>,
-        <span class="cf-handle" :style="{ color: handleStyle('lukewu').color }">lukewu</span>,
-        <span class="cf-handle" :style="{ color: handleStyle('Weeeeeeeeeeeee00').color }">Weeeeeeeeeeeee00</span>,
+        <LayoutCfHandle name="zyo" />,
+        <LayoutCfHandle name="lukewu" />,
+        <LayoutCfHandle name="Weeeeeeeeeeeee00" />,
         3 hours ago
       </div>
 
       <div class="topic-body">
         <p>各位好，</p>
         <p>
-          我們三個——<span class="cf-handle" :style="{ color: handleStyle('zyo').color }">zyo</span>、<span
-            class="cf-handle" :style="{ color: handleStyle('lukewu').color }">lukewu</span>、<span class="cf-handle"
-            :style="{ color: handleStyle('Weeeeeeeeeeeee00').color }">Weeeeeeeeeeeee00</span>——每週固定挑一組
+          我們三個——<LayoutCfHandle name="zyo" />、<LayoutCfHandle name="lukewu" />、<LayoutCfHandle
+            name="Weeeeeeeeeeeee00" />——每週固定挑一組
           CSES 題目，開一場自己的 mini round，互相追進度、對送出紀錄、留解題筆記。這週的位子幫你留好了，<strong>來一起打吧。</strong>
         </p>
 
@@ -71,9 +70,9 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
         <div v-if="liveStandings.length" class="live-standings">
           <div class="ls-caption">目前賽況（即時）</div>
           <div v-for="s in liveStandings" :key="s.name" class="ls-row">
-            <span class="cf-handle" :style="{ color: s.style.color }">{{ s.name }}</span>
+            <LayoutCfHandle :name="s.name" class="ls-handle" />
             <span class="ls-bar-track">
-              <span class="ls-bar-fill" :style="{ width: `${s.total ? (s.solved / s.total) * 100 : 0}%`, background: s.style.color }" />
+              <span class="ls-bar-fill" :style="{ width: `${s.total ? (s.solved / s.total) * 100 : 0}%` }" />
             </span>
             <span class="ls-count">{{ s.solved }} / {{ s.total }}</span>
           </div>
@@ -209,12 +208,11 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
   margin: 0.3rem 0;
   font-size: 0.85rem;
 }
-.ls-row .cf-handle {
+.ls-handle {
   width: 9rem;
   flex-shrink: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .ls-bar-track {
   flex: 1;
@@ -226,6 +224,7 @@ const inviteTags = ['cses', 'weekly-round', 'dp', 'graphs', '三人成團']
 .ls-bar-fill {
   display: block;
   height: 100%;
+  background: var(--cs-accent);
 }
 .ls-count {
   width: 3.5rem;
