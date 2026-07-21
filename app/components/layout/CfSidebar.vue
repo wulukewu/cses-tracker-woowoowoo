@@ -83,8 +83,7 @@ const recent = computed(() => {
       </table>
       <template #footer>
         <div class="tr-footer">
-          <NuxtLink to="/round">賽況</NuxtLink>
-          <NuxtLink to="/round">看全部 →</NuxtLink>
+          <NuxtLink to="/round">看完整賽況 →</NuxtLink>
         </div>
       </template>
     </LayoutCfBox>
@@ -149,7 +148,7 @@ const recent = computed(() => {
   font-weight: 700;
   text-align: center;
   padding: 0.35rem 0.5rem;
-  border-bottom: 1px solid var(--cf-sep);
+  border-bottom: 1px solid var(--cf-border);
   background: #fff;
 }
 .cf-datatable th.c-user {
@@ -158,9 +157,13 @@ const recent = computed(() => {
 .cf-datatable td {
   padding: 0.4rem 0.5rem;
   border-bottom: 1px solid var(--cf-sep);
-  background: var(--cf-cell);
+  background: #ffffff;
 }
-.cf-datatable tr:last-child td {
+/* Codeforces zebra striping: odd rows shaded, even rows white */
+.cf-datatable tbody tr:nth-child(odd) td {
+  background: #f5f5f5;
+}
+.cf-datatable tbody tr:last-child td {
   border-bottom: none;
 }
 .c-rank {
@@ -172,6 +175,10 @@ const recent = computed(() => {
   text-align: center;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.tr-footer {
+  text-align: right;
 }
 
 /* Recent actions */
