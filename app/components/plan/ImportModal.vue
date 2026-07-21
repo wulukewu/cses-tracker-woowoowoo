@@ -37,7 +37,7 @@ function handleConfirm() {
         <h3>匯入成功</h3>
         <p>已成功匯入 {{ weeksData.length }} 個次別的資料。</p>
         <div class="modal-actions">
-          <button class="primary-btn" @click="emit('close')">關閉</button>
+          <button class="cf-btn" @click="emit('close')">關閉</button>
         </div>
       </div>
 
@@ -47,7 +47,7 @@ function handleConfirm() {
         <h3>匯入失敗</h3>
         <p class="error-msg">{{ saveError }}</p>
         <div class="modal-actions">
-          <button class="cancel-btn" @click="emit('close')">關閉</button>
+          <button class="cf-btn" @click="emit('close')">關閉</button>
         </div>
       </div>
 
@@ -89,9 +89,9 @@ function handleConfirm() {
         </div>
 
         <div class="modal-actions">
-          <button class="cancel-btn" :disabled="saving" @click="emit('close')">取消</button>
+          <button class="cf-btn" :disabled="saving" @click="emit('close')">取消</button>
           <button
-            :class="mode === 'overwrite' ? 'danger-btn' : 'primary-btn'"
+            :class="mode === 'overwrite' ? 'cf-btn cf-btn--danger' : 'cf-btn'"
             :disabled="saving || (mode === 'overwrite' && overwriteConfirmText !== OVERWRITE_PHRASE)"
             @click="handleConfirm"
           >
@@ -117,16 +117,18 @@ function handleConfirm() {
 
 .modal-card {
   background: var(--cs-bg);
+  border: 1px solid var(--cf-border);
   border-radius: var(--cs-radius);
   max-width: 460px;
   width: 100%;
   padding: 1.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
 }
 
 .modal-card h2 {
   font-size: 1.05rem;
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--cf-blue);
   margin: 0 0 1rem;
 }
 
@@ -228,52 +230,6 @@ function handleConfirm() {
   justify-content: flex-end;
   gap: 0.6rem;
   margin-top: 1rem;
-}
-
-.cancel-btn {
-  padding: 0.5rem 0.9rem;
-  background: var(--cs-bg);
-  color: var(--cs-text);
-  border: 1px solid var(--cs-border);
-  border-radius: var(--cs-radius);
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.cancel-btn:hover {
-  border-color: #ccc;
-}
-
-.primary-btn {
-  padding: 0.5rem 0.9rem;
-  background: var(--cs-text);
-  color: var(--cs-bg);
-  border: none;
-  border-radius: var(--cs-radius);
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.primary-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.danger-btn {
-  padding: 0.5rem 0.9rem;
-  background: #b3261e;
-  color: #fff;
-  border: none;
-  border-radius: var(--cs-radius);
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.danger-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
 }
 
 /* 狀態顯示樣式 */

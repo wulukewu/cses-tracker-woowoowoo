@@ -78,13 +78,13 @@ watch(
       </div>
     </div>
     <div class="week-actions">
-      <button v-if="week" class="action-btn todos-btn" @click="emit('openTodos')">
+      <button v-if="week" class="cf-btn todos-btn" @click="emit('openTodos')">
         當週作業<span v-if="todoSummary" class="todo-badge" :class="{ 'all-done': todoSummary.allDone }">
           {{ todoSummary.allDone ? '✓' : `${todoSummary.completed}/${todoSummary.total}` }}
         </span>
       </button>
-      <NuxtLink v-if="week" :to="`/plan?edit=${encodeURIComponent(week.id)}`" class="action-btn edit-btn">編輯這次</NuxtLink>
-      <button class="action-btn refresh-btn" :disabled="pending || refreshing" @click="emit('refresh')">重新整理</button>
+      <NuxtLink v-if="week" :to="`/plan?edit=${encodeURIComponent(week.id)}`" class="cf-btn">編輯這次</NuxtLink>
+      <button class="cf-btn" :disabled="pending || refreshing" @click="emit('refresh')">重新整理</button>
     </div>
   </div>
 </template>
@@ -172,45 +172,6 @@ watch(
   justify-content: flex-end;
   gap: 0.5rem;
   flex-shrink: 0;
-}
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.8rem;
-  background: var(--cs-bg);
-  color: var(--cs-text-secondary);
-  border: 1px solid var(--cs-border);
-  border-radius: var(--cs-radius);
-  cursor: pointer;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  line-height: 1.2;
-}
-
-.action-btn:hover:not(:disabled) {
-  border-color: #ccc;
-  color: var(--cs-text);
-  background: var(--cs-bg-subtle);
-}
-
-.action-btn:active:not(:disabled) {
-  transform: scale(0.97);
-}
-
-.action-btn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-/* 特殊樣式點綴 */
-.todos-btn {
-  color: var(--cs-text);
-  font-weight: 500;
 }
 
 .todo-badge {

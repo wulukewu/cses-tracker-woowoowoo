@@ -108,10 +108,10 @@ function closeImportModal() {
         </div>
       </div>
       <div class="header-actions">
-        <button class="export-btn" @click="exportWeeks">匯出所有資料</button>
-        <button class="import-btn" @click="triggerImport">匯入資料</button>
+        <button class="cf-btn" @click="exportWeeks">匯出所有資料</button>
+        <button class="cf-btn" @click="triggerImport">匯入資料</button>
         <input ref="fileInput" type="file" accept=".json" style="display: none" @change="handleImportFile" />
-        <button class="reset-btn" @click="openResetModal">重置所有次別</button>
+        <button class="cf-btn cf-btn--danger" @click="openResetModal">重置所有次別</button>
       </div>
     </div>
 
@@ -127,7 +127,7 @@ function closeImportModal() {
           <input v-model="deadline" type="date" />
         </label>
       </div>
-      <button class="save-btn" :disabled="saving || selectedCount === 0" @click="save">
+      <button class="cf-btn save-btn" :disabled="saving || selectedCount === 0" @click="save">
         {{ saving ? '儲存中...' : editingWeek ? '更新這次' : '存檔' }}
       </button>
       <p v-if="saveSuccess" class="save-success">{{ editingWeek ? '已更新這次！' : '已儲存新的一次！' }}</p>
@@ -228,38 +228,6 @@ function closeImportModal() {
   gap: 0.6rem;
 }
 
-.export-btn,
-.import-btn {
-  padding: 0.45rem 0.8rem;
-  background: var(--cs-bg);
-  color: var(--cs-text);
-  border: 1px solid var(--cs-border);
-  border-radius: var(--cs-radius);
-  cursor: pointer;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-.export-btn:hover,
-.import-btn:hover {
-  border-color: #ccc;
-}
-
-.reset-btn {
-  padding: 0.45rem 0.8rem;
-  background: var(--cs-bg);
-  color: #b3261e;
-  border: 1px solid #f0c4bf;
-  border-radius: var(--cs-radius);
-  cursor: pointer;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-.reset-btn:hover {
-  background: #fdf1f0;
-}
-
 .search-input {
   width: 100%;
   padding: 0.55rem 0.8rem;
@@ -305,18 +273,7 @@ function closeImportModal() {
 }
 
 .save-btn {
-  padding: 0.5rem 1.1rem;
-  background: #3b5998;
-  color: #fff;
-  border: 1px solid #2f477a;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.save-btn:hover:not(:disabled) {
-  background: #34508a;
+  padding: 0.35rem 1.2rem;
 }
 
 .save-btn:disabled {

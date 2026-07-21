@@ -238,8 +238,7 @@ onUnmounted(() => {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(22, 23, 26, 0.4);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -249,16 +248,16 @@ onUnmounted(() => {
 
 .modal-card {
   background: var(--cs-bg);
-  border: 1px solid var(--cs-border);
-  border-radius: 12px;
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cs-radius);
   max-width: 820px;
   width: 100%;
   height: 580px;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  animation: modalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+  animation: modalEnter 0.16s ease;
   position: relative;
   overflow: hidden;
 }
@@ -278,8 +277,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--cs-border-subtle);
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--cf-border);
   background: var(--cs-bg);
 }
 
@@ -296,10 +295,10 @@ onUnmounted(() => {
 }
 
 .modal-header h2 {
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   margin: 0;
-  color: var(--cs-text);
+  color: var(--cf-blue);
 }
 
 .header-actions {
