@@ -101,8 +101,8 @@ function closeImportModal() {
         </h2>
         <h2 v-else>規劃下次題目</h2>
         <div class="header-links">
-          <button v-if="editingWeek" class="cancel-edit-btn" @click="cancelEdit">取消編輯，改為新增下一次</button>
-          <button v-if="editingWeek" class="delete-week-btn" :disabled="deleting" @click="handleDeleteClick">
+          <button v-if="editingWeek" class="cf-btn" @click="cancelEdit">取消編輯，改為新增下一次</button>
+          <button v-if="editingWeek" class="cf-btn cf-btn--danger" :disabled="deleting" @click="handleDeleteClick">
             {{ deleting ? '刪除中...' : deleteArmed ? '確定要刪除？再按一次' : '刪除這次' }}
           </button>
         </div>
@@ -196,30 +196,7 @@ function closeImportModal() {
 .header-links {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
-}
-
-.cancel-edit-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--cs-text-secondary);
-  font-size: 0.82rem;
-  cursor: pointer;
-}
-
-.delete-week-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  color: #b3261e;
-  font-size: 0.82rem;
-  cursor: pointer;
-}
-
-.delete-week-btn:disabled {
-  opacity: 0.5;
-  cursor: default;
+  gap: 0.5rem;
 }
 
 .header-actions {

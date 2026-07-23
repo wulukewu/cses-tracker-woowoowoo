@@ -53,7 +53,7 @@ const emit = defineEmits<{
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .modal-card {

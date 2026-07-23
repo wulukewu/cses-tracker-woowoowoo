@@ -47,6 +47,19 @@
 
 <style>
 :root {
+  --cf-bg: #ffffff;
+  --cf-cell: #f8f8f8;
+  --cf-border: #b9b9b9;
+  --cf-sep: #e1e1e1;
+  --cf-text: #000000;
+  --cf-text-secondary: #555555;
+  --cf-text-muted: #888888;
+  --cf-accent: #008000;
+  --cf-accent-bg: #e9f3e9;
+  --cf-radius: 6px;
+  --cf-blue: #3b5998;
+  --cf-link: #3b5998;
+
   --cs-bg: #ffffff;
   --cs-bg-subtle: #f8f8f8;
   --cs-border: #b9b9b9;
@@ -54,15 +67,9 @@
   --cs-text: #000000;
   --cs-text-secondary: #555555;
   --cs-text-muted: #888888;
-  --cs-accent: #008000;          /* Codeforces "accepted" green */
+  --cs-accent: #008000;
   --cs-accent-bg: #e9f3e9;
   --cs-radius: 6px;
-
-  --cf-blue: #3b5998;
-  --cf-link: #3b5998;
-  --cf-border: #b9b9b9;
-  --cf-sep: #e1e1e1;
-  --cf-cell: #f8f8f8;
 }
 
 * {
