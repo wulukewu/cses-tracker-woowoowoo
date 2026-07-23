@@ -60,8 +60,6 @@ function notesStore() {
   return getStore('notes')
 }
 
-const DEFAULT_NOTES: Record<string, Record<string, string>> = {}
-
 export function normalizeNotes(raw: Record<string, any>): Record<string, UserNote> {
   const normalized: Record<string, UserNote> = {}
   for (const [username, val] of Object.entries(raw)) {
@@ -80,16 +78,6 @@ export function normalizeNotes(raw: Record<string, any>): Record<string, UserNot
 export async function listNotes(): Promise<Record<string, Record<string, UserNote>>> {
   const store = notesStore()
   const { blobs } = await store.list()
-  
-  if (blobs.length === 0) {
-    const normalizedDefault: Record<string, Record<string, UserNote>> = {}
-    for (const [id, contentMap] of Object.entries(DEFAULT_NOTES)) {
-      const normalized = normalizeNotes(contentMap)
-      await store.setJSON(id, normalized)
-      normalizedDefault[id] = normalized
-    }
-    return normalizedDefault
-  }
 
   const result: Record<string, Record<string, UserNote>> = {}
   await Promise.all(
@@ -106,8 +94,7 @@ export async function listNotes(): Promise<Record<string, Record<string, UserNot
 export async function getNote(problemId: string): Promise<Record<string, UserNote>> {
   const store = notesStore()
   const val = await store.get(problemId, { type: 'json' })
-  const raw = val === null ? (DEFAULT_NOTES[problemId] || {}) : val
-  return normalizeNotes(raw as Record<string, any>)
+  return normalizeNotes((val ?? {}) as Record<string, any>)
 }
 
 export async function saveNote(problemId: string, username: string, content: string, stuck: boolean = false): Promise<void> {

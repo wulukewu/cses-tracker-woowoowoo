@@ -27,7 +27,7 @@ export default defineEventHandler(async (event): Promise<ProblemStatsResponse> =
             `problem-stats:${problem.id}`,
             TTL_MS,
             () => fetchProblemStats(problem.id, sessionCookie),
-            { force },
+            { force, event },
           )
           if (stats) result[String(problem.id)] = stats
         }),

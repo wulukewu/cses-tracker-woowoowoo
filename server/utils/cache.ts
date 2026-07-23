@@ -1,4 +1,5 @@
 const CACHE_TTL_MS = 7 * 60 * 1000
+const MAX_SIZE = 100
 
 interface CacheEntry<T> {
   value: T
@@ -15,6 +16,10 @@ export async function cached<T>(key: string, fn: () => Promise<T>, options?: { f
     }
   }
   const value = await fn()
+  if (store.size >= MAX_SIZE) {
+    const oldest = store.keys().next().value
+    if (oldest) store.delete(oldest)
+  }
   store.set(key, { value, expiresAt: Date.now() + CACHE_TTL_MS })
   return value
 }

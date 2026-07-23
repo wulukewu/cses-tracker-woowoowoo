@@ -12,6 +12,24 @@ function mockFetchOnce(html: string, status = 200) {
   )
 }
 
+function mockFetchSequence(responses: Array<{ html: string; status?: number }>) {
+  const fns = responses.map((r) =>
+    vi.fn().mockResolvedValue({
+      status: r.status ?? 200,
+      ok: (r.status ?? 200) >= 200 && (r.status ?? 200) < 300,
+      text: () => Promise.resolve(r.html),
+    }),
+  )
+  let callIndex = 0
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation(() => {
+      const fn = fns[Math.min(callIndex++, fns.length - 1)]
+      return fn()
+    }),
+  )
+}
+
 afterEach(() => {
   vi.unstubAllGlobals()
 })
@@ -93,13 +111,18 @@ describe('fetchSubmissionSummary', () => {
   })
 
   it('never solved: reports every failing submission with no firstAcTime', async () => {
-    mockFetchOnce(`
+    mockFetchSequence([
+      {
+        html: `
       <table class="full-width">
         <tr><th>Time</th></tr>
         ${row('2024-01-02 10:00:00', 'zero')}
         ${row('2024-01-01 10:00:00', 'zero')}
       </table>
-    `)
+    `,
+      },
+      { html: '<table class="full-width"><tr><th>Time</th></tr></table>' },
+    ])
 
     const summary = await fetchSubmissionSummary(1234, 'alice', 'PHPSESSID=abc')
 
@@ -125,12 +148,17 @@ describe('fetchSubmissionSummary', () => {
   })
 
   it('non-AC rows never carry a detailUrl even if a details-link happens to be present', async () => {
-    mockFetchOnce(`
+    mockFetchSequence([
+      {
+        html: `
       <table class="full-width">
         <tr><th>Time</th></tr>
         ${row('2024-01-01 10:00:00', 'zero')}
       </table>
-    `)
+    `,
+      },
+      { html: '<table class="full-width"><tr><th>Time</th></tr></table>' },
+    ])
 
     const summary = await fetchSubmissionSummary(1234, 'alice', 'PHPSESSID=abc')
 
