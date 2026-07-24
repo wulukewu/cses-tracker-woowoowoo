@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { inject } from 'vue'
-
 const props = defineProps<{ name: string }>()
 
 const style = computed(() => handleStyle(props.name))
 const firstChar = computed(() => (style.value.legendary ? props.name.slice(0, 1) : ''))
 const restChars = computed(() => (style.value.legendary ? props.name.slice(1) : props.name))
 
-const viewProfile = inject<(name: string) => void>('viewProfile', null)
+const { openProfile } = useProfileModal()
 
 function handleClick() {
-  viewProfile?.(props.name)
+  openProfile(props.name)
 }
 </script>
 
