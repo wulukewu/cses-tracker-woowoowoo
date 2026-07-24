@@ -56,6 +56,8 @@ const STORAGE_KEY = 'cses-tracker-theme'
 
 const isDark = ref(false)
 
+provide('viewProfile', (name: string) => navigateTo(`/round`))
+
 function toggleTheme() {
   isDark.value = !isDark.value
   applyTheme(isDark.value)

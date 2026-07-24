@@ -122,6 +122,11 @@ watch(anyModalOpen, (open) => {
   if (import.meta.client) document.body.style.overflow = open ? 'hidden' : ''
 })
 
+provide('viewProfile', (name: string) => {
+  const idx = users.value.findIndex((u) => u.name === name)
+  if (idx !== -1) openProfile(idx)
+})
+
 onUnmounted(() => {
   if (import.meta.client) document.body.style.overflow = ''
 })
@@ -165,7 +170,6 @@ onUnmounted(() => {
         :cell-info="cellInfo"
         :problem-meta="problemMeta"
         :notes="notes || {}"
-        @open-profile="openProfile"
         @open-modal="openModal"
       />
     </template>

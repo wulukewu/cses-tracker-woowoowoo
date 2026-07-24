@@ -11,7 +11,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  openProfile: [index: number]
   openModal: [problem: WeekProblem, userName: string]
 }>()
 
@@ -38,12 +37,8 @@ const cellInfoMap = computed(() => {
       <thead>
         <tr>
           <th class="col-problem">題目</th>
-          <th v-for="(u, i) in users" :key="u.csesId" class="col-user">
-            <button
-              type="button"
-              class="user-name-btn"
-              @click="emit('openProfile', i)"
-            ><LayoutCfHandle :name="u.name" /></button>
+          <th v-for="u in users" :key="u.csesId" class="col-user">
+            <LayoutCfHandle :name="u.name" />
           </th>
         </tr>
       </thead>
