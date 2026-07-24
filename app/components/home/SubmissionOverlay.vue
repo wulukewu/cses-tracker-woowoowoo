@@ -308,6 +308,15 @@ onUnmounted(() => {
   color: var(--cf-text-secondary);
 }
 
+.detail-link {
+  color: var(--cf-blue);
+  text-decoration: none;
+}
+.detail-link:hover {
+  text-decoration: underline;
+  color: var(--cf-red);
+}
+
 .c-time { width: 7rem; }
 .c-verdict { width: 3.5rem; font-weight: 700; }
 .c-lang { width: 5rem; }
