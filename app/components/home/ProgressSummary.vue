@@ -104,7 +104,7 @@ const sorted = computed(() => {
 }
 
 .user-btn:hover {
-  color: var(--cf-accent);
+  color: var(--cf-link);
   text-decoration: underline;
 }
 
