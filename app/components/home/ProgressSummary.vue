@@ -111,7 +111,7 @@ const sorted = computed(() => {
 .bar-track {
   display: block;
   height: 6px;
-  border-radius: 3px;
+  border-radius: 0;
   background: var(--cf-sep);
   overflow: hidden;
   max-width: 180px;

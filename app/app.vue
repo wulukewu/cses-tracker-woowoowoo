@@ -88,12 +88,12 @@ useHead({
 :root {
   --cf-bg: #ffffff;
   --cf-cell: #f8f8f8;
-  --cf-border: #b9b9b9;
+  --cf-border: #d0d0d0;
   --cf-sep: #e1e1e1;
   --cf-text: #000000;
   --cf-text-secondary: #555555;
   --cf-text-muted: #888888;
-  --cf-accent: #008000;
+  --cf-accent: #4B8B2B;
   --cf-accent-bg: #e9f3e9;
   --cf-stuck-bg: #fff3e0;
   --cf-stuck-color: #e65100;
@@ -105,7 +105,7 @@ useHead({
   --cf-gold: #d4a017;
   --cf-blue-dot: #2f6fed;
   --cf-saving-color: #b45309;
-  --cf-radius: 6px;
+  --cf-radius: 0px;
   --cf-blue: #3b5998;
   --cf-link: #3b5998;
   --cf-logo-a: #2a2a2a;
@@ -172,7 +172,7 @@ a:hover {
 
 .cf-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 0 14px;
   flex: 1;
@@ -204,7 +204,7 @@ a:hover {
 }
 
 .cf-wordmark {
-  font-family: 'Trebuchet MS', Verdana, sans-serif;
+  font-family: Georgia, 'Times New Roman', serif;
   font-weight: 700;
   font-size: 2rem;
   letter-spacing: -0.01em;
@@ -276,8 +276,7 @@ a:hover {
   display: flex;
   align-items: center;
   color: var(--cf-text);
-  text-transform: uppercase;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 400;
   letter-spacing: 0.01em;
   padding: 0.6rem 0.85rem;
@@ -303,7 +302,7 @@ a:hover {
   width: 130px;
   height: 22px;
   border: 1px solid var(--cf-border);
-  border-radius: 4px;
+  border-radius: 2px;
   background: var(--cf-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat right 6px center;
   color: var(--cf-text);
 }

@@ -158,7 +158,7 @@ const cellInfoMap = computed(() => {
   background: var(--cf-cell);
   border: 1px solid var(--cf-border);
   padding: 0.1rem 0.3rem;
-  border-radius: 4px;
+  border-radius: 1px;
   flex-shrink: 0;
 }
 

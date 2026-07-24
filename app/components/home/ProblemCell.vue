@@ -87,7 +87,7 @@ const emit = defineEmits<{
   border: 1px solid var(--cf-sep);
   background: var(--cf-cell);
   color: var(--cf-text-muted);
-  border-radius: 3px;
+  border-radius: 0;
   cursor: pointer;
   padding: 0.4rem;
   font-family: inherit;

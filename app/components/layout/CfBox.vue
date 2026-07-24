@@ -33,7 +33,7 @@ defineProps<{
   border-bottom: 1px solid var(--cf-border);
   font-weight: 700;
   font-size: 0.9rem;
-  color: var(--cf-text);
+  color: var(--cf-blue);
 }
 
 .cf-box-body {

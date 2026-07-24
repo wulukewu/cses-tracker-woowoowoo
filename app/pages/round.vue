@@ -215,7 +215,7 @@ onUnmounted(() => {
 }
 
 .cf-page-title h1 {
-  font-size: 1.7rem;
+  font-size: 1.3rem;
   font-weight: 400;
   margin: 0;
   color: var(--cf-blue);
