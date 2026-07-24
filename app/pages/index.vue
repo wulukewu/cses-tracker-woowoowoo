@@ -54,9 +54,8 @@ const posts = computed(() => {
 </script>
 
 <template>
-  <div class="cf-home-layout">
-    <div class="cf-home-feed">
-      <article v-for="post in posts" :key="post.id" class="cf-topic">
+  <div class="cf-home">
+    <article v-for="post in posts" :key="post.id" class="cf-topic">
       <h2 class="topic-title">
         <NuxtLink to="/round">{{ post.copy.title }}</NuxtLink>
       </h2>
@@ -112,40 +111,13 @@ const posts = computed(() => {
         </div>
       </div>
     </article>
-    </div>
-
-    <aside class="cf-home-sidebar">
-      <LayoutCfBox title="即時時間">
-        <HomeTaiwanClock />
-      </LayoutCfBox>
-    </aside>
   </div>
 </template>
 
 <style scoped>
-.cf-home-layout {
+.cf-home {
   display: flex;
-  gap: 1.5rem;
-  align-items: flex-start;
-}
-
-.cf-home-feed {
-  flex: 1;
-  min-width: 0;
-}
-
-.cf-home-sidebar {
-  width: 16rem;
-  flex-shrink: 0;
-}
-
-@media (max-width: 768px) {
-  .cf-home-layout {
-    flex-direction: column;
-  }
-  .cf-home-sidebar {
-    width: 100%;
-  }
+  flex-direction: column;
 }
 
 .cf-topic {
