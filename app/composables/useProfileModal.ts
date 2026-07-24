@@ -1,6 +1,6 @@
-import type { Ref } from 'vue'
+import { ref } from 'vue'
 
-const userName: Ref<string | null> = ref(null)
+const userName = ref<string | null>(null)
 
 export function useProfileModal() {
   function openProfile(name: string) {
