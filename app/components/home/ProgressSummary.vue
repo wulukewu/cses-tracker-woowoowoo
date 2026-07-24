@@ -7,8 +7,6 @@ const props = defineProps<{
   solvedCountFor: (index: number) => number
 }>()
 
-const emit = defineEmits<{ openProfile: [index: number] }>()
-
 const sorted = computed(() => {
   return props.users
     .map((u, i) => ({ user: u, solved: props.solvedCountFor(i), index: i }))
@@ -30,9 +28,7 @@ const sorted = computed(() => {
       <tr v-for="(entry, rank) in sorted" :key="entry.user.csesId">
         <td class="col-rank">{{ rank + 1 }}</td>
         <td class="col-user">
-          <button type="button" class="user-btn" @click="emit('openProfile', entry.index)">
             <LayoutCfHandle :name="entry.user.name" />
-          </button>
         </td>
         <td class="col-solved">{{ entry.solved }} / {{ week.problems.length }}</td>
         <td class="col-bar">

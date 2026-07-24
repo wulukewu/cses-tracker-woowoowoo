@@ -48,6 +48,12 @@
         CSES Tracker &mdash; 三人週賽練功房 &nbsp;·&nbsp; lukewu &nbsp;·&nbsp; zyo &nbsp;·&nbsp; Weeeeeeeeeeeee00
       </footer>
     </div>
+
+    <HomeUserProfileModal
+      v-if="profileUserName"
+      :user-name="profileUserName"
+      @close="profileUserName = null"
+    />
   </div>
 </template>
 
@@ -55,8 +61,9 @@
 const STORAGE_KEY = 'cses-tracker-theme'
 
 const isDark = ref(false)
+const profileUserName = ref<string | null>(null)
 
-provide('viewProfile', (name: string) => navigateTo(`/round`))
+provide('viewProfile', (name: string) => { profileUserName.value = name })
 
 function toggleTheme() {
   isDark.value = !isDark.value

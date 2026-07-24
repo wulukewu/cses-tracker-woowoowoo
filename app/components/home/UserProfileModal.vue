@@ -1,25 +1,57 @@
 <script setup lang="ts">
-import type { UserProgress } from '~~/shared/types'
-import type { CategoryProgress } from '~/composables/useUserProfile'
+import type { ProgressResponse, UserProgress } from '~~/shared/types'
 
 defineProps<{
-  user: UserProgress
-  totalSolved: number
-  totalProblemCount: number
-  categories: CategoryProgress[]
-  expandedCategories: Set<string>
-  solvedSet: Set<number> | null
+  userName: string
 }>()
 
 const emit = defineEmits<{
   close: []
-  toggleCategory: [name: string]
 }>()
+
+const { data: prog } = useFetch<ProgressResponse | null>('/api/progress', {
+  server: false,
+  default: () => null,
+})
+
+const user = computed<UserProgress | null>(() => {
+  if (!prog.value?.users) return null
+  return prog.value.users.find((u) => u.name === props.userName) ?? null
+})
+
+const weekProblems = computed(() => prog.value?.week?.problems ?? [])
+const totalProblemCount = computed(() => weekProblems.value.length)
+const solvedSet = computed(() => new Set(user.value?.solvedIds ?? []))
+const totalSolved = computed(() => solvedSet.value.size)
+
+type CategoryGroup = { name: string; problems: typeof weekProblems.value; solvedCount: number }
+const categories = computed<CategoryGroup[]>(() => {
+  const set = solvedSet.value
+  const groups = new Map<string, typeof weekProblems.value>()
+  for (const p of weekProblems.value) {
+    const key = p.category ?? '未分類'
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(p)
+  }
+  return Array.from(groups.entries()).map(([name, problems]) => ({
+    name,
+    problems,
+    solvedCount: problems.filter((p) => set.has(p.id)).length,
+  }))
+})
+
+const expandedCategories = ref<Set<string>>(new Set())
+function toggleCategory(name: string) {
+  const next = new Set(expandedCategories.value)
+  if (next.has(name)) next.delete(name)
+  else next.add(name)
+  expandedCategories.value = next
+}
 </script>
 
 <template>
   <div class="modal-overlay" @click.self="emit('close')">
-    <div class="modal-card profile-card" role="dialog" aria-modal="true">
+    <div v-if="user" class="modal-card profile-card" role="dialog" aria-modal="true">
       <div class="modal-header">
         <h2>{{ user.name }}</h2>
         <button type="button" class="modal-close" aria-label="關閉" @click="emit('close')">✕</button>
@@ -46,7 +78,7 @@ const emit = defineEmits<{
 
       <ul class="profile-category-list">
         <li v-for="c in categories" :key="c.name" class="profile-category">
-          <button type="button" class="profile-category-header" @click="emit('toggleCategory', c.name)">
+          <button type="button" class="profile-category-header" @click="toggleCategory(c.name)">
             <span class="profile-category-name">{{ c.name }}</span>
             <span class="profile-category-count">{{ c.solvedCount }} / {{ c.problems.length }}</span>
           </button>
