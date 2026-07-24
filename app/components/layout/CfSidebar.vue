@@ -30,26 +30,27 @@ const standings = computed(() => {
     .sort((a, b) => (b.solved ?? 0) - (a.solved ?? 0))
 })
 
-// Recent actions derived from real data: stuck markers / notes / week solves.
+// Recent actions derived from real data: week solves, then stuck/notes.
 const recent = computed(() => {
   const w = prog.value?.week
   const usrs = prog.value?.users
   const entries: { user: string; action: string }[] = []
   if (w && usrs) {
     const nameById = new Map(w.problems.map((p) => [p.id, p.name]))
+    // Solves first — more significant than notes.
+    for (const u of usrs) {
+      for (const pid of u.solvedIds) {
+        const pname = nameById.get(pid)
+        if (pname) entries.push({ user: u.name, action: `通過了 ${pname}` })
+      }
+    }
+    // Then notes/stuck — show both when both exist.
     for (const [pidStr, perUser] of Object.entries(notesData.value || {})) {
       const pname = nameById.get(Number(pidStr))
       if (!pname) continue
       for (const [user, note] of Object.entries(perUser)) {
         if (note.stuck) entries.push({ user, action: `在 ${pname} 標記了卡題` })
-        else if (note.content?.trim()) entries.push({ user, action: `更新了 ${pname} 的解題筆記` })
-      }
-    }
-    for (const u of usrs) {
-      const solved = w.problems.filter((p) => u.solvedIds.includes(p.id))
-      if (solved.length) {
-        const last = solved[solved.length - 1]!
-        entries.push({ user: u.name, action: `通過了 ${last.name}` })
+        if (note.content?.trim()) entries.push({ user, action: `更新了 ${pname} 的解題筆記` })
       }
     }
   }
