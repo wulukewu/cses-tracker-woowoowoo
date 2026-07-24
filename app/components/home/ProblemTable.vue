@@ -214,6 +214,14 @@ const cellInfoMap = computed(() => {
   text-decoration: underline;
 }
 
+/* ---------- Responsive: tablet (sidebar folded, narrower content) ---------- */
+@media (max-width: 800px) {
+  .col-user {
+    width: 120px;
+    min-width: 100px;
+  }
+}
+
 /* ---------- Responsive: mobile ---------- */
 @media (max-width: 640px) {
   .problem-table {
@@ -228,8 +236,12 @@ const cellInfoMap = computed(() => {
     padding: 0.3rem 0.4rem;
   }
 
+  .col-problem {
+    width: 140px;
+  }
+
   .col-user {
-    width: 100px;
+    width: 90px;
     min-width: 80px;
     padding: 0.3rem !important;
   }
@@ -244,7 +256,7 @@ const cellInfoMap = computed(() => {
   }
 
   .problem-meta {
-    font-size: 0.6rem;
+    display: none;
   }
 
   .category-name {
