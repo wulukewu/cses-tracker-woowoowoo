@@ -399,12 +399,66 @@ a:hover {
   --cf-btn-active: #2a2a2a;
 }
 
+/* ---------- Responsive: tablet & below ---------- */
 @media (max-width: 900px) {
   .app-main {
     grid-template-columns: 1fr;
   }
   .cf-sidebar-col {
     order: 2;
+  }
+}
+
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .cf-container {
+    padding: 0 8px;
+  }
+
+  .cf-topbar {
+    padding: 0.6rem 0.15rem 0.5rem;
+    gap: 0.4rem;
+  }
+
+  .cf-logo-bars {
+    width: 30px;
+    height: 22px;
+  }
+
+  .cf-wordmark {
+    font-size: 1.3rem;
+  }
+
+  .cf-topbar-right {
+    font-size: 0.75rem;
+  }
+
+  .cf-menu-box {
+    flex-wrap: wrap;
+    padding: 0 0.25rem;
+  }
+
+  .cf-menu-list {
+    padding: 0;
+  }
+
+  .cf-menu-list a {
+    font-size: 0.8rem;
+    padding: 0.45rem 0.55rem;
+  }
+
+  .cf-menu-search {
+    display: none;
+  }
+
+  .app-main {
+    padding: 0.25rem 0.05rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .cf-footer {
+    font-size: 0.65rem;
+    padding: 0.6rem 0.15rem 1rem;
   }
 }
 </style>
