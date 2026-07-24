@@ -50,8 +50,8 @@
     </div>
 
     <HomeUserProfileModal
-      v-if="profileUserName"
-      :user-name="profileUserName"
+      v-show="!!profileUserName"
+      :user-name="profileUserName ?? ''"
       @close="closeProfile"
     />
   </div>
