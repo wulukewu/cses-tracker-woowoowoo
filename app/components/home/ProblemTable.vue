@@ -178,9 +178,10 @@ const cellInfoMap = computed(() => {
 }
 
 .col-user {
-  width: 120px;
-  text-align: center !important; /* 強制置中以覆蓋 th text-align: left */
-  padding: 0.5rem !important; /* 縮減 padding 讓格子卡片有更大發揮空間 */
+  width: 150px;
+  min-width: 130px;
+  text-align: center !important;
+  padding: 0.5rem !important;
 }
 
 .user-name-btn {

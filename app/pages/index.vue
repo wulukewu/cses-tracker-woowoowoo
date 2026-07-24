@@ -14,7 +14,7 @@ const { data: live } = await useFetch<ProgressResponse | null>('/api/progress', 
   default: () => null,
 })
 
-const INV_TAGS = ['cses', 'weekly-round', '練功', '三人成團']
+const INV_TAGS = ['cses', 'weekly-round', '練功', '四人成團']
 const REC_TAGS = ['cses', 'recap', '週賽']
 
 const FALLBACK: Week = { id: 'preview', createdAt: '', deadline: null, problems: [] }
@@ -65,14 +65,15 @@ const posts = computed(() => {
         <LayoutCfHandle name="zyo" />,
         <LayoutCfHandle name="lukewu" />,
         <LayoutCfHandle name="Weeeeeeeeeeeee00" />,
+        <LayoutCfHandle name="yc" />,
         {{ post.time }}
       </div>
 
       <div class="topic-body">
         <p>{{ post.copy.intro }}</p>
         <p>
-          我們三個——<LayoutCfHandle name="zyo" />、<LayoutCfHandle name="lukewu" />、<LayoutCfHandle
-            name="Weeeeeeeeeeeee00" />——{{ post.copy.lead }}
+          我們四個——<LayoutCfHandle name="zyo" />、<LayoutCfHandle name="lukewu" />、<LayoutCfHandle
+            name="Weeeeeeeeeeeee00" />、<LayoutCfHandle name="yc" />——{{ post.copy.lead }}
         </p>
         <p>{{ post.copy.how }}</p>
 
@@ -180,7 +181,7 @@ const posts = computed(() => {
   font-size: 0.85rem;
 }
 .st-handle {
-  width: 9rem;
+  width: 12rem;
   flex-shrink: 0;
   overflow: hidden;
   text-overflow: ellipsis;

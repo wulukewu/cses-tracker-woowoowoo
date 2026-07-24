@@ -45,7 +45,7 @@
       </div>
 
       <footer class="cf-footer">
-        CSES Tracker &mdash; 三人週賽練功房 &nbsp;·&nbsp; lukewu &nbsp;·&nbsp; zyo &nbsp;·&nbsp; Weeeeeeeeeeeee00
+        CSES Tracker &mdash; 四人週賽練功房 &nbsp;·&nbsp; lukewu &nbsp;·&nbsp; zyo &nbsp;·&nbsp; Weeeeeeeeeeeee00 &nbsp;·&nbsp; yc
       </footer>
     </div>
 
@@ -182,7 +182,7 @@ a:hover {
 
 .cf-container {
   width: 100%;
-  max-width: 1000px;
+  max-width: min(94vw, 1400px);
   margin: 0 auto;
   padding: 0 14px;
   flex: 1;
