@@ -76,7 +76,7 @@ const todoSummary = computed(() => {
   background: var(--cf-bg);
   color: var(--cf-link);
   border: 1px solid var(--cf-border);
-  border-radius: 4px;
+  border-radius: 0;
   cursor: pointer;
   font-size: 0.85rem;
   white-space: nowrap;
@@ -106,7 +106,7 @@ const todoSummary = computed(() => {
   color: var(--cf-text-secondary);
   font-size: 0.72rem;
   padding: 0.05rem 0.35rem;
-  border-radius: 3px;
+  border-radius: 0;
   font-weight: 600;
   margin-left: 0.2rem;
 }

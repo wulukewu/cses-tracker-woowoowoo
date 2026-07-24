@@ -177,6 +177,6 @@ function toggleCategory(name: string) {
   background: var(--cf-cell);
   border: 1px solid var(--cf-sep);
   padding: 0.05rem 0.35rem;
-  border-radius: 3px;
+  border-radius: 0;
 }
 </style>
