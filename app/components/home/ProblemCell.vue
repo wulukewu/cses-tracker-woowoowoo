@@ -117,7 +117,7 @@ const emit = defineEmits<{
 .mark-cell-card.attempted {
   background: rgba(192, 57, 43, 0.04);
   border-color: rgba(192, 57, 43, 0.1);
-  color: #c0392b;
+  color: var(--cf-wa);
 }
 
 .mark-cell-card.attempted:hover {
@@ -157,8 +157,8 @@ const emit = defineEmits<{
   height: 1.1rem;
   padding: 0 0.25rem;
   border-radius: 999px;
-  background: #fbe9e7;
-  color: #c0392b;
+  background: var(--cf-wa-bg);
+  color: var(--cf-wa);
   font-weight: 700;
   font-size: 0.65rem;
   line-height: 1;
@@ -214,11 +214,11 @@ const emit = defineEmits<{
 }
 
 .first-dot {
-  background: #d4a017;
+  background: var(--cf-gold);
 }
 
 .fastest-dot {
-  background: #2f6fed;
+  background: var(--cf-blue-dot);
 }
 
 .stuck-warning-badge {
@@ -232,8 +232,8 @@ const emit = defineEmits<{
   height: 14px;
   border-radius: 50%;
   background: var(--cf-stuck-bg);
-  border: 1px solid #ffb74d;
-  color: #e65100;
+  border: 1px solid var(--cf-stuck-border);
+  color: var(--cf-stuck-color);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   z-index: 2;
 }

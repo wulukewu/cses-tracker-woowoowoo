@@ -212,7 +212,7 @@ onUnmounted(() => {
   font-size: 0.75rem;
 }
 
-.sync-hint.saving { color: #b45309; }
+.sync-hint.saving { color: var(--cf-saving-color); }
 .sync-hint.error  { color: var(--cf-red); }
 .sync-hint.saved  { color: var(--cf-text-muted); }
 
@@ -298,7 +298,7 @@ onUnmounted(() => {
 }
 
 .ac-row td {
-  color: #000;
+  color: var(--cf-text);
 }
 
 .fail-row td {

@@ -90,7 +90,7 @@ function toggleCategory(name: string) {
 }
 
 .category-header:hover {
-  background: #f0f0f0;
+  background: var(--cf-cell);
 }
 
 .category-indicator {

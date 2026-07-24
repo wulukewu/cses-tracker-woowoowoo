@@ -89,7 +89,7 @@ const todoSummary = computed(() => {
 
 .week-tab.active {
   background: var(--cf-blue);
-  color: #fff;
+  color: var(--cf-bg);
   border-color: var(--cf-blue);
   font-weight: 700;
 }

@@ -49,7 +49,7 @@ const message = computed(() => {
 .error-card {
   text-align: center;
   border: 1px solid var(--cf-border);
-  background: #fff;
+  background: var(--cf-bg);
   padding: 2.5rem 3rem;
   max-width: 420px;
   width: 100%;

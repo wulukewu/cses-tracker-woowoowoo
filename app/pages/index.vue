@@ -156,7 +156,7 @@ const posts = computed(() => {
   text-decoration: underline;
 }
 .post-cta:hover {
-  color: #24428a;
+  color: var(--cf-blue);
 }
 .post-cta-line {
   margin-top: 0.9rem;
