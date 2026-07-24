@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { WeekTodo } from '~~/shared/types'
+import type { WeekProblem, WeekTodo } from '~~/shared/types'
 
 const {
   weeks,
@@ -9,6 +9,7 @@ const {
   users,
   staleSince,
   solvedSets,
+  submissions,
   pending,
   refreshing,
   refreshAll,
@@ -32,11 +33,43 @@ const {
   toggleCategory,
 } = useUserProfile(users, solvedSets, categories)
 
+const overlayProblem = ref<WeekProblem | null>(null)
+const overlayUserName = ref<string | null>(null)
 const showTodos = ref(false)
 
-function openModal(problem: WeekProblem, userName: string) {
-  navigateTo(`/submissions?problemId=${problem.id}&userName=${encodeURIComponent(userName)}&weekId=${encodeURIComponent(selectedWeekId.value || '')}`)
+const overlaySummary = computed(() => {
+  if (!overlayProblem.value || !overlayUserName.value) return null
+  return submissions.value?.[String(overlayProblem.value.id)]?.[overlayUserName.value] ?? null
+})
+
+const overlayLocked = computed(() => {
+  if (!overlayProblem.value || !overlayUserName.value) return false
+  const uIdx = users.value.findIndex(u => u.name === overlayUserName.value)
+  if (uIdx === -1) return false
+  return cellInfo(uIdx, overlayProblem.value.id).locked
+})
+
+function handleSaveNote(username: string, content: string, stuck: boolean) {
+  if (notes.value && overlayProblem.value) {
+    const pid = String(overlayProblem.value.id)
+    const newNotes = { ...notes.value }
+    if (!newNotes[pid]) newNotes[pid] = {}
+    newNotes[pid] = { ...newNotes[pid], [username]: { content, stuck } }
+    notes.value = newNotes
+  }
 }
+
+function openModal(problem: WeekProblem, userName: string) {
+  overlayProblem.value = problem
+  overlayUserName.value = userName
+}
+
+function closeOverlay() {
+  overlayProblem.value = null
+  overlayUserName.value = null
+}
+
+const anyModalOpen = computed(() => Boolean(overlayProblem.value || profileUser.value || showTodos.value))
 
 async function handleUpdateTodos(newTodos: WeekTodo[]) {
   if (!week.value) return
@@ -84,8 +117,6 @@ async function handleUpdateTodos(newTodos: WeekTodo[]) {
     console.error('更新待辦作業失敗:', err)
   }
 }
-
-const anyModalOpen = computed(() => Boolean(profileUser.value || showTodos.value))
 
 watch(anyModalOpen, (open) => {
   if (import.meta.client) document.body.style.overflow = open ? 'hidden' : ''
@@ -138,6 +169,19 @@ onUnmounted(() => {
         @open-modal="openModal"
       />
     </template>
+
+    <HomeSubmissionOverlay
+      v-if="overlayProblem && overlayUserName"
+      :problem-id="overlayProblem.id"
+      :problem-name="overlayProblem.name"
+      :user-name="overlayUserName"
+      :summary="overlaySummary"
+      :initial-note-content="notes?.[String(overlayProblem.id)]?.[overlayUserName]?.content || ''"
+      :initial-stuck="notes?.[String(overlayProblem.id)]?.[overlayUserName]?.stuck || false"
+      :locked="overlayLocked"
+      @close="closeOverlay"
+      @save-note="handleSaveNote"
+    />
 
     <HomeUserProfileModal
       v-if="profileUser"
