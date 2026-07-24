@@ -117,7 +117,7 @@ onUnmounted(() => {
   <div>
     <div class="cf-page-title">
       <h1>CSES Weekly Round</h1>
-      <span class="cf-page-sub">逐題賽況 · 三人同場</span>
+      <span class="cf-page-sub">逐題賽況 · 四人同場</span>
     </div>
 
     <div v-if="!weeks || weeks.length === 0" class="empty-state">

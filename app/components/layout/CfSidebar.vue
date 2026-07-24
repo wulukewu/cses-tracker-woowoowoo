@@ -68,7 +68,7 @@ const recent = computed(() => {
       <div class="pay-attention">
         <p class="pa-line">Before round</p>
         <NuxtLink to="/round" class="pa-title">CSES Weekly Round</NuxtLink>
-        <p class="pa-meta">三位固定夥伴 · 每週一組精選題</p>
+        <p class="pa-meta">四位固定夥伴 · 每週一組精選題</p>
         <NuxtLink to="/round" class="pa-enter">進入賽區 »</NuxtLink>
       </div>
     </LayoutCfBox>
