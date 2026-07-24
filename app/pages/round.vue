@@ -232,7 +232,6 @@ onUnmounted(() => {
   color: var(--cf-text-muted);
   background: #fff;
   border: 1px solid var(--cf-border);
-  border-radius: var(--cf-radius);
 }
 
 .stale-banner {
@@ -240,7 +239,6 @@ onUnmounted(() => {
   color: var(--cf-text-secondary);
   border: 1px solid var(--cf-sep);
   padding: 0.55rem 0.85rem;
-  border-radius: var(--cf-radius);
   margin-bottom: 1.25rem;
   font-size: 0.85rem;
 }

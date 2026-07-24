@@ -59,7 +59,6 @@ const emit = defineEmits<{
 .modal-card {
   background: var(--cf-bg);
   border: 1px solid var(--cf-border);
-  border-radius: var(--cf-radius);
   max-width: 420px;
   width: 100%;
   padding: 1.25rem;

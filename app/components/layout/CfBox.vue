@@ -25,17 +25,15 @@ defineProps<{
 .cf-box {
   background: #ffffff;
   border: 1px solid var(--cf-border);
-  border-radius: var(--cf-radius);
   margin-bottom: 1.1rem;
-  overflow: hidden;
 }
 
 .cf-box-caption {
-  padding: 0.55rem 0.5rem 0.5rem 0.75rem;
+  padding: 0.45rem 0.5rem 0.4rem 0.75rem;
   border-bottom: 1px solid var(--cf-border);
   font-weight: 700;
-  font-size: 1.03rem;
-  color: var(--cf-blue);
+  font-size: 0.9rem;
+  color: var(--cf-text);
 }
 
 .cf-box-body {

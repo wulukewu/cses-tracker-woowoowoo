@@ -118,7 +118,6 @@ function handleConfirm() {
 .modal-card {
   background: var(--cf-bg);
   border: 1px solid var(--cf-border);
-  border-radius: var(--cf-radius);
   max-width: 460px;
   width: 100%;
   padding: 1.5rem;
@@ -152,7 +151,6 @@ function handleConfirm() {
   gap: 0.8rem;
   padding: 0.8rem;
   border: 1px solid var(--cf-border);
-  border-radius: var(--cf-radius);
   cursor: pointer;
   /* CF-style: no animation */
 }
@@ -199,7 +197,6 @@ function handleConfirm() {
 .overwrite-confirm-box {
   background: #fdf1f0;
   border: 1px solid #f0c4bf;
-  border-radius: var(--cf-radius);
   padding: 0.8rem;
   margin-bottom: 1.2rem;
 }

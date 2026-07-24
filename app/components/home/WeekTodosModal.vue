@@ -134,7 +134,6 @@ function handleRemoveTodo(todoId: string) {
 .modal-card {
   background: var(--cf-bg);
   border: 1px solid var(--cf-border);
-  border-radius: var(--cf-radius);
   width: 100%;
   max-width: 520px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);

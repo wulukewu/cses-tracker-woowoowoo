@@ -67,7 +67,7 @@ function toggleCategory(name: string) {
 <style scoped>
 .category-section {
   border: 1px solid var(--cf-border);
-  border-radius: var(--cf-radius);
+  border-radius: 0;
   margin-bottom: 0.75rem;
   overflow: hidden;
 }

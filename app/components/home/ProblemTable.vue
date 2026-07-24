@@ -83,8 +83,6 @@ const cellInfoMap = computed(() => {
 <style scoped>
 .problem-table-wrap {
   border: 1px solid var(--cf-border);
-  border-radius: var(--cf-radius);
-  overflow: hidden;
 }
 
 .problem-table {

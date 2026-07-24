@@ -167,7 +167,6 @@ a:hover {
   justify-content: space-between;
   background: #ffffff;
   border: 1px solid var(--cf-border);
-  border-radius: var(--cf-radius);
   padding: 0 0.5rem;
   margin-bottom: 0.85rem;
 }
