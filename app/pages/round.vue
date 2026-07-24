@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { WeekProblem, WeekTodo } from '~~/shared/types'
+import type { WeekTodo } from '~~/shared/types'
 
 const {
   weeks,
@@ -9,7 +9,6 @@ const {
   users,
   staleSince,
   solvedSets,
-  submissions,
   pending,
   refreshing,
   refreshAll,
@@ -33,45 +32,10 @@ const {
   toggleCategory,
 } = useUserProfile(users, solvedSets, categories)
 
-const modalProblem = ref<WeekProblem | null>(null)
-const modalUserName = ref<string | null>(null)
 const showTodos = ref(false)
 
-function handleSaveNote(username: string, content: string, stuck: boolean) {
-  if (notes.value && modalProblem.value) {
-    const pid = String(modalProblem.value.id)
-    const newNotes = { ...notes.value }
-    if (!newNotes[pid]) {
-      newNotes[pid] = {}
-    }
-    newNotes[pid] = {
-      ...newNotes[pid],
-      [username]: { content, stuck }
-    }
-    notes.value = newNotes
-  }
-}
-
-const modalSummary = computed(() => {
-  if (!modalProblem.value || !modalUserName.value) return null
-  return submissions.value?.[String(modalProblem.value.id)]?.[modalUserName.value] ?? null
-})
-
-const modalLocked = computed(() => {
-  if (!modalProblem.value || !modalUserName.value) return false
-  const uIdx = users.value.findIndex(u => u.name === modalUserName.value)
-  if (uIdx === -1) return false
-  return cellInfo(uIdx, modalProblem.value.id).locked
-})
-
 function openModal(problem: WeekProblem, userName: string) {
-  modalProblem.value = problem
-  modalUserName.value = userName
-}
-
-function closeModal() {
-  modalProblem.value = null
-  modalUserName.value = null
+  navigateTo(`/submissions?problemId=${problem.id}&userName=${encodeURIComponent(userName)}&weekId=${encodeURIComponent(selectedWeekId.value || '')}`)
 }
 
 async function handleUpdateTodos(newTodos: WeekTodo[]) {
@@ -121,15 +85,7 @@ async function handleUpdateTodos(newTodos: WeekTodo[]) {
   }
 }
 
-// Without this, scrolling past the end of a modal's own list chains into
-// the page behind it — the fixed overlay stays put but the body scrolls,
-// which shows up as the page's own scrollbar (detached from the card)
-// moving instead of the modal's.
-const anyModalOpen = computed(() => Boolean(
-  (modalProblem.value && modalUserName.value) ||
-  profileUser.value ||
-  showTodos.value
-))
+const anyModalOpen = computed(() => Boolean(profileUser.value || showTodos.value))
 
 watch(anyModalOpen, (open) => {
   if (import.meta.client) document.body.style.overflow = open ? 'hidden' : ''
@@ -182,18 +138,6 @@ onUnmounted(() => {
         @open-modal="openModal"
       />
     </template>
-
-    <HomeSubmissionModal
-      v-if="modalProblem && modalUserName"
-      :problem="modalProblem"
-      :user-name="modalUserName"
-      :summary="modalSummary"
-      :initial-note-content="notes?.[String(modalProblem.id)]?.[modalUserName]?.content || ''"
-      :initial-stuck="notes?.[String(modalProblem.id)]?.[modalUserName]?.stuck || false"
-      :locked="modalLocked"
-      @close="closeModal"
-      @save-note="handleSaveNote"
-    />
 
     <HomeUserProfileModal
       v-if="profileUser"
