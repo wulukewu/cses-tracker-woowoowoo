@@ -204,7 +204,7 @@ a:hover {
 }
 
 .cf-wordmark {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Trebuchet MS', 'Segoe UI', Verdana, sans-serif;
   font-weight: 700;
   font-size: 2rem;
   letter-spacing: -0.01em;
