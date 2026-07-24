@@ -1,8 +1,6 @@
-import { ref } from 'vue'
-
-const userName = ref<string | null>(null)
-
 export function useProfileModal() {
+  const userName = useState<string | null>('profile-modal-user', () => null)
+
   function openProfile(name: string) {
     userName.value = name
   }
