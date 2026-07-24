@@ -139,7 +139,7 @@ const cellInfoMap = computed(() => {
 }
 
 .col-problem {
-  width: auto;
+  width: 40%;
 }
 
 .problem-title-row {
@@ -186,8 +186,7 @@ const cellInfoMap = computed(() => {
 }
 
 .col-user {
-  width: 150px;
-  min-width: 130px;
+  width: 15%;
   text-align: center !important;
   padding: 0.5rem !important;
 }
@@ -216,10 +215,6 @@ const cellInfoMap = computed(() => {
 
 /* ---------- Responsive: tablet (sidebar folded, narrower content) ---------- */
 @media (max-width: 800px) {
-  .col-user {
-    width: 100px;
-  }
-
   .problem-meta {
     display: none;
   }
