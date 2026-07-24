@@ -118,7 +118,6 @@ onUnmounted(() => {
     <div class="cf-page-title">
       <h1>CSES Weekly Round</h1>
       <span class="cf-page-sub">逐題賽況 · 三人同場</span>
-      <span class="cf-page-clock"><HomeTaiwanClock /></span>
     </div>
 
     <div v-if="!weeks || weeks.length === 0" class="empty-state">
@@ -186,10 +185,6 @@ onUnmounted(() => {
   margin: 0 0 1rem;
   padding-bottom: 0.55rem;
   border-bottom: 1px solid var(--cf-sep);
-}
-
-.cf-page-clock {
-  margin-left: auto;
 }
 
 .cf-page-title h1 {
