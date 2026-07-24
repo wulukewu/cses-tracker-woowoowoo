@@ -57,7 +57,7 @@ const sorted = computed(() => {
   text-align: left;
   padding: 0.35rem 0.5rem;
   border-bottom: 1px solid var(--cf-border);
-  background: #fff;
+  background: var(--cf-bg);
   font-size: 0.8rem;
   color: var(--cf-text-secondary);
 }
@@ -66,7 +66,7 @@ const sorted = computed(() => {
   padding: 0.4rem 0.5rem;
   border-bottom: 1px solid var(--cf-sep);
   vertical-align: middle;
-  background: #fff;
+  background: var(--cf-bg);
 }
 
 .standings-table tbody tr:nth-child(odd) td {

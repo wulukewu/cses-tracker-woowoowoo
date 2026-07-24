@@ -230,7 +230,7 @@ onUnmounted(() => {
   padding: 2rem;
   text-align: center;
   color: var(--cf-text-muted);
-  background: #fff;
+  background: var(--cf-bg);
   border: 1px solid var(--cf-border);
 }
 

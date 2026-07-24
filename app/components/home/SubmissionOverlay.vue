@@ -167,7 +167,7 @@ onUnmounted(() => {
 }
 
 .overlay-card {
-  background: #fff;
+  background: var(--cf-bg);
   border: 1px solid var(--cf-border);
   max-width: 820px;
   width: 100%;
@@ -228,7 +228,7 @@ onUnmounted(() => {
 
 .close-btn:hover {
   border-color: var(--cf-border);
-  color: #000;
+  color: var(--cf-text);
 }
 
 .card-body {
@@ -278,14 +278,14 @@ onUnmounted(() => {
   text-align: left;
   padding: 0.3rem 0.5rem;
   border-bottom: 1px solid var(--cf-border);
-  background: #fff;
+  background: var(--cf-bg);
   white-space: nowrap;
 }
 
 .sub-table td {
   padding: 0.3rem 0.5rem;
   border-bottom: 1px solid var(--cf-sep);
-  background: #fff;
+  background: var(--cf-bg);
   white-space: nowrap;
 }
 
@@ -344,7 +344,7 @@ onUnmounted(() => {
   width: 100%;
   padding: 0.5rem;
   border: 1px solid var(--cf-border);
-  background: #fff;
+  background: var(--cf-bg);
   color: var(--cf-text);
   font-family: monospace;
   font-size: 0.85rem;

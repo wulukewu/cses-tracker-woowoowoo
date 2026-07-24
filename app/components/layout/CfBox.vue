@@ -23,7 +23,7 @@ defineProps<{
 
 <style scoped>
 .cf-box {
-  background: #ffffff;
+  background: var(--cf-bg);
   border: 1px solid var(--cf-border);
   margin-bottom: 1.1rem;
 }

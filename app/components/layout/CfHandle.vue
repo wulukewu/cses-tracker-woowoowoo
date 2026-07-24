@@ -19,7 +19,7 @@ const restChars = computed(() => (style.value.legendary ? props.name.slice(1) : 
   white-space: nowrap;
 }
 .cf-handle-first {
-  color: #000000;
+  color: var(--cf-text);
 }
 .cf-handle:hover {
   text-decoration: underline;

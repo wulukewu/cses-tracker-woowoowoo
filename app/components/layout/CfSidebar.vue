@@ -149,7 +149,7 @@ const recent = computed(() => {
   text-align: center;
   padding: 0.35rem 0.5rem;
   border-bottom: 1px solid var(--cf-border);
-  background: #fff;
+  background: var(--cf-bg);
 }
 .cf-datatable th.c-user {
   text-align: left;
@@ -157,7 +157,7 @@ const recent = computed(() => {
 .cf-datatable td {
   padding: 0.4rem 0.5rem;
   border-bottom: 1px solid var(--cf-sep);
-  background: #ffffff;
+  background: var(--cf-bg);
 }
 /* Codeforces zebra striping: odd rows shaded, even rows white */
 .cf-datatable tbody tr:nth-child(odd) td {

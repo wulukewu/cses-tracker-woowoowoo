@@ -73,7 +73,7 @@ const todoSummary = computed(() => {
 .week-tab {
   flex-shrink: 0;
   padding: 0.35rem 0.75rem;
-  background: #fff;
+  background: var(--cf-bg);
   color: var(--cf-link);
   border: 1px solid var(--cf-border);
   border-radius: 4px;

@@ -145,7 +145,7 @@ const posts = computed(() => {
 .topic-body {
   font-size: 0.95rem;
   line-height: 1.65;
-  color: #000;
+  color: var(--cf-text);
 }
 .topic-body p {
   margin: 0 0 0.8rem;

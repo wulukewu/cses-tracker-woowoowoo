@@ -15,6 +15,9 @@
         <div class="cf-topbar-right">
           <span class="cf-lang">En&nbsp;|&nbsp;Ru</span>
           <span class="cf-auth"><span class="cf-authlink">Enter</span> | <span class="cf-authlink">Register</span></span>
+          <button type="button" class="cf-theme-toggle" @click="toggleTheme" :title="isDark ? '切換亮色模式' : '切換深色模式'">
+            <span v-if="isDark">☀</span><span v-else>☾</span>
+          </button>
         </div>
       </header>
 
@@ -46,6 +49,40 @@
   </div>
 </template>
 
+<script setup lang="ts">
+const STORAGE_KEY = 'cses-tracker-theme'
+
+const isDark = ref(false)
+
+function toggleTheme() {
+  isDark.value = !isDark.value
+  applyTheme(isDark.value)
+  try {
+    localStorage.setItem(STORAGE_KEY, isDark.value ? 'dark' : 'light')
+  } catch {}
+}
+
+function applyTheme(dark: boolean) {
+  document.documentElement.dataset.theme = dark ? 'dark' : ''
+}
+
+onMounted(() => {
+  const stored = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+  isDark.value = stored === 'dark' || (!stored && prefersDark)
+  applyTheme(isDark.value)
+})
+
+useHead({
+  script: [
+    {
+      innerHTML: `(function(){var t;try{t=localStorage.getItem('${STORAGE_KEY}')}catch(e){}var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.dataset.theme='dark'})()`,
+      tagPosition: 'head',
+    },
+  ],
+})
+</script>
+
 <style>
 :root {
   --cf-bg: #ffffff;
@@ -57,9 +94,29 @@
   --cf-text-muted: #888888;
   --cf-accent: #008000;
   --cf-accent-bg: #e9f3e9;
+  --cf-stuck-bg: #fff3e0;
   --cf-radius: 6px;
   --cf-blue: #3b5998;
   --cf-link: #3b5998;
+  --cf-logo-a: #2a2a2a;
+  --cf-logo-b: #5b7fb0;
+}
+
+[data-theme="dark"] {
+  --cf-bg: #121212;
+  --cf-cell: #1e1e1e;
+  --cf-border: #333333;
+  --cf-sep: #2a2a2a;
+  --cf-text: #e0e0e0;
+  --cf-text-secondary: #999999;
+  --cf-text-muted: #666666;
+  --cf-accent: #3fb950;
+  --cf-accent-bg: #0d2818;
+  --cf-stuck-bg: #3d2a0a;
+  --cf-blue: #58a6ff;
+  --cf-link: #58a6ff;
+  --cf-logo-a: #e0e0e0;
+  --cf-logo-b: #5890d0;
 }
 
 * {
@@ -68,7 +125,7 @@
 
 html,
 body {
-  background: #ffffff;
+  background: var(--cf-bg);
 }
 
 body {
@@ -135,10 +192,10 @@ a:hover {
   line-height: 1;
 }
 .wm-a {
-  color: #2a2a2a;
+  color: var(--cf-logo-a);
 }
 .wm-b {
-  color: #5b7fb0;
+  color: var(--cf-logo-b);
   margin-left: 0.12em;
 }
 
@@ -160,12 +217,23 @@ a:hover {
   cursor: default;
 }
 
-/* ---------- Menu box (white rounded box, black uppercase links) ---------- */
+.cf-theme-toggle {
+  font-size: 1rem;
+  line-height: 1;
+  background: none;
+  border: 1px solid var(--cf-border);
+  border-radius: 3px;
+  padding: 0.15rem 0.35rem;
+  cursor: pointer;
+  color: var(--cf-text);
+}
+
+/* ---------- Menu box ---------- */
 .cf-menu-box {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  background: #ffffff;
+  background: var(--cf-bg);
   border: 1px solid var(--cf-border);
   padding: 0 0.5rem;
   margin-bottom: 0.85rem;
@@ -186,7 +254,7 @@ a:hover {
 .cf-menu-list a {
   display: flex;
   align-items: center;
-  color: #000000;
+  color: var(--cf-text);
   text-transform: uppercase;
   font-size: 0.9rem;
   font-weight: 400;
@@ -202,7 +270,7 @@ a:hover {
 
 .cf-menu-list a.current {
   border-bottom-color: var(--cf-blue);
-  color: #000000;
+  color: var(--cf-text);
 }
 
 .cf-menu-search {
@@ -215,7 +283,8 @@ a:hover {
   height: 22px;
   border: 1px solid var(--cf-border);
   border-radius: 4px;
-  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat right 6px center;
+  background: var(--cf-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat right 6px center;
+  color: var(--cf-text);
 }
 
 /* ---------- Main two-column layout ---------- */
@@ -244,7 +313,7 @@ a:hover {
   color: var(--cf-text-muted);
 }
 
-/* ---------- Codeforces-style button (native grey, subtle bevel) ---------- */
+/* ---------- Codeforces-style button ---------- */
 .cf-btn {
   display: inline-flex;
   align-items: center;
@@ -253,9 +322,9 @@ a:hover {
   font-family: Verdana, Arial, sans-serif;
   font-size: 0.85rem;
   line-height: 1.35;
-  color: #000000;
-  background: linear-gradient(#fafafa, #e4e4e4);
-  border: 1px solid #b0b0b0;
+  color: var(--cf-text);
+  background: linear-gradient(var(--cf-btn-top, #fafafa), var(--cf-btn-bot, #e4e4e4));
+  border: 1px solid var(--cf-btn-border, #b0b0b0);
   border-radius: 2px;
   padding: 0.25rem 0.8rem;
   cursor: pointer;
@@ -264,14 +333,14 @@ a:hover {
 }
 
 .cf-btn:hover {
-  background: linear-gradient(#f0f0f0, #dadada);
-  border-color: #9e9e9e;
+  background: linear-gradient(var(--cf-btn-hover-top, #f0f0f0), var(--cf-btn-hover-bot, #dadada));
+  border-color: var(--cf-btn-hover-border, #9e9e9e);
   text-decoration: none;
-  color: #000000;
+  color: var(--cf-text);
 }
 
 .cf-btn:active:not(:disabled) {
-  background: #d6d6d6;
+  background: var(--cf-btn-active, #d6d6d6);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -287,6 +356,16 @@ a:hover {
 }
 .cf-btn--danger:hover {
   color: #a00000;
+}
+
+[data-theme="dark"] {
+  --cf-btn-top: #2c2c2c;
+  --cf-btn-bot: #222222;
+  --cf-btn-border: #444444;
+  --cf-btn-hover-top: #333333;
+  --cf-btn-hover-bot: #2a2a2a;
+  --cf-btn-hover-border: #555555;
+  --cf-btn-active: #2a2a2a;
 }
 
 @media (max-width: 900px) {
