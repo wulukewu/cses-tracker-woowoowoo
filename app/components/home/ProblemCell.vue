@@ -30,7 +30,8 @@ const emit = defineEmits<{
     @click="emit('click')"
   >
     <div class="cell-main-content">
-      <span v-if="info.solved && info.waCount > 0" class="wa-count-symbol">{{ info.waCount }}</span>
+      <span v-if="info.solved" class="ac-count-symbol">{{ info.waCount || '0' }}</span>
+      <span v-else-if="info.waCount > 0" class="fail-count-symbol">{{ info.waCount }}</span>
       <span v-else class="mark-symbol">{{ cellSymbol(info) }}</span>
     </div>
     
@@ -149,7 +150,13 @@ const emit = defineEmits<{
   font-size: 0.9rem;
 }
 
-.wa-count-symbol {
+.ac-count-symbol {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--cf-accent);
+}
+
+.fail-count-symbol {
   font-weight: 700;
   font-size: 0.9rem;
   color: var(--cf-wa);
