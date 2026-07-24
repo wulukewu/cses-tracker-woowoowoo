@@ -147,6 +147,27 @@ describe('fetchSubmissionSummary', () => {
     expect(summary.submissions.map((s) => s.verdict)).toEqual(['FAIL', 'AC'])
   })
 
+  it('includes every AC row and sets detailUrl on each of them', async () => {
+    mockFetchOnce(`
+      <table class="full-width">
+        <tr><th>Time</th></tr>
+        ${row('2024-01-05 10:00:00', 'full', '/problemset/result/3/4')}
+        ${row('2024-01-04 10:00:00', 'zero')}
+        ${row('2024-01-03 10:00:00', 'full', '/problemset/result/1/2')}
+        ${row('2024-01-02 10:00:00', 'zero')}
+        ${row('2024-01-01 10:00:00', 'zero')}
+      </table>
+    `)
+
+    const summary = await fetchSubmissionSummary(1234, 'alice', 'PHPSESSID=abc')
+
+    expect(summary.waCount).toBe(2)
+    expect(summary.firstAcTime).toBe('2024-01-03 10:00:00')
+    expect(summary.submissions.map((s) => s.verdict)).toEqual(['FAIL', 'FAIL', 'AC', 'FAIL', 'AC'])
+    expect(summary.submissions[2].detailUrl).toBe('https://cses.fi/problemset/result/1/2')
+    expect(summary.submissions[4].detailUrl).toBe('https://cses.fi/problemset/result/3/4')
+  })
+
   it('non-AC rows never carry a detailUrl even if a details-link happens to be present', async () => {
     mockFetchSequence([
       {

@@ -152,11 +152,13 @@ export async function fetchSubmissionSummary(
 
   let waCount = 0
   let firstAcTime: string | null = null
+  let sawAc = false
   const submissions: SubmissionEntry[] = []
   for (const row of chronological) {
     if (row.verdict === 'CE') continue
     if (row.verdict === 'AC') {
-      firstAcTime = row.time
+      if (!firstAcTime) firstAcTime = row.time
+      sawAc = true
       submissions.push({
         time: row.time,
         verdict: 'AC',
@@ -165,10 +167,10 @@ export async function fetchSubmissionSummary(
         codeSize: row.codeSize,
         detailUrl: row.detailUrl,
       })
-      break
+    } else {
+      if (!sawAc) waCount++
+      submissions.push({ time: row.time, verdict: 'FAIL', lang: row.lang, execTime: row.execTime, codeSize: row.codeSize })
     }
-    waCount++
-    submissions.push({ time: row.time, verdict: 'FAIL', lang: row.lang, execTime: row.execTime, codeSize: row.codeSize })
   }
 
   return { unlocked: true, waCount, firstAcTime, submissions }
