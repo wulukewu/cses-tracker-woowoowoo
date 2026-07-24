@@ -86,9 +86,9 @@ const emit = defineEmits<{
 }
 
 .modal-card {
-  background: var(--cs-bg);
+  background: var(--cf-bg);
   border: 1px solid var(--cf-border);
-  border-radius: var(--cs-radius);
+  border-radius: var(--cf-radius);
   max-width: 420px;
   width: 100%;
   max-height: 80vh;
@@ -117,7 +117,7 @@ const emit = defineEmits<{
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   font-size: 1rem;
   line-height: 1;
   padding: 0.25rem;
@@ -126,14 +126,14 @@ const emit = defineEmits<{
 .progress-bar-track {
   height: 6px;
   border-radius: 999px;
-  background: var(--cs-border-subtle);
+  background: var(--cf-sep);
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--cs-accent);
-  transition: width 0.2s ease;
+  background: var(--cf-accent);
+  /* CF-style: no animation */
 }
 
 .profile-card {
@@ -144,7 +144,7 @@ const emit = defineEmits<{
 .profile-summary {
   margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--cs-border-subtle);
+  border-bottom: 1px solid var(--cf-sep);
 }
 
 .profile-total {
@@ -161,19 +161,19 @@ const emit = defineEmits<{
 
 .profile-total-label {
   font-size: 0.85rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
 }
 
 .profile-cses-link {
   display: inline-block;
   margin-top: 0.5rem;
   font-size: 0.8rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   text-decoration: none;
 }
 
 .profile-cses-link:hover {
-  color: var(--cs-accent);
+  color: var(--cf-accent);
   text-decoration: underline;
 }
 
@@ -185,7 +185,7 @@ const emit = defineEmits<{
 
 .profile-category {
   padding: 0.5rem 0;
-  border-bottom: 1px solid var(--cs-border-subtle);
+  border-bottom: 1px solid var(--cf-sep);
 }
 
 .profile-category:last-child {
@@ -214,7 +214,7 @@ const emit = defineEmits<{
 
 .profile-category-count {
   font-size: 0.8rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   flex-shrink: 0;
 }
 
@@ -235,23 +235,23 @@ const emit = defineEmits<{
   gap: 0.5rem;
   padding: 0.25rem 0;
   font-size: 0.85rem;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
 }
 
 .profile-problem-row.solved {
-  color: var(--cs-text);
+  color: var(--cf-text);
 }
 
 .profile-problem-mark {
   width: 1rem;
   flex-shrink: 0;
   font-weight: 600;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
   text-align: center;
 }
 
 .profile-problem-row.solved .profile-problem-mark {
-  color: var(--cs-accent);
+  color: var(--cf-accent);
 }
 
 .profile-problem-name {

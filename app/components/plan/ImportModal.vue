@@ -116,9 +116,9 @@ function handleConfirm() {
 }
 
 .modal-card {
-  background: var(--cs-bg);
+  background: var(--cf-bg);
   border: 1px solid var(--cf-border);
-  border-radius: var(--cs-radius);
+  border-radius: var(--cf-radius);
   max-width: 460px;
   width: 100%;
   padding: 1.5rem;
@@ -134,7 +134,7 @@ function handleConfirm() {
 
 .info-summary {
   font-size: 0.88rem;
-  color: var(--cs-text);
+  color: var(--cf-text);
   margin-bottom: 1.2rem;
   line-height: 1.5;
 }
@@ -151,10 +151,10 @@ function handleConfirm() {
   align-items: flex-start;
   gap: 0.8rem;
   padding: 0.8rem;
-  border: 1px solid var(--cs-border);
-  border-radius: var(--cs-radius);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius);
   cursor: pointer;
-  transition: all 0.2s ease;
+  /* CF-style: no animation */
 }
 
 .mode-option:hover {
@@ -163,7 +163,7 @@ function handleConfirm() {
 }
 
 .mode-option.active {
-  border-color: var(--cs-text);
+  border-color: var(--cf-text);
   background: rgba(0, 0, 0, 0.01);
 }
 
@@ -183,7 +183,7 @@ function handleConfirm() {
 
 .option-details span {
   font-size: 0.78rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   line-height: 1.4;
 }
 
@@ -199,7 +199,7 @@ function handleConfirm() {
 .overwrite-confirm-box {
   background: #fdf1f0;
   border: 1px solid #f0c4bf;
-  border-radius: var(--cs-radius);
+  border-radius: var(--cf-radius);
   padding: 0.8rem;
   margin-bottom: 1.2rem;
 }
@@ -213,10 +213,10 @@ function handleConfirm() {
 .confirm-input {
   width: 100%;
   padding: 0.45rem 0.6rem;
-  background: var(--cs-bg);
+  background: var(--cf-bg);
   border: 1px solid #f0c4bf;
-  border-radius: var(--cs-radius);
-  color: var(--cs-text);
+  border-radius: var(--cf-radius);
+  color: var(--cf-text);
   font-size: 0.85rem;
 }
 
@@ -270,7 +270,7 @@ function handleConfirm() {
 
 .status-container p {
   font-size: 0.85rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   margin: 0 0 1rem;
 }
 

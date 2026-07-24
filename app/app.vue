@@ -60,17 +60,6 @@
   --cf-radius: 6px;
   --cf-blue: #3b5998;
   --cf-link: #3b5998;
-
-  --cs-bg: #ffffff;
-  --cs-bg-subtle: #f8f8f8;
-  --cs-border: #b9b9b9;
-  --cs-border-subtle: #e1e1e1;
-  --cs-text: #000000;
-  --cs-text-secondary: #555555;
-  --cs-text-muted: #888888;
-  --cs-accent: #008000;
-  --cs-accent-bg: #e9f3e9;
-  --cs-radius: 6px;
 }
 
 * {
@@ -85,7 +74,7 @@ body {
 body {
   margin: 0;
   font-family: Verdana, Arial, 'Helvetica Neue', sans-serif;
-  color: var(--cs-text);
+  color: var(--cf-text);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -161,10 +150,10 @@ a:hover {
   font-size: 0.82rem;
 }
 .cf-lang {
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
 }
 .cf-auth {
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
 }
 .cf-authlink {
   color: var(--cf-link);
@@ -178,7 +167,7 @@ a:hover {
   justify-content: space-between;
   background: #ffffff;
   border: 1px solid var(--cf-border);
-  border-radius: var(--cs-radius);
+  border-radius: var(--cf-radius);
   padding: 0 0.5rem;
   margin-bottom: 0.85rem;
 }
@@ -253,7 +242,7 @@ a:hover {
   padding: 1rem 0.25rem 1.5rem;
   text-align: center;
   font-size: 0.75rem;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
 }
 
 /* ---------- Codeforces-style button (native grey, subtle bevel) ---------- */

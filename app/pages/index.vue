@@ -138,7 +138,7 @@ const posts = computed(() => {
 
 .topic-info {
   font-size: 0.82rem;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
   margin-bottom: 0.9rem;
 }
 
@@ -169,7 +169,7 @@ const posts = computed(() => {
 .standings-cap {
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   margin-bottom: 0.4rem;
 }
 .standings-row {
@@ -190,18 +190,18 @@ const posts = computed(() => {
   max-width: 22rem;
   height: 8px;
   border-radius: 2px;
-  background: var(--cs-border-subtle);
+  background: var(--cf-sep);
   overflow: hidden;
 }
 .st-fill {
   display: block;
   height: 100%;
-  background: var(--cs-accent);
+  background: var(--cf-accent);
 }
 .st-count {
   width: 3.5rem;
   text-align: right;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   flex-shrink: 0;
 }
 
@@ -234,15 +234,15 @@ const posts = computed(() => {
   font-size: 0.85rem;
 }
 .v-up {
-  color: var(--cs-accent);
+  color: var(--cf-accent);
   font-size: 0.75rem;
 }
 .v-score {
   font-weight: 700;
-  color: var(--cs-accent);
+  color: var(--cf-accent);
 }
 .v-down {
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
   font-size: 0.75rem;
 }
 .footer-meta {

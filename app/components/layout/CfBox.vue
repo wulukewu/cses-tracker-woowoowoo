@@ -25,7 +25,7 @@ defineProps<{
 .cf-box {
   background: #ffffff;
   border: 1px solid var(--cf-border);
-  border-radius: var(--cs-radius);
+  border-radius: var(--cf-radius);
   margin-bottom: 1.1rem;
   overflow: hidden;
 }

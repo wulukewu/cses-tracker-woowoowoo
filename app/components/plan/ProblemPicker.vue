@@ -109,7 +109,7 @@ function toggleCategory(name: string) {
 .collapse-arrow {
   margin-left: auto;
   font-size: 0.65rem;
-  transition: transform 0.15s ease;
+  /* CF-style: no animation */
 }
 
 .collapse-arrow.expanded {

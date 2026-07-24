@@ -57,9 +57,9 @@ const emit = defineEmits<{
 }
 
 .modal-card {
-  background: var(--cs-bg);
+  background: var(--cf-bg);
   border: 1px solid var(--cf-border);
-  border-radius: var(--cs-radius);
+  border-radius: var(--cf-radius);
   max-width: 420px;
   width: 100%;
   padding: 1.25rem;
@@ -74,7 +74,7 @@ const emit = defineEmits<{
 
 .modal-card p {
   font-size: 0.85rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   margin: 0 0 0.75rem;
   line-height: 1.5;
 }
@@ -82,10 +82,10 @@ const emit = defineEmits<{
 .reset-confirm-input {
   width: 100%;
   padding: 0.5rem 0.7rem;
-  background: var(--cs-bg);
-  border: 1px solid var(--cs-border);
-  border-radius: var(--cs-radius);
-  color: var(--cs-text);
+  background: var(--cf-bg);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius);
+  color: var(--cf-text);
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }

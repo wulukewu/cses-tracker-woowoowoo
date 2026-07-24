@@ -121,6 +121,6 @@ const sorted = computed(() => {
   display: block;
   height: 100%;
   background: var(--cf-accent);
-  transition: width 0.2s ease;
+  /* CF-style: no animation */
 }
 </style>

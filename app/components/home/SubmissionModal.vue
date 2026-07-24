@@ -247,9 +247,9 @@ onUnmounted(() => {
 }
 
 .modal-card {
-  background: var(--cs-bg);
+  background: var(--cf-bg);
   border: 1px solid var(--cf-border);
-  border-radius: var(--cs-radius);
+  border-radius: var(--cf-radius);
   max-width: 820px;
   width: 100%;
   height: 580px;
@@ -279,7 +279,7 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 0.7rem 1rem;
   border-bottom: 1px solid var(--cf-border);
-  background: var(--cs-bg);
+  background: var(--cf-bg);
 }
 
 .header-title-area {
@@ -291,7 +291,7 @@ onUnmounted(() => {
 .problem-id {
   font-size: 0.88rem;
   font-weight: 500;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
 }
 
 .modal-header h2 {
@@ -311,7 +311,7 @@ onUnmounted(() => {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   font-size: 1rem;
   line-height: 1;
   padding: 0.25rem;
@@ -322,8 +322,8 @@ onUnmounted(() => {
 }
 
 .modal-close:hover {
-  background: var(--cs-bg-subtle);
-  color: var(--cs-text);
+  background: var(--cf-cell);
+  color: var(--cf-text);
 }
 
 /* 雲端同步狀態樣式 */
@@ -334,9 +334,9 @@ onUnmounted(() => {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  color: var(--cs-text-muted); /* 預設灰色 */
-  background: var(--cs-bg-subtle);
-  border: 1px solid var(--cs-border-subtle);
+  color: var(--cf-text-muted); /* 預設灰色 */
+  background: var(--cf-cell);
+  border: 1px solid var(--cf-sep);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: help;
 }
@@ -361,18 +361,13 @@ onUnmounted(() => {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--cs-bg);
-  border: 1px solid var(--cs-border-subtle);
+  background: var(--cf-bg);
+  border: 1px solid var(--cf-sep);
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  animation: badgePop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes badgePop {
-  from { transform: scale(0); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  /* CF-style: no animation */
 }
 
 /* saving (同步中)：黃色，雲朵與 spinner */
@@ -402,8 +397,8 @@ onUnmounted(() => {
 
 /* saved (已同步)：綠色，雲朵與打勾 */
 .sync-indicator.saved {
-  color: var(--cs-accent);
-  background: var(--cs-accent-bg);
+  color: var(--cf-accent);
+  background: var(--cf-accent-bg);
   border-color: rgba(10, 143, 92, 0.15);
 }
 
@@ -446,12 +441,12 @@ onUnmounted(() => {
 }
 
 .left-col {
-  border-right: 1px solid var(--cs-border-subtle);
-  background: var(--cs-bg-subtle);
+  border-right: 1px solid var(--cf-sep);
+  background: var(--cf-cell);
 }
 
 .right-col {
-  background: var(--cs-bg);
+  background: var(--cf-bg);
 }
 
 .col-title {
@@ -459,10 +454,10 @@ onUnmounted(() => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   margin: 0;
   padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid var(--cs-border-subtle);
+  border-bottom: 1px solid var(--cf-sep);
 }
 
 .col-content {
@@ -480,7 +475,7 @@ onUnmounted(() => {
 
 .editor-info {
   font-size: 0.75rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   line-height: 1.4;
 }
 
@@ -489,10 +484,10 @@ onUnmounted(() => {
   height: 100%;
   min-height: 290px;
   padding: 0.75rem;
-  border: 1px solid var(--cs-border);
+  border: 1px solid var(--cf-border);
   border-radius: 6px;
-  background: var(--cs-bg-subtle);
-  color: var(--cs-text);
+  background: var(--cf-cell);
+  color: var(--cf-text);
   font-family: monospace;
   font-size: 0.88rem;
   line-height: 1.5;
@@ -502,9 +497,9 @@ onUnmounted(() => {
 }
 
 .note-textarea:focus {
-  border-color: var(--cs-accent);
-  box-shadow: 0 0 0 2px var(--cs-accent-bg);
-  background: var(--cs-bg);
+  border-color: var(--cf-accent);
+  box-shadow: 0 0 0 2px var(--cf-accent-bg);
+  background: var(--cf-bg);
 }
 
 .submission-list {
@@ -519,7 +514,7 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 0.15rem;
   padding: 0.5rem 0;
-  border-bottom: 1px solid var(--cs-border-subtle);
+  border-bottom: 1px solid var(--cf-sep);
 }
 
 .submission-row:last-child {
@@ -539,7 +534,7 @@ onUnmounted(() => {
 }
 
 .submission-row.ac .submission-verdict {
-  color: var(--cs-accent);
+  color: var(--cf-accent);
 }
 
 .submission-row.fail .submission-verdict {
@@ -548,7 +543,7 @@ onUnmounted(() => {
 
 .submission-meta {
   font-size: 0.72rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
 }
 
 .submission-link {
@@ -566,7 +561,7 @@ onUnmounted(() => {
 .empty-state {
   padding: 3rem 1rem;
   text-align: center;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
   font-size: 0.85rem;
 }
 
@@ -579,11 +574,11 @@ onUnmounted(() => {
   height: 100%;
   min-height: 250px;
   padding: 2rem 1rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
 }
 
 .locked-icon-large {
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
   margin-bottom: 0.75rem;
   opacity: 0.85;
 }
@@ -591,14 +586,14 @@ onUnmounted(() => {
 .locked-title {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--cs-text);
+  color: var(--cf-text);
   margin: 0 0 0.4rem 0;
 }
 
 .locked-desc {
   font-size: 0.76rem;
   line-height: 1.5;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
   margin: 0;
   max-width: 240px;
 }
@@ -610,8 +605,8 @@ onUnmounted(() => {
   gap: 1rem;
   flex-wrap: wrap;
   padding: 0.5rem 0.75rem;
-  background: var(--cs-bg-subtle);
-  border: 1px solid var(--cs-border-subtle);
+  background: var(--cf-cell);
+  border: 1px solid var(--cf-sep);
   border-radius: 6px;
 }
 
@@ -623,7 +618,7 @@ onUnmounted(() => {
   user-select: none;
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
 }
 
 .stuck-toggle-input {
@@ -637,7 +632,7 @@ onUnmounted(() => {
   position: relative;
   width: 32px;
   height: 18px;
-  background-color: var(--cs-border);
+  background-color: var(--cf-border);
   border-radius: 99px;
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -649,7 +644,7 @@ onUnmounted(() => {
   left: 2px;
   width: 14px;
   height: 14px;
-  background-color: var(--cs-bg);
+  background-color: var(--cf-bg);
   border-radius: 50%;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);

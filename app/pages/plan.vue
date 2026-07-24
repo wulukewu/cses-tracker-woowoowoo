@@ -176,7 +176,7 @@ function closeImportModal() {
 
 .cf-page-sub {
   font-size: 0.82rem;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
 }
 
 .plan-header {
@@ -208,10 +208,10 @@ function closeImportModal() {
 .search-input {
   width: 100%;
   padding: 0.55rem 0.8rem;
-  background: var(--cs-bg);
-  border: 1px solid var(--cs-border);
-  border-radius: var(--cs-radius);
-  color: var(--cs-text);
+  background: var(--cf-bg);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius);
+  color: var(--cf-text);
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
@@ -219,8 +219,8 @@ function closeImportModal() {
 .plan-footer {
   position: sticky;
   bottom: 0;
-  background: var(--cs-bg);
-  border-top: 1px solid var(--cs-border);
+  background: var(--cf-bg);
+  border-top: 1px solid var(--cf-border);
   padding: 1rem 0 0.5rem;
   margin-top: 1.5rem;
 }
@@ -238,14 +238,14 @@ function closeImportModal() {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
 }
 
 .deadline-label input {
-  background: var(--cs-bg);
-  border: 1px solid var(--cs-border);
-  color: var(--cs-text);
-  border-radius: var(--cs-radius);
+  background: var(--cf-bg);
+  border: 1px solid var(--cf-border);
+  color: var(--cf-text);
+  border-radius: var(--cf-radius);
   padding: 0.3rem 0.5rem;
 }
 
@@ -259,7 +259,7 @@ function closeImportModal() {
 }
 
 .save-success {
-  color: var(--cs-accent);
+  color: var(--cf-accent);
   font-size: 0.85rem;
 }
 

@@ -84,28 +84,28 @@ const emit = defineEmits<{
   align-items: center;
   justify-content: center;
   gap: 0.15rem;
-  border: 1px solid var(--cs-border-subtle);
-  background: var(--cs-bg-subtle);
-  color: var(--cs-text-muted);
+  border: 1px solid var(--cf-sep);
+  background: var(--cf-cell);
+  color: var(--cf-text-muted);
   border-radius: 3px;
   cursor: pointer;
   padding: 0.4rem;
   font-family: inherit;
-  transition: all 0.15s ease;
+  /* CF-style: no animation */
 }
 
 /* 未嘗試 hover 狀態 */
 .mark-cell-card:hover {
-  border-color: var(--cs-border);
+  border-color: var(--cf-border);
   background: #f5f5f5;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
 }
 
 /* 已解出 AC 狀態 */
 .mark-cell-card.solved {
   background: rgba(10, 143, 92, 0.05);
   border-color: rgba(10, 143, 92, 0.12);
-  color: var(--cs-accent);
+  color: var(--cf-accent);
 }
 
 .mark-cell-card.solved:hover {
@@ -132,7 +132,7 @@ const emit = defineEmits<{
   left: 15%;
   width: 70%;
   height: 2px;
-  background: var(--cs-accent);
+  background: var(--cf-accent);
   border-radius: 99px;
   opacity: 0.85;
 }
@@ -168,7 +168,7 @@ const emit = defineEmits<{
   position: absolute;
   bottom: 4px;
   right: 4px;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
   cursor: help;
   flex-shrink: 0;
   opacity: 0.7;
@@ -187,7 +187,7 @@ const emit = defineEmits<{
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  border: 1px solid var(--cs-bg);
+  border: 1px solid var(--cf-bg);
   cursor: default;
 }
 
@@ -196,8 +196,8 @@ const emit = defineEmits<{
   position: absolute;
   bottom: 130%;
   right: -4px;
-  background: var(--cs-text);
-  color: var(--cs-bg);
+  background: var(--cf-text);
+  color: var(--cf-bg);
   font-size: 0.65rem;
   font-weight: 500;
   white-space: nowrap;
@@ -236,15 +236,10 @@ const emit = defineEmits<{
   color: #e65100;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   z-index: 2;
-  animation: badgePop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .stuck-warning-svg {
   flex-shrink: 0;
 }
 
-@keyframes badgePop {
-  from { transform: scale(0); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
 </style>
