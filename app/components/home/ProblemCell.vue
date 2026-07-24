@@ -26,12 +26,12 @@ const emit = defineEmits<{
       'has-note': hasNote,
       stuck: hasStuck
     }"
-    :aria-label="info.solved ? '已解，點擊查看紀錄與筆記' : info.waCount ? '嘗試過但未過，點擊查看與編輯筆記' : '未嘗試，點擊查看與編輯筆記'"
+    :aria-label="info.solved && info.waCount > 0 ? `已解（${info.waCount} 次失敗），點擊查看紀錄與筆記` : info.solved ? '已解，點擊查看紀錄與筆記' : info.waCount ? '嘗試過但未過，點擊查看與編輯筆記' : '未嘗試，點擊查看與編輯筆記'"
     @click="emit('click')"
   >
     <div class="cell-main-content">
-      <span class="mark-symbol">{{ cellSymbol(info) }}</span>
-      <span v-if="info.waCount" class="wa-badge">{{ info.waCount }}</span>
+      <span v-if="info.solved && info.waCount > 0" class="wa-count-symbol">{{ info.waCount }}</span>
+      <span v-else class="mark-symbol">{{ cellSymbol(info) }}</span>
     </div>
     
     <!-- 筆記高亮底線 (取代雜亂的 icon) -->
@@ -113,14 +113,14 @@ const emit = defineEmits<{
   border-color: rgba(10, 143, 92, 0.2);
 }
 
-/* 嘗試過但未過 WA 狀態 */
-.mark-cell-card.attempted {
+/* 嘗試過但未過 WA 狀態（僅限未 AC 時套用紅色） */
+.mark-cell-card.attempted:not(.solved) {
   background: rgba(192, 57, 43, 0.04);
   border-color: rgba(192, 57, 43, 0.1);
   color: var(--cf-wa);
 }
 
-.mark-cell-card.attempted:hover {
+.mark-cell-card.attempted:not(.solved):hover {
   background: rgba(192, 57, 43, 0.07);
   border-color: rgba(192, 57, 43, 0.18);
 }
@@ -147,6 +147,12 @@ const emit = defineEmits<{
 .mark-symbol {
   font-weight: 700;
   font-size: 0.9rem;
+}
+
+.wa-count-symbol {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--cf-wa);
 }
 
 .wa-badge {
