@@ -56,8 +56,8 @@ const cellInfoMap = computed(() => {
             <div class="problem-title-row">
               <span class="problem-id-tag">#{{ p.id }}</span>
               <a class="problem-name" :href="`https://cses.fi/problemset/task/${p.id}/`" :title="p.name" target="_blank" rel="noopener">{{ p.name }}</a>
-              <span v-if="problemMeta(p.id)" class="problem-meta">{{ problemMeta(p.id) }}</span>
             </div>
+            <div v-if="problemMeta(p.id)" class="problem-meta">{{ problemMeta(p.id) }}</div>
           </td>
           <td v-for="(u, i) in users" :key="u.csesId" class="col-user">
             <HomeProblemCell
@@ -176,13 +176,20 @@ const cellInfoMap = computed(() => {
 }
 
 .problem-meta {
-  flex-shrink: 0;
+  display: none;
+  margin-top: 0.15rem;
   font-size: 0.68rem;
   color: var(--cf-text-secondary);
   opacity: 0.7;
   white-space: nowrap;
-  margin-left: auto;
-  padding-left: 0.4rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 1100px) {
+  .problem-meta {
+    display: block;
+  }
 }
 
 .col-user {
@@ -211,13 +218,6 @@ const cellInfoMap = computed(() => {
 .user-name-btn:hover {
   color: var(--cf-link);
   text-decoration: underline;
-}
-
-/* ---------- Responsive: tablet (sidebar folded, narrower content) ---------- */
-@media (max-width: 800px) {
-  .problem-meta {
-    display: none;
-  }
 }
 
 /* ---------- Responsive: mobile ---------- */
@@ -250,10 +250,6 @@ const cellInfoMap = computed(() => {
   .problem-id-tag {
     font-size: 0.62rem;
     padding: 0.05rem 0.2rem;
-  }
-
-  .problem-meta {
-    display: none;
   }
 
   .category-name {
