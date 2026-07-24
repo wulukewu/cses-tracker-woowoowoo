@@ -217,8 +217,11 @@ const cellInfoMap = computed(() => {
 /* ---------- Responsive: tablet (sidebar folded, narrower content) ---------- */
 @media (max-width: 800px) {
   .col-user {
-    width: 120px;
-    min-width: 100px;
+    width: 100px;
+  }
+
+  .problem-meta {
+    display: none;
   }
 }
 
@@ -237,12 +240,11 @@ const cellInfoMap = computed(() => {
   }
 
   .col-problem {
-    width: 140px;
+    width: 240px;
   }
 
   .col-user {
-    width: 90px;
-    min-width: 80px;
+    width: 75px;
     padding: 0.3rem !important;
   }
 
