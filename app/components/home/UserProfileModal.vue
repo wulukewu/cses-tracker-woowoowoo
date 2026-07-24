@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { ProgressResponse, UserProgress } from '~~/shared/types'
+import type { ProblemCategory, ProgressResponse, UserProgress } from '~~/shared/types'
+import problems from '~~/server/data/problems.json'
 
 const props = defineProps<{
   userName: string
@@ -14,35 +15,27 @@ const { data: prog } = useFetch<ProgressResponse | null>('/api/progress', {
   default: () => null,
 })
 
+const categories = ref(problems as ProblemCategory[])
+
+const totalProblemCount = computed(() =>
+  (categories.value ?? []).reduce((sum, c) => sum + c.problems.length, 0),
+)
+
 const user = computed<UserProgress | null>(() => {
   if (!prog.value?.users) return null
   return prog.value.users.find((u) => u.name === props.userName) ?? null
 })
 
-const weekProblems = computed(() => prog.value?.week?.problems ?? [])
-const totalProblemCount = computed(() => weekProblems.value.length)
-const weekProblemIds = computed(() => new Set(weekProblems.value.map((p) => p.id)))
-const solvedSet = computed(() => {
-  const week = weekProblemIds.value
-  return new Set((user.value?.solvedIds ?? []).filter((id) => week.has(id)))
-})
-const totalSolved = computed(() => solvedSet.value.size)
+const solvedIds = computed(() => new Set(user.value?.solvedIds ?? []))
+const totalSolved = computed(() => solvedIds.value.size)
 
-type CategoryGroup = { name: string; problems: typeof weekProblems.value; solvedCount: number }
-const categories = computed<CategoryGroup[]>(() => {
-  const set = solvedSet.value
-  const groups = new Map<string, typeof weekProblems.value>()
-  for (const p of weekProblems.value) {
-    const key = p.category ?? '未分類'
-    if (!groups.has(key)) groups.set(key, [])
-    groups.get(key)!.push(p)
-  }
-  return Array.from(groups.entries()).map(([name, problems]) => ({
-    name,
-    problems,
-    solvedCount: problems.filter((p) => set.has(p.id)).length,
-  }))
-})
+const categoryProgress = computed(() =>
+  (categories.value ?? []).map((c) => ({
+    name: c.name,
+    problems: c.problems,
+    solvedCount: c.problems.filter((p) => solvedIds.value.has(p.id)).length,
+  })),
+)
 
 const expandedCategories = ref<Set<string>>(new Set())
 function toggleCategory(name: string) {
@@ -81,7 +74,7 @@ function toggleCategory(name: string) {
       </div>
 
       <ul class="profile-category-list">
-        <li v-for="c in categories" :key="c.name" class="profile-category">
+        <li v-for="c in categoryProgress" :key="c.name" class="profile-category">
           <button type="button" class="profile-category-header" @click="toggleCategory(c.name)">
             <span class="profile-category-name">{{ c.name }}</span>
             <span class="profile-category-count">{{ c.solvedCount }} / {{ c.problems.length }}</span>
@@ -97,9 +90,9 @@ function toggleCategory(name: string) {
               v-for="p in c.problems"
               :key="p.id"
               class="profile-problem-row"
-              :class="{ solved: solvedSet?.has(p.id) }"
+              :class="{ solved: solvedIds.has(p.id) }"
             >
-              <span class="profile-problem-mark">{{ solvedSet?.has(p.id) ? '✓' : '–' }}</span>
+              <span class="profile-problem-mark">{{ solvedIds.has(p.id) ? '✓' : '–' }}</span>
               <a class="profile-problem-name" :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
             </li>
           </ul>
