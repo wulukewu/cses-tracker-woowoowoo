@@ -55,9 +55,9 @@ const cellInfoMap = computed(() => {
           <td class="col-problem">
             <div class="problem-title-row">
               <span class="problem-id-tag">#{{ p.id }}</span>
-              <a class="problem-name" :href="`https://cses.fi/problemset/task/${p.id}/`" target="_blank" rel="noopener">{{ p.name }}</a>
+              <a class="problem-name" :href="`https://cses.fi/problemset/task/${p.id}/`" :title="p.name" target="_blank" rel="noopener">{{ p.name }}</a>
+              <span v-if="problemMeta(p.id)" class="problem-meta">{{ problemMeta(p.id) }}</span>
             </div>
-            <span v-if="problemMeta(p.id)" class="problem-meta">{{ problemMeta(p.id) }}</span>
           </td>
           <td v-for="(u, i) in users" :key="u.csesId" class="col-user">
             <HomeProblemCell
@@ -145,7 +145,8 @@ const cellInfoMap = computed(() => {
 .problem-title-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  overflow: hidden;
 }
 
 .problem-id-tag {
@@ -154,13 +155,16 @@ const cellInfoMap = computed(() => {
   color: var(--cf-text-secondary);
   background: var(--cf-cell);
   border: 1px solid var(--cf-border);
-  padding: 0.1rem 0.3rem;
+  padding: 0.08rem 0.3rem;
   border-radius: 1px;
   flex-shrink: 0;
 }
 
 .problem-name {
-  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
   text-decoration: none;
   font-weight: 500;
   color: var(--cf-text);
@@ -172,11 +176,13 @@ const cellInfoMap = computed(() => {
 }
 
 .problem-meta {
-  display: block;
-  margin-top: 0.2rem;
-  font-size: 0.72rem;
+  flex-shrink: 0;
+  font-size: 0.68rem;
   color: var(--cf-text-secondary);
-  opacity: 0.85;
+  opacity: 0.7;
+  white-space: nowrap;
+  margin-left: auto;
+  padding-left: 0.4rem;
 }
 
 .col-user {
@@ -215,17 +221,17 @@ const cellInfoMap = computed(() => {
   }
 
   .problem-table th {
-    padding: 0.4rem 0.5rem;
+    padding: 0.35rem 0.4rem;
   }
 
   .problem-table td {
-    padding: 0.35rem 0.5rem;
+    padding: 0.3rem 0.4rem;
   }
 
   .col-user {
-    width: 110px;
-    min-width: 90px;
-    padding: 0.35rem !important;
+    width: 100px;
+    min-width: 80px;
+    padding: 0.3rem !important;
   }
 
   .problem-name {
@@ -233,11 +239,20 @@ const cellInfoMap = computed(() => {
   }
 
   .problem-id-tag {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
+    padding: 0.05rem 0.2rem;
+  }
+
+  .problem-meta {
+    font-size: 0.6rem;
   }
 
   .category-name {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
+  }
+
+  .category-row td {
+    padding: 0.3rem 0.4rem;
   }
 }
 </style>
