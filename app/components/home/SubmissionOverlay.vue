@@ -123,7 +123,10 @@ onUnmounted(() => {
                   :class="s.verdict === 'AC' ? 'ac-row' : 'fail-row'"
                 >
                   <td class="c-time">{{ s.time }}</td>
-                  <td class="c-verdict">{{ s.verdict }}</td>
+                  <td class="c-verdict">
+                    <a v-if="s.detailUrl" :href="s.detailUrl" target="_blank" rel="noopener" class="detail-link">{{ s.verdict }}</a>
+                    <span v-else>{{ s.verdict }}</span>
+                  </td>
                   <td class="c-lang">{{ s.lang }}</td>
                   <td class="c-exec">{{ s.execTime }}</td>
                   <td class="c-size">{{ s.codeSize }}</td>
