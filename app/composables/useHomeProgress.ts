@@ -153,8 +153,8 @@ export async function useHomeProgress() {
       }
 
       map.set(p.id, {
-        firstSolverName: solvedCount >= 2 ? firstSolverName : null,
-        fastestName: timedCount >= 2 ? fastestName : null,
+        firstSolverName: solvedCount >= 1 ? firstSolverName : null,
+        fastestName: timedCount >= 1 ? fastestName : null,
       })
     }
     return map
