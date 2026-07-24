@@ -115,4 +115,33 @@ const todoSummary = computed(() => {
   background: var(--cf-accent-bg);
   color: var(--cf-accent);
 }
+
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .week-switcher {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .week-tabs {
+    padding-bottom: 0.25rem;
+  }
+
+  .week-tab {
+    font-size: 0.78rem;
+    padding: 0.3rem 0.55rem;
+  }
+
+  .week-actions {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .week-actions .cf-btn {
+    font-size: 0.78rem;
+    padding: 0.2rem 0.55rem;
+  }
+}
 </style>

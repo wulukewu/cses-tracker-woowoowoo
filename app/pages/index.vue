@@ -259,4 +259,47 @@ const posts = computed(() => {
 .cf-comments {
   color: var(--cf-link);
 }
+
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .topic-title {
+    font-size: 1.2rem;
+  }
+
+  .topic-info {
+    font-size: 0.75rem;
+  }
+
+  .topic-body {
+    font-size: 0.85rem;
+  }
+
+  .standings-row {
+    gap: 0.35rem;
+    font-size: 0.78rem;
+  }
+
+  .st-handle {
+    width: 7rem;
+  }
+
+  .st-bar {
+    max-width: 8rem;
+  }
+
+  .st-count {
+    width: 3rem;
+  }
+
+  .topic-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .footer-meta {
+    font-size: 0.75rem;
+    gap: 0.6rem;
+  }
+}
 </style>

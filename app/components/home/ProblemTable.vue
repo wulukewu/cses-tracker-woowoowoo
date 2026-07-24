@@ -78,6 +78,8 @@ const cellInfoMap = computed(() => {
 <style scoped>
 .problem-table-wrap {
   border: 1px solid var(--cf-border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .problem-table {
@@ -204,5 +206,38 @@ const cellInfoMap = computed(() => {
 .user-name-btn:hover {
   color: var(--cf-link);
   text-decoration: underline;
+}
+
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .problem-table {
+    font-size: 0.75rem;
+  }
+
+  .problem-table th {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .problem-table td {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .col-user {
+    width: 110px;
+    min-width: 90px;
+    padding: 0.35rem !important;
+  }
+
+  .problem-name {
+    font-size: 0.75rem;
+  }
+
+  .problem-id-tag {
+    font-size: 0.65rem;
+  }
+
+  .category-name {
+    font-size: 0.75rem;
+  }
 }
 </style>

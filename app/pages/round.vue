@@ -215,4 +215,27 @@ onUnmounted(() => {
   margin-bottom: 1.25rem;
   font-size: 0.85rem;
 }
+
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .cf-page-title {
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .cf-page-title h1 {
+    font-size: 1.1rem;
+  }
+
+  .cf-page-sub {
+    font-size: 0.75rem;
+  }
+
+  .stale-banner {
+    font-size: 0.78rem;
+    padding: 0.4rem 0.65rem;
+    margin-bottom: 0.75rem;
+  }
+}
 </style>

@@ -117,6 +117,34 @@ const sorted = computed(() => {
   display: block;
   height: 100%;
   background: var(--cf-accent);
-  /* CF-style: no animation */
+}
+
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .standings-table {
+    font-size: 0.78rem;
+  }
+
+  .standings-table th {
+    padding: 0.25rem 0.35rem;
+    font-size: 0.72rem;
+  }
+
+  .standings-table td {
+    padding: 0.3rem 0.35rem;
+  }
+
+  .col-user {
+    width: 6rem;
+  }
+
+  .col-solved {
+    width: 3.5rem;
+    font-size: 0.75rem;
+  }
+
+  .bar-track {
+    max-width: 100px;
+  }
 }
 </style>
