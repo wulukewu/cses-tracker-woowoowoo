@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ProgressResponse, UserProgress } from '~~/shared/types'
 
-defineProps<{
+const props = defineProps<{
   userName: string
 }>()
 
@@ -21,7 +21,11 @@ const user = computed<UserProgress | null>(() => {
 
 const weekProblems = computed(() => prog.value?.week?.problems ?? [])
 const totalProblemCount = computed(() => weekProblems.value.length)
-const solvedSet = computed(() => new Set(user.value?.solvedIds ?? []))
+const weekProblemIds = computed(() => new Set(weekProblems.value.map((p) => p.id)))
+const solvedSet = computed(() => {
+  const week = weekProblemIds.value
+  return new Set((user.value?.solvedIds ?? []).filter((id) => week.has(id)))
+})
 const totalSolved = computed(() => solvedSet.value.size)
 
 type CategoryGroup = { name: string; problems: typeof weekProblems.value; solvedCount: number }
