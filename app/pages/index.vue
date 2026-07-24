@@ -184,6 +184,7 @@ const posts = computed(() => {
   flex-shrink: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
 }
 .st-bar {
   flex: 1;
