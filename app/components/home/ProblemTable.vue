@@ -38,7 +38,7 @@ const cellInfoMap = computed(() => {
         <tr>
           <th class="col-problem">題目</th>
           <th v-for="u in users" :key="u.csesId" class="col-user">
-            <LayoutCfHandle :name="u.name" />
+            <LayoutCfHandle :name="u.name" truncate />
           </th>
         </tr>
       </thead>

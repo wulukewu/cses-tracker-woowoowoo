@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { useProfileModal } from '~/composables/useProfileModal'
 
-const props = defineProps<{ name: string }>()
+const props = defineProps<{
+  name: string
+  truncate?: boolean
+}>()
 
 const style = computed(() => handleStyle(props.name))
 const firstChar = computed(() => (style.value.legendary ? props.name.slice(0, 1) : ''))
@@ -18,6 +21,7 @@ function handleClick() {
   <button
     type="button"
     class="cf-handle"
+    :class="{ truncated: truncate }"
     :title="`${style.title} · ${style.rating}`"
     @click="handleClick"
   >
@@ -40,6 +44,12 @@ function handleClick() {
 }
 .cf-handle:hover {
   text-decoration: underline;
+}
+.cf-handle.truncated {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 .cf-handle-first {
   color: var(--cf-text);
