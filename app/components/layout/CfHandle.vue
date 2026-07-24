@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useProfileModal } from '~/composables/useProfileModal'
+
 const props = defineProps<{ name: string }>()
 
 const style = computed(() => handleStyle(props.name))
