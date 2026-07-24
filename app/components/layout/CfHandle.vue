@@ -50,6 +50,7 @@ function handleClick() {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  text-align: center;
 }
 .cf-handle-first {
   color: var(--cf-text);
