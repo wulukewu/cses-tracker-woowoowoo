@@ -13,7 +13,8 @@
           <span class="cf-wordmark"><span class="wm-a">CSES</span><span class="wm-b">Tracker</span></span>
         </NuxtLink>
         <div class="cf-topbar-right">
-          <span class="cf-lang">三人週賽練功房</span>
+          <span class="cf-lang">En&nbsp;|&nbsp;Ru</span>
+          <span class="cf-auth"><span class="cf-authlink">Enter</span> | <span class="cf-authlink">Register</span></span>
         </div>
       </header>
 
