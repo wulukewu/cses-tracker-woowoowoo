@@ -60,6 +60,10 @@ const recent = computed(() => {
 
 <template>
   <aside class="cf-sidebar">
+    <LayoutCfBox title="→ 即時時間">
+      <HomeTaiwanClock />
+    </LayoutCfBox>
+
     <LayoutCfBox title="→ Pay attention">
       <div class="pay-attention">
         <p class="pa-line">Before round</p>
