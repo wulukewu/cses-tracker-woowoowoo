@@ -101,8 +101,8 @@ function closeImportModal() {
         </h2>
         <h2 v-else>規劃下次題目</h2>
         <div class="header-links">
-          <button v-if="editingWeek" class="cancel-edit-btn" @click="cancelEdit">取消編輯，改為新增下一次</button>
-          <button v-if="editingWeek" class="delete-week-btn" :disabled="deleting" @click="handleDeleteClick">
+          <button v-if="editingWeek" class="cf-btn" @click="cancelEdit">取消編輯，改為新增下一次</button>
+          <button v-if="editingWeek" class="cf-btn cf-btn--danger" :disabled="deleting" @click="handleDeleteClick">
             {{ deleting ? '刪除中...' : deleteArmed ? '確定要刪除？再按一次' : '刪除這次' }}
           </button>
         </div>
@@ -176,7 +176,7 @@ function closeImportModal() {
 
 .cf-page-sub {
   font-size: 0.82rem;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
 }
 
 .plan-header {
@@ -196,30 +196,7 @@ function closeImportModal() {
 .header-links {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
-}
-
-.cancel-edit-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--cs-text-secondary);
-  font-size: 0.82rem;
-  cursor: pointer;
-}
-
-.delete-week-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  color: #b3261e;
-  font-size: 0.82rem;
-  cursor: pointer;
-}
-
-.delete-week-btn:disabled {
-  opacity: 0.5;
-  cursor: default;
+  gap: 0.5rem;
 }
 
 .header-actions {
@@ -231,10 +208,10 @@ function closeImportModal() {
 .search-input {
   width: 100%;
   padding: 0.55rem 0.8rem;
-  background: var(--cs-bg);
-  border: 1px solid var(--cs-border);
-  border-radius: var(--cs-radius);
-  color: var(--cs-text);
+  background: var(--cf-bg);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius);
+  color: var(--cf-text);
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
@@ -242,8 +219,8 @@ function closeImportModal() {
 .plan-footer {
   position: sticky;
   bottom: 0;
-  background: var(--cs-bg);
-  border-top: 1px solid var(--cs-border);
+  background: var(--cf-bg);
+  border-top: 1px solid var(--cf-border);
   padding: 1rem 0 0.5rem;
   margin-top: 1.5rem;
 }
@@ -261,14 +238,14 @@ function closeImportModal() {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
 }
 
 .deadline-label input {
-  background: var(--cs-bg);
-  border: 1px solid var(--cs-border);
-  color: var(--cs-text);
-  border-radius: var(--cs-radius);
+  background: var(--cf-bg);
+  border: 1px solid var(--cf-border);
+  color: var(--cf-text);
+  border-radius: var(--cf-radius);
   padding: 0.3rem 0.5rem;
 }
 
@@ -282,12 +259,12 @@ function closeImportModal() {
 }
 
 .save-success {
-  color: var(--cs-accent);
+  color: var(--cf-accent);
   font-size: 0.85rem;
 }
 
 .save-error {
-  color: #b3261e;
+  color: var(--cf-red);
   font-size: 0.85rem;
 }
 </style>

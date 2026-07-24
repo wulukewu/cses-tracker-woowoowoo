@@ -1,10 +1,11 @@
+import problems from '~~/server/data/problems.json'
 import type { ProblemCategory, Week, WeekProblem } from '~~/shared/types'
 
 export async function useWeekPlanner() {
   const route = useRoute()
   const router = useRouter()
 
-  const { data: categories } = await useFetch<ProblemCategory[]>('/api/problems')
+  const categories = ref(problems as ProblemCategory[])
   const { data: weeks, refresh: refreshWeeks } = await useFetch<Week[]>('/api/weeks')
 
   const editingWeekId = ref<string | null>(typeof route.query.edit === 'string' ? route.query.edit : null)

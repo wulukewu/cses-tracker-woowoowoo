@@ -33,46 +33,43 @@ const {
   toggleCategory,
 } = useUserProfile(users, solvedSets, categories)
 
-const modalProblem = ref<WeekProblem | null>(null)
-const modalUserName = ref<string | null>(null)
+const overlayProblem = ref<WeekProblem | null>(null)
+const overlayUserName = ref<string | null>(null)
 const showTodos = ref(false)
 
+const overlaySummary = computed(() => {
+  if (!overlayProblem.value || !overlayUserName.value) return null
+  return submissions.value?.[String(overlayProblem.value.id)]?.[overlayUserName.value] ?? null
+})
+
+const overlayLocked = computed(() => {
+  if (!overlayProblem.value || !overlayUserName.value) return false
+  const uIdx = users.value.findIndex(u => u.name === overlayUserName.value)
+  if (uIdx === -1) return false
+  return cellInfo(uIdx, overlayProblem.value.id).locked
+})
+
 function handleSaveNote(username: string, content: string, stuck: boolean) {
-  if (notes.value && modalProblem.value) {
-    const pid = String(modalProblem.value.id)
+  if (notes.value && overlayProblem.value) {
+    const pid = String(overlayProblem.value.id)
     const newNotes = { ...notes.value }
-    if (!newNotes[pid]) {
-      newNotes[pid] = {}
-    }
-    newNotes[pid] = {
-      ...newNotes[pid],
-      [username]: { content, stuck }
-    }
+    if (!newNotes[pid]) newNotes[pid] = {}
+    newNotes[pid] = { ...newNotes[pid], [username]: { content, stuck } }
     notes.value = newNotes
   }
 }
 
-const modalSummary = computed(() => {
-  if (!modalProblem.value || !modalUserName.value) return null
-  return submissions.value?.[String(modalProblem.value.id)]?.[modalUserName.value] ?? null
-})
-
-const modalLocked = computed(() => {
-  if (!modalProblem.value || !modalUserName.value) return false
-  const uIdx = users.value.findIndex(u => u.name === modalUserName.value)
-  if (uIdx === -1) return false
-  return cellInfo(uIdx, modalProblem.value.id).locked
-})
-
 function openModal(problem: WeekProblem, userName: string) {
-  modalProblem.value = problem
-  modalUserName.value = userName
+  overlayProblem.value = problem
+  overlayUserName.value = userName
 }
 
-function closeModal() {
-  modalProblem.value = null
-  modalUserName.value = null
+function closeOverlay() {
+  overlayProblem.value = null
+  overlayUserName.value = null
 }
+
+const anyModalOpen = computed(() => Boolean(overlayProblem.value || profileUser.value || showTodos.value))
 
 async function handleUpdateTodos(newTodos: WeekTodo[]) {
   if (!week.value) return
@@ -120,16 +117,6 @@ async function handleUpdateTodos(newTodos: WeekTodo[]) {
     console.error('更新待辦作業失敗:', err)
   }
 }
-
-// Without this, scrolling past the end of a modal's own list chains into
-// the page behind it — the fixed overlay stays put but the body scrolls,
-// which shows up as the page's own scrollbar (detached from the card)
-// moving instead of the modal's.
-const anyModalOpen = computed(() => Boolean(
-  (modalProblem.value && modalUserName.value) ||
-  profileUser.value ||
-  showTodos.value
-))
 
 watch(anyModalOpen, (open) => {
   if (import.meta.client) document.body.style.overflow = open ? 'hidden' : ''
@@ -183,15 +170,16 @@ onUnmounted(() => {
       />
     </template>
 
-    <HomeSubmissionModal
-      v-if="modalProblem && modalUserName"
-      :problem="modalProblem"
-      :user-name="modalUserName"
-      :summary="modalSummary"
-      :initial-note-content="notes?.[String(modalProblem.id)]?.[modalUserName]?.content || ''"
-      :initial-stuck="notes?.[String(modalProblem.id)]?.[modalUserName]?.stuck || false"
-      :locked="modalLocked"
-      @close="closeModal"
+    <HomeSubmissionOverlay
+      v-if="overlayProblem && overlayUserName"
+      :problem-id="overlayProblem.id"
+      :problem-name="overlayProblem.name"
+      :user-name="overlayUserName"
+      :summary="overlaySummary"
+      :initial-note-content="notes?.[String(overlayProblem.id)]?.[overlayUserName]?.content || ''"
+      :initial-stuck="notes?.[String(overlayProblem.id)]?.[overlayUserName]?.stuck || false"
+      :locked="overlayLocked"
+      @close="closeOverlay"
       @save-note="handleSaveNote"
     />
 
@@ -235,25 +223,23 @@ onUnmounted(() => {
 
 .cf-page-sub {
   font-size: 0.82rem;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
 }
 
 .empty-state {
   padding: 2rem;
   text-align: center;
-  color: var(--cs-text-muted);
-  background: var(--cs-bg);
+  color: var(--cf-text-muted);
+  background: var(--cf-bg);
   border: 1px solid var(--cf-border);
-  border-radius: var(--cs-radius);
 }
 
 .stale-banner {
-  background: #fdf6e3;
-  color: #8a6d1a;
-  border: 1px solid #f0e2ae;
-  padding: 0.6rem 0.9rem;
-  border-radius: var(--cs-radius);
+  background: var(--cf-cell);
+  color: var(--cf-text-secondary);
+  border: 1px solid var(--cf-sep);
+  padding: 0.55rem 0.85rem;
   margin-bottom: 1.25rem;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
 }
 </style>

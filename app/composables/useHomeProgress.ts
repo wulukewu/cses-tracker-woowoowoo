@@ -1,3 +1,4 @@
+import problems from '~~/server/data/problems.json'
 import type {
   ProblemCategory,
   ProblemStatsResponse,
@@ -33,7 +34,7 @@ export function cellSymbol(info: CellInfo) {
 
 export async function useHomeProgress() {
   const { data: weeks } = await useFetch<Week[]>('/api/weeks')
-  const { data: categories } = await useFetch<ProblemCategory[]>('/api/problems')
+  const categories = ref(problems as ProblemCategory[])
 
   const categoryByProblemId = computed(() => {
     const map = new Map<number, string>()

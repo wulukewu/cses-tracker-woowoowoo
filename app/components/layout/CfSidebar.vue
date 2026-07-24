@@ -118,7 +118,7 @@ const recent = computed(() => {
 }
 .pa-line {
   margin: 0 0 0.2rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   font-weight: 700;
   font-size: 0.86rem;
 }
@@ -130,7 +130,7 @@ const recent = computed(() => {
 }
 .pa-meta {
   margin: 0.3rem 0 0.5rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   font-size: 0.8rem;
 }
 .pa-enter {
@@ -149,7 +149,7 @@ const recent = computed(() => {
   text-align: center;
   padding: 0.35rem 0.5rem;
   border-bottom: 1px solid var(--cf-border);
-  background: #fff;
+  background: var(--cf-bg);
 }
 .cf-datatable th.c-user {
   text-align: left;
@@ -157,11 +157,11 @@ const recent = computed(() => {
 .cf-datatable td {
   padding: 0.4rem 0.5rem;
   border-bottom: 1px solid var(--cf-sep);
-  background: #ffffff;
+  background: var(--cf-bg);
 }
 /* Codeforces zebra striping: odd rows shaded, even rows white */
 .cf-datatable tbody tr:nth-child(odd) td {
-  background: #f5f5f5;
+  background: var(--cf-cell);
 }
 .cf-datatable tbody tr:last-child td {
   border-bottom: none;
@@ -169,7 +169,7 @@ const recent = computed(() => {
 .c-rank {
   width: 1.8rem;
   text-align: center;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
 }
 .c-rating {
   text-align: center;
@@ -197,12 +197,12 @@ const recent = computed(() => {
   border-bottom: none;
 }
 .recent-action {
-  color: var(--cs-text);
+  color: var(--cf-text);
 }
 .recent-empty {
   margin: 0;
   padding: 0.6rem 0.75rem;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
   font-size: 0.82rem;
 }
 

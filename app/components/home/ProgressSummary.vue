@@ -1,56 +1,99 @@
 <script setup lang="ts">
 import type { UserProgress, Week } from '~~/shared/types'
 
-defineProps<{
+const props = defineProps<{
   week: Week
   users: UserProgress[]
   solvedCountFor: (index: number) => number
 }>()
 
 const emit = defineEmits<{ openProfile: [index: number] }>()
+
+const sorted = computed(() => {
+  return props.users
+    .map((u, i) => ({ user: u, solved: props.solvedCountFor(i), index: i }))
+    .sort((a, b) => b.solved - a.solved)
+})
 </script>
 
 <template>
-  <section class="progress-summary">
-    <div v-for="(u, i) in users" :key="u.csesId" class="summary-item">
-      <div class="summary-header">
-        <button
-          type="button"
-          class="user-name-btn"
-          @click="emit('openProfile', i)"
-        ><LayoutCfHandle :name="u.name" /></button>
-        <span class="user-count">{{ solvedCountFor(i) }} / {{ week.problems.length }}</span>
-      </div>
-      <div class="progress-bar-track">
-        <div
-          class="progress-bar-fill"
-          :style="{ width: `${week.problems.length ? (solvedCountFor(i) / week.problems.length) * 100 : 0}%` }"
-        />
-      </div>
-    </div>
-  </section>
+  <table class="standings-table">
+    <thead>
+      <tr>
+        <th class="col-rank">#</th>
+        <th class="col-user">使用者</th>
+        <th class="col-solved">解題數</th>
+        <th class="col-bar"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(entry, rank) in sorted" :key="entry.user.csesId">
+        <td class="col-rank">{{ rank + 1 }}</td>
+        <td class="col-user">
+          <button type="button" class="user-btn" @click="emit('openProfile', entry.index)">
+            <LayoutCfHandle :name="entry.user.name" />
+          </button>
+        </td>
+        <td class="col-solved">{{ entry.solved }} / {{ week.problems.length }}</td>
+        <td class="col-bar">
+          <span class="bar-track">
+            <span class="bar-fill" :style="{ width: `${week.problems.length ? (entry.solved / week.problems.length) * 100 : 0}%` }" />
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <style scoped>
-.progress-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.75rem;
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
 }
 
-.summary-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.35rem;
-  font-size: 0.9rem;
+.standings-table th {
+  font-weight: 700;
+  text-align: left;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--cf-border);
+  background: var(--cf-bg);
+  font-size: 0.8rem;
+  color: var(--cf-text-secondary);
 }
 
-.user-name {
-  font-weight: 600;
+.standings-table td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--cf-sep);
+  vertical-align: middle;
+  background: var(--cf-bg);
 }
 
-.user-name-btn {
+.standings-table tbody tr:nth-child(odd) td {
+  background: var(--cf-cell);
+}
+
+.standings-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.col-rank {
+  width: 1.8rem;
+  text-align: center;
+  color: var(--cf-text-secondary);
+}
+
+.col-user {
+  width: 10rem;
+}
+
+.col-solved {
+  width: 5rem;
+  font-weight: 700;
+  color: var(--cf-text-secondary);
+}
+
+.user-btn {
   font: inherit;
   font-weight: 600;
   color: inherit;
@@ -60,25 +103,24 @@ const emit = defineEmits<{ openProfile: [index: number] }>()
   cursor: pointer;
 }
 
-.user-name-btn:hover {
-  color: var(--cs-accent);
+.user-btn:hover {
+  color: var(--cf-link);
   text-decoration: underline;
 }
 
-.user-count {
-  color: var(--cs-text-secondary);
-}
-
-.progress-bar-track {
+.bar-track {
+  display: block;
   height: 6px;
-  border-radius: 999px;
-  background: var(--cs-border-subtle);
+  border-radius: 3px;
+  background: var(--cf-sep);
   overflow: hidden;
+  max-width: 180px;
 }
 
-.progress-bar-fill {
+.bar-fill {
+  display: block;
   height: 100%;
-  background: var(--cs-accent);
-  transition: width 0.2s ease;
+  background: var(--cf-accent);
+  /* CF-style: no animation */
 }
 </style>

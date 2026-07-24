@@ -83,8 +83,6 @@ const cellInfoMap = computed(() => {
 <style scoped>
 .problem-table-wrap {
   border: 1px solid var(--cf-border);
-  border-radius: var(--cs-radius);
-  overflow: hidden;
 }
 
 .problem-table {
@@ -102,7 +100,7 @@ const cellInfoMap = computed(() => {
 .problem-table th {
   text-align: left;
   font-weight: 700;
-  color: var(--cs-text);
+  color: var(--cf-text);
   padding: 0.6rem 1rem;
 }
 
@@ -156,9 +154,9 @@ const cellInfoMap = computed(() => {
 .problem-id-tag {
   font-family: monospace;
   font-size: 0.75rem;
-  color: var(--cs-text-secondary);
-  background: var(--cs-bg-subtle);
-  border: 1px solid var(--cs-border);
+  color: var(--cf-text-secondary);
+  background: var(--cf-cell);
+  border: 1px solid var(--cf-border);
   padding: 0.1rem 0.3rem;
   border-radius: 4px;
   flex-shrink: 0;
@@ -168,11 +166,11 @@ const cellInfoMap = computed(() => {
   display: block;
   text-decoration: none;
   font-weight: 500;
-  color: var(--cs-text);
+  color: var(--cf-text);
 }
 
 .problem-name:hover {
-  color: var(--cs-accent);
+  color: var(--cf-link);
   text-decoration: underline;
 }
 
@@ -180,7 +178,7 @@ const cellInfoMap = computed(() => {
   display: block;
   margin-top: 0.2rem;
   font-size: 0.72rem;
-  color: var(--cs-text-secondary);
+  color: var(--cf-text-secondary);
   opacity: 0.85;
 }
 
@@ -208,7 +206,7 @@ const cellInfoMap = computed(() => {
 }
 
 .user-name-btn:hover {
-  color: var(--cs-accent);
+  color: var(--cf-link);
   text-decoration: underline;
 }
 </style>

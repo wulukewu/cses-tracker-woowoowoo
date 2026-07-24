@@ -1,10 +1,37 @@
 import * as cheerio from 'cheerio'
 import type { ProblemStats, SubmissionEntry, SubmissionSummary } from '~~/shared/types'
 
+const FETCH_TIMEOUT_MS = 15_000
+const MAX_RETRIES = 1
+
 export class CsesSessionExpiredError extends Error {
   constructor() {
     super('CSES session expired or invalid')
     this.name = 'CsesSessionExpiredError'
+  }
+}
+
+async function fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal })
+    return res
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+async function fetchWithRetry(url: string, options: RequestInit = {}, retries = MAX_RETRIES): Promise<Response> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fetchWithTimeout(url, options)
+    } catch (err) {
+      const isLast = attempt >= retries
+      if (isLast || (err instanceof TypeError && !(err instanceof DOMException))) throw err
+      console.warn(`[cses] fetch failed (attempt ${attempt + 1}/${retries + 1}) for ${url.slice(0, 80)}:`, err)
+      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)))
+    }
   }
 }
 
@@ -18,7 +45,7 @@ export async function fetchSolvedTaskIds(csesId: string, sessionCookie: string):
     console.error(`[cses] CSES_SESSION_COOKIE is empty when fetching user ${csesId}`)
   }
 
-  const res = await fetch(`https://cses.fi/problemset/user/${csesId}/`, {
+  const res = await fetchWithRetry(`https://cses.fi/problemset/user/${csesId}/`, {
     headers: {
       cookie: sessionCookie,
       'user-agent': 'Mozilla/5.0 (cses-tracker)',
@@ -56,33 +83,16 @@ export async function fetchSolvedTaskIds(csesId: string, sessionCookie: string):
  * `unlocked: false`). The filter must be the CSES username, not the numeric
  * user id (the id silently matches zero rows).
  *
- * Only page 1 is fetched (newest submissions first); a user with more than
- * ~50 submissions on one task could have an older first-AC missed.
+ * Pages through the submission history (up to MAX_PAGES) so a busy user
+ * with many submissions per problem does not miss an older first AC.
  */
+const SUBMISSION_MAX_PAGES = 5
+
 export async function fetchSubmissionSummary(
   taskId: number,
   username: string,
   sessionCookie: string,
 ): Promise<SubmissionSummary> {
-  const res = await fetch(
-    `https://cses.fi/problemset/queue/${taskId}/1/?user=${encodeURIComponent(username)}`,
-    {
-      headers: {
-        cookie: sessionCookie,
-        'user-agent': 'Mozilla/5.0 (cses-tracker)',
-      },
-    },
-  )
-
-  if (res.status === 404) {
-    return { unlocked: false, waCount: 0, firstAcTime: null, submissions: [] }
-  }
-
-  const html = await res.text()
-  const $ = cheerio.load(html)
-
-  const rows = $('table.full-width tr').filter((_, el) => $(el).find('th').length === 0)
-
   type ParsedRow = {
     time: string
     verdict: 'AC' | 'FAIL' | 'CE'
@@ -92,25 +102,51 @@ export async function fetchSubmissionSummary(
     detailUrl: string | null
   }
   const newestFirst: ParsedRow[] = []
-  rows.each((_, el) => {
-    const tds = $(el).find('td')
-    if (tds.length < 6) return
-    const time = $(tds[0]).text().trim()
-    // tds[1] is the CSES username link — already known (this fetch is filtered to one user).
-    const lang = $(tds[2]).text().trim()
-    const execTime = $(tds[3]).text().trim().replace(/\s+/g, ' ')
-    const codeSize = $(tds[4]).text().trim().replace(/\s+/g, ' ')
-    const classes = ($(tds[5]).attr('class') || '').split(/\s+/)
-    const verdict: ParsedRow['verdict'] = classes.includes('full')
-      ? 'AC'
-      : classes.includes('skipped')
-        ? 'CE'
-        : 'FAIL'
-    // Only AC rows carry a "details" link (to CSES's public hacking/results page for that entry).
-    const detailHref = $(el).find('a.details-link').attr('href') || null
-    const detailUrl = detailHref ? `https://cses.fi${detailHref}` : null
-    newestFirst.push({ time, verdict, lang, execTime, codeSize, detailUrl })
-  })
+
+  for (let page = 1; page <= SUBMISSION_MAX_PAGES; page++) {
+    const res = await fetchWithTimeout(
+      `https://cses.fi/problemset/queue/${taskId}/${page}/?user=${encodeURIComponent(username)}`,
+      {
+        headers: {
+          cookie: sessionCookie,
+          'user-agent': 'Mozilla/5.0 (cses-tracker)',
+        },
+      },
+    )
+
+    if (res.status === 404) {
+      if (page === 1) return { unlocked: false, waCount: 0, firstAcTime: null, submissions: [] }
+      break
+    }
+
+    const html = await res.text()
+    const $ = cheerio.load(html)
+
+    const rows = $('table.full-width tr').filter((_, el) => $(el).find('th').length === 0)
+    if (rows.length === 0) break
+
+    let foundAcOnPage = false
+    rows.each((_, el) => {
+      const tds = $(el).find('td')
+      if (tds.length < 6) return
+      const time = $(tds[0]).text().trim()
+      const lang = $(tds[2]).text().trim()
+      const execTime = $(tds[3]).text().trim().replace(/\s+/g, ' ')
+      const codeSize = $(tds[4]).text().trim().replace(/\s+/g, ' ')
+      const classes = ($(tds[5]).attr('class') || '').split(/\s+/)
+      const verdict: ParsedRow['verdict'] = classes.includes('full')
+        ? 'AC'
+        : classes.includes('skipped')
+          ? 'CE'
+          : 'FAIL'
+      const detailHref = $(el).find('a.details-link').attr('href') || null
+      const detailUrl = detailHref ? `https://cses.fi${detailHref}` : null
+      newestFirst.push({ time, verdict, lang, execTime, codeSize, detailUrl })
+      if (verdict === 'AC') foundAcOnPage = true
+    })
+
+    if (foundAcOnPage) break
+  }
 
   const chronological = [...newestFirst].reverse()
 
@@ -145,7 +181,7 @@ export async function fetchSubmissionSummary(
  * itself.
  */
 export async function fetchProblemStats(taskId: number, sessionCookie: string): Promise<ProblemStats | null> {
-  const res = await fetch(`https://cses.fi/problemset/stats/${taskId}/`, {
+  const res = await fetchWithTimeout(`https://cses.fi/problemset/stats/${taskId}/`, {
     headers: {
       cookie: sessionCookie,
       'user-agent': 'Mozilla/5.0 (cses-tracker)',
