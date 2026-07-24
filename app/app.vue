@@ -52,7 +52,7 @@
     <HomeUserProfileModal
       v-if="profileUserName"
       :user-name="profileUserName"
-      @close="profileUserName = null"
+      @close="closeProfile"
     />
   </div>
 </template>
@@ -61,9 +61,7 @@
 const STORAGE_KEY = 'cses-tracker-theme'
 
 const isDark = ref(false)
-const profileUserName = ref<string | null>(null)
-
-provide('viewProfile', (name: string) => { profileUserName.value = name })
+const { profileUserName, closeProfile } = useProfileModal()
 
 function toggleTheme() {
   isDark.value = !isDark.value
