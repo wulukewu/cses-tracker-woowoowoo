@@ -97,7 +97,7 @@ const emit = defineEmits<{
 /* 未嘗試 hover 狀態 */
 .mark-cell-card:hover {
   border-color: var(--cf-border);
-  background: #f5f5f5;
+  background: var(--cf-cell);
   color: var(--cf-text-secondary);
 }
 

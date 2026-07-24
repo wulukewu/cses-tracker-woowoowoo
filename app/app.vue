@@ -95,6 +95,8 @@ useHead({
   --cf-accent: #008000;
   --cf-accent-bg: #e9f3e9;
   --cf-stuck-bg: #fff3e0;
+  --cf-red: #b3261e;
+  --cf-red-bg: #fef2f2;
   --cf-radius: 6px;
   --cf-blue: #3b5998;
   --cf-link: #3b5998;
@@ -113,6 +115,8 @@ useHead({
   --cf-accent: #3fb950;
   --cf-accent-bg: #0d2818;
   --cf-stuck-bg: #3d2a0a;
+  --cf-red: #f87171;
+  --cf-red-bg: #3b1515;
   --cf-blue: #58a6ff;
   --cf-link: #58a6ff;
   --cf-logo-a: #e0e0e0;
@@ -352,10 +356,11 @@ a:hover {
 }
 
 .cf-btn--danger {
-  color: #c00000;
+  color: var(--cf-red);
 }
 .cf-btn--danger:hover {
-  color: #a00000;
+  color: var(--cf-red);
+  opacity: 0.85;
 }
 
 [data-theme="dark"] {

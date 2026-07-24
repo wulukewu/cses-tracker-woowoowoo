@@ -261,7 +261,7 @@ function handleRemoveTodo(todoId: string) {
 }
 
 .del-btn:hover {
-  color: #b3261e;
+  color: var(--cf-red);
 }
 
 .modal-footer {

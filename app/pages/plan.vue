@@ -264,7 +264,7 @@ function closeImportModal() {
 }
 
 .save-error {
-  color: #b3261e;
+  color: var(--cf-red);
   font-size: 0.85rem;
 }
 </style>

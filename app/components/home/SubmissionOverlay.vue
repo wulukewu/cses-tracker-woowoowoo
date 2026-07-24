@@ -213,7 +213,7 @@ onUnmounted(() => {
 }
 
 .sync-hint.saving { color: #b45309; }
-.sync-hint.error  { color: #b3261e; }
+.sync-hint.error  { color: var(--cf-red); }
 .sync-hint.saved  { color: var(--cf-text-muted); }
 
 .close-btn {

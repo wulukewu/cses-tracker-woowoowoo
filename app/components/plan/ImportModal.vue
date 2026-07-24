@@ -156,13 +156,13 @@ function handleConfirm() {
 }
 
 .mode-option:hover {
-  background: rgba(0, 0, 0, 0.02);
-  border-color: #ccc;
+  background: var(--cf-cell);
+  border-color: var(--cf-text-muted);
 }
 
 .mode-option.active {
   border-color: var(--cf-text);
-  background: rgba(0, 0, 0, 0.01);
+  background: var(--cf-cell);
 }
 
 .mode-option input[type="radio"] {
@@ -186,24 +186,24 @@ function handleConfirm() {
 }
 
 .danger-option.active {
-  border-color: #b3261e;
-  background: #fdf1f0;
+  border-color: var(--cf-red);
+  background: var(--cf-red-bg);
 }
 
 .warning-text {
-  color: #b3261e !important;
+  color: var(--cf-red) !important;
 }
 
 .overwrite-confirm-box {
-  background: #fdf1f0;
-  border: 1px solid #f0c4bf;
+  background: var(--cf-red-bg);
+  border: 1px solid var(--cf-red);
   padding: 0.8rem;
   margin-bottom: 1.2rem;
 }
 
 .overwrite-confirm-box p {
   font-size: 0.8rem;
-  color: #b3261e;
+  color: var(--cf-red);
   margin: 0 0 0.5rem;
 }
 
@@ -211,7 +211,7 @@ function handleConfirm() {
   width: 100%;
   padding: 0.45rem 0.6rem;
   background: var(--cf-bg);
-  border: 1px solid #f0c4bf;
+  border: 1px solid var(--cf-red);
   border-radius: var(--cf-radius);
   color: var(--cf-text);
   font-size: 0.85rem;
@@ -219,7 +219,7 @@ function handleConfirm() {
 
 .confirm-input:focus {
   outline: none;
-  border-color: #b3261e;
+  border-color: var(--cf-red);
 }
 
 .modal-actions {
@@ -251,13 +251,13 @@ function handleConfirm() {
 }
 
 .status-container.success .status-icon {
-  background: #e6f4ea;
-  color: #137333;
+  background: var(--cf-accent-bg);
+  color: var(--cf-accent);
 }
 
 .status-container.error .status-icon {
-  background: #fdf1f0;
-  color: #b3261e;
+  background: var(--cf-red-bg);
+  color: var(--cf-red);
 }
 
 .status-container h3 {
@@ -272,7 +272,7 @@ function handleConfirm() {
 }
 
 .error-msg {
-  color: #b3261e !important;
+  color: var(--cf-red) !important;
   word-break: break-all;
 }
 </style>
