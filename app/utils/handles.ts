@@ -27,6 +27,7 @@ const HANDLES: Record<string, HandleStyle> = {
   zyo: LGM(3550),
   lukewu: LGM(3421),
   Weeeeeeeeeeeee00: LGM(3187),
+  yc: LGM(3000),
 }
 
 export function handleStyle(name: string): HandleStyle {

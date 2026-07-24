@@ -7,4 +7,5 @@ export const USERS: TrackedUser[] = [
   { name: 'lukewu', csesId: '347938' },
   { name: 'zyo', csesId: '443592' },
   { name: 'Weeeeeeeeeeeee00', csesId: '394165' },
+  { name: 'yc', csesId: '277835' },
 ]
