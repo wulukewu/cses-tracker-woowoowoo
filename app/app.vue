@@ -153,6 +153,7 @@ body {
   color: var(--cf-text);
   font-size: 13px;
   line-height: 1.5;
+  scrollbar-gutter: stable;
 }
 
 a {
