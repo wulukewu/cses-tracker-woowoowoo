@@ -58,6 +58,8 @@
 </template>
 
 <script setup lang="ts">
+import { useProfileModal } from '~/composables/useProfileModal'
+
 const STORAGE_KEY = 'cses-tracker-theme'
 
 const isDark = ref(false)
