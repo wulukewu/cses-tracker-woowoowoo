@@ -3,12 +3,10 @@ import type { WeekProblem, WeekTodo } from '~~/shared/types'
 
 const {
   weeks,
-  categories,
   selectedWeekId,
   week,
   users,
   staleSince,
-  solvedSets,
   submissions,
   pending,
   refreshing,
@@ -16,22 +14,10 @@ const {
   solvedCountFor,
   problemMeta,
   cellInfo,
-  totalProblemCount,
   groupedProblems,
   notes,
   progress,
 } = await useHomeProgress()
-
-const {
-  profileUser,
-  profileSolvedSet,
-  profileTotalSolved,
-  profileCategories,
-  expandedCategories,
-  openProfile,
-  closeProfile,
-  toggleCategory,
-} = useUserProfile(users, solvedSets, categories)
 
 const overlayProblem = ref<WeekProblem | null>(null)
 const overlayUserName = ref<string | null>(null)
@@ -69,7 +55,7 @@ function closeOverlay() {
   overlayUserName.value = null
 }
 
-const anyModalOpen = computed(() => Boolean(overlayProblem.value || profileUser.value || showTodos.value))
+const anyModalOpen = computed(() => Boolean(overlayProblem.value || showTodos.value))
 
 async function handleUpdateTodos(newTodos: WeekTodo[]) {
   if (!week.value) return
@@ -122,11 +108,6 @@ watch(anyModalOpen, (open) => {
   if (import.meta.client) document.body.style.overflow = open ? 'hidden' : ''
 })
 
-provide('viewProfile', (name: string) => {
-  const idx = users.value.findIndex((u) => u.name === name)
-  if (idx !== -1) openProfile(idx)
-})
-
 onUnmounted(() => {
   if (import.meta.client) document.body.style.overflow = ''
 })
@@ -160,7 +141,7 @@ onUnmounted(() => {
       </div>
 
       <LayoutCfBox v-if="week" title="→ Standings（本週進度）">
-        <HomeProgressSummary :week="week" :users="users" :solved-count-for="solvedCountFor" @open-profile="openProfile" />
+        <HomeProgressSummary :week="week" :users="users" :solved-count-for="solvedCountFor" />
       </LayoutCfBox>
 
       <HomeProblemTable
@@ -185,18 +166,6 @@ onUnmounted(() => {
       :locked="overlayLocked"
       @close="closeOverlay"
       @save-note="handleSaveNote"
-    />
-
-    <HomeUserProfileModal
-      v-if="profileUser"
-      :user="profileUser"
-      :total-solved="profileTotalSolved"
-      :total-problem-count="totalProblemCount"
-      :categories="profileCategories"
-      :expanded-categories="expandedCategories"
-      :solved-set="profileSolvedSet"
-      @close="closeProfile"
-      @toggle-category="toggleCategory"
     />
 
     <HomeWeekTodosModal
