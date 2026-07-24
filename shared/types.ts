@@ -51,7 +51,7 @@ export interface SubmissionSummary {
   /** failed submissions (WA/RE/TLE/...) before the first AC; CE is never counted. */
   waCount: number
   firstAcTime: string | null
-  /** chronological submissions up to and including the first AC; empty/partial when never solved. */
+  /** chronological submissions; includes all AC entries and FAILs before the first AC. Empty/partial when never solved. */
   submissions: SubmissionEntry[]
 }
 
