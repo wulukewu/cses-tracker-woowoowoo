@@ -14,10 +14,12 @@
         </NuxtLink>
         <div class="cf-topbar-right">
           <span class="cf-lang">En&nbsp;|&nbsp;Ru</span>
-          <span class="cf-auth"><span class="cf-authlink">Enter</span> | <span class="cf-authlink">Register</span></span>
-          <button type="button" class="cf-theme-toggle" @click="toggleTheme" :title="isDark ? '切換亮色模式' : '切換深色模式'">
-            <span v-if="isDark">☀</span><span v-else>☾</span>
-          </button>
+          <span class="cf-auth">
+            <button type="button" class="cf-theme-toggle" @click="toggleTheme" :title="isDark ? '切換亮色模式' : '切換深色模式'">
+              <span v-if="isDark">☀</span><span v-else>☾</span>
+            </button>
+            <span class="cf-authlink">Enter</span> | <span class="cf-authlink">Register</span>
+          </span>
         </div>
       </header>
 
@@ -68,15 +70,14 @@ function applyTheme(dark: boolean) {
 
 onMounted(() => {
   const stored = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  isDark.value = stored === 'dark' || (!stored && prefersDark)
+  isDark.value = stored === 'dark' || (!stored)
   applyTheme(isDark.value)
 })
 
 useHead({
   script: [
     {
-      innerHTML: `(function(){var t;try{t=localStorage.getItem('${STORAGE_KEY}')}catch(e){}var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.dataset.theme='dark'})()`,
+      innerHTML: `(function(){var t;try{t=localStorage.getItem('${STORAGE_KEY}')}catch(e){}var d=t==='dark'||(!t);if(d)document.documentElement.dataset.theme='dark'})()`,
       tagPosition: 'head',
     },
   ],
@@ -228,6 +229,9 @@ a:hover {
   color: var(--cf-text-secondary);
 }
 .cf-auth {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   color: var(--cf-text-muted);
 }
 .cf-authlink {
@@ -236,14 +240,13 @@ a:hover {
 }
 
 .cf-theme-toggle {
-  font-size: 1rem;
+  font-size: 0.9rem;
   line-height: 1;
   background: none;
-  border: 1px solid var(--cf-border);
-  border-radius: 3px;
-  padding: 0.15rem 0.35rem;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  color: var(--cf-text);
+  color: var(--cf-link);
 }
 
 /* ---------- Menu box ---------- */
