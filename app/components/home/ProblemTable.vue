@@ -170,7 +170,7 @@ const cellInfoMap = computed(() => {
 }
 
 .problem-name:hover {
-  color: var(--cf-accent);
+  color: var(--cf-link);
   text-decoration: underline;
 }
 
@@ -206,7 +206,7 @@ const cellInfoMap = computed(() => {
 }
 
 .user-name-btn:hover {
-  color: var(--cf-accent);
+  color: var(--cf-link);
   text-decoration: underline;
 }
 </style>

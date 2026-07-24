@@ -172,7 +172,7 @@ const emit = defineEmits<{
 }
 
 .profile-cses-link:hover {
-  color: var(--cf-accent);
+  color: var(--cf-link);
   text-decoration: underline;
 }
 
