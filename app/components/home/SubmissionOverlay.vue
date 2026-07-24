@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SubmissionSummary, UserNote } from '~~/shared/types'
+import { csesTimeToTaiwan } from '~/utils/formatDate'
 
 const props = defineProps<{
   problemId: number
@@ -109,7 +110,7 @@ onUnmounted(() => {
             <table v-if="!locked && reversedSubmissions.length" class="sub-table">
               <thead>
                 <tr>
-                  <th class="c-time">時間</th>
+                  <th class="c-time">時間 (台灣)</th>
                   <th class="c-verdict">結果</th>
                   <th class="c-lang">語言</th>
                   <th class="c-exec">執行</th>
@@ -122,7 +123,7 @@ onUnmounted(() => {
                   :key="idx"
                   :class="s.verdict === 'AC' ? 'ac-row' : 'fail-row'"
                 >
-                  <td class="c-time">{{ s.time }}</td>
+                  <td class="c-time">{{ csesTimeToTaiwan(s.time) }}</td>
                   <td class="c-verdict">
                     <a v-if="s.detailUrl" :href="s.detailUrl" target="_blank" rel="noopener" class="detail-link">{{ s.verdict }}</a>
                     <span v-else>{{ s.verdict }}</span>
