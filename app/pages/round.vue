@@ -235,25 +235,25 @@ onUnmounted(() => {
 
 .cf-page-sub {
   font-size: 0.82rem;
-  color: var(--cs-text-muted);
+  color: var(--cf-text-muted);
 }
 
 .empty-state {
   padding: 2rem;
   text-align: center;
-  color: var(--cs-text-muted);
-  background: var(--cs-bg);
+  color: var(--cf-text-muted);
+  background: #fff;
   border: 1px solid var(--cf-border);
-  border-radius: var(--cs-radius);
+  border-radius: var(--cf-radius);
 }
 
 .stale-banner {
-  background: #fdf6e3;
-  color: #8a6d1a;
-  border: 1px solid #f0e2ae;
-  padding: 0.6rem 0.9rem;
-  border-radius: var(--cs-radius);
+  background: var(--cf-cell);
+  color: var(--cf-text-secondary);
+  border: 1px solid var(--cf-sep);
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--cf-radius);
   margin-bottom: 1.25rem;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
 }
 </style>
