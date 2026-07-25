@@ -22,13 +22,18 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}): Promise
   }
 }
 
+/**
+ * Retries every failure, including the `TypeError` that `fetch` raises for a
+ * dropped connection or DNS blip — the most retryable case there is, and one an
+ * earlier revision excluded, leaving only timeouts to be retried. These are all
+ * idempotent GETs, so a repeat attempt is always safe.
+ */
 async function fetchWithRetry(url: string, options: RequestInit = {}, retries = MAX_RETRIES): Promise<Response> {
   for (let attempt = 0; ; attempt++) {
     try {
       return await fetchWithTimeout(url, options)
     } catch (err) {
-      const isLast = attempt >= retries
-      if (isLast || (err instanceof TypeError && !(err instanceof DOMException))) throw err
+      if (attempt >= retries) throw err
       console.warn(`[cses] fetch failed (attempt ${attempt + 1}/${retries + 1}) for ${url.slice(0, 80)}:`, err)
       await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)))
     }
@@ -111,7 +116,7 @@ export async function fetchSubmissionSummary(
   let reachedCap = false
 
   for (let page = 1; page <= SUBMISSION_MAX_PAGES; page++) {
-    const res = await fetchWithTimeout(
+    const res = await fetchWithRetry(
       `https://cses.fi/problemset/queue/${taskId}/${page}/?user=${encodeURIComponent(username)}`,
       {
         headers: {
@@ -203,16 +208,23 @@ export async function fetchSubmissionSummary(
  * counts across all CSES users, not just the tracked ones. Unlike the queue
  * page, this doesn't require the scraper account to have solved the task
  * itself.
+ *
+ * Throws on a non-ok response so a transient CSES failure propagates instead of
+ * being cached: `null` is a value the caller stores for a full day, and a hiccup
+ * must not blank a problem's stats until tomorrow. `null` is reserved for a page
+ * that genuinely carries no usable numbers.
  */
 export async function fetchProblemStats(taskId: number, sessionCookie: string): Promise<ProblemStats | null> {
-  const res = await fetchWithTimeout(`https://cses.fi/problemset/stats/${taskId}/`, {
+  const res = await fetchWithRetry(`https://cses.fi/problemset/stats/${taskId}/`, {
     headers: {
       cookie: sessionCookie,
       'user-agent': 'Mozilla/5.0 (cses-tracker)',
     },
   })
 
-  if (!res.ok) return null
+  if (!res.ok) {
+    throw new Error(`[cses] stats page for task ${taskId} returned ${res.status}`)
+  }
 
   const html = await res.text()
   const $ = cheerio.load(html)
