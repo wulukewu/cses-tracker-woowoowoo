@@ -120,8 +120,8 @@ export async function useHomeProgress() {
     fastestName: string | null
   }
 
-  // Only credited when at least two tracked users have a comparable value —
-  // "first" or "fastest" among a field of one isn't a meaningful callout.
+  // Credited even when only one tracked user has a comparable value: a solo
+  // solver still earns the dot (see 4dae7b5). Null only when nobody qualifies.
   const problemInsights = computed(() => {
     const map = new Map<number, ProblemInsight>()
     for (const p of week.value?.problems ?? []) {

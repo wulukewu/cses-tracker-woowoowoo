@@ -3,6 +3,8 @@ import { getStore } from './netlifyBlobs'
 interface CacheEntry<T> {
   value: T
   expiresAt: number
+  /** When this entry was stored, used to avoid overwriting a newer result. */
+  writtenAt?: number
 }
 
 function cacheStore() {
@@ -13,8 +15,29 @@ function cacheStore() {
 const activePromises = new Map<string, Promise<any>>()
 
 /**
+ * Returns the platform's real `waitUntil`, or null when the runtime has none.
+ *
+ * Nitro always defines `event.waitUntil`, so its presence proves nothing. When
+ * the preset has no platform support — as with the Netlify functions preset,
+ * whose handler never populates `event.context.waitUntil` — Nitro's version only
+ * pushes the promise onto `event.context.nitro._waitUntilPromises`, an array
+ * that nothing in Nitro ever awaits. The revalidation is then plain
+ * fire-and-forget inside a container the platform may freeze the moment the
+ * response is sent, so it can die halfway through, or thaw much later and store
+ * a result it scraped long ago on top of newer data.
+ *
+ * Only `event.context.waitUntil` is actually backed by the platform, so that is
+ * what we probe for; without it the caller revalidates synchronously instead.
+ */
+function platformWaitUntil(event: any): ((promise: Promise<unknown>) => void) | null {
+  const fn = event?.context?.waitUntil
+  return typeof fn === 'function' ? (promise) => fn.call(event.context, promise) : null
+}
+
+/**
  * Persisted cache in Netlify Blobs.
- * Supports Stale-While-Revalidate (SWR) if the `event` option is provided.
+ * Revalidates in the background (SWR) only where the runtime can keep the work
+ * alive past the response; otherwise it refreshes synchronously.
  */
 export async function cachedBlob<T>(
   key: string,
@@ -27,26 +50,23 @@ export async function cachedBlob<T>(
   if (!options?.force) {
     const hit = (await store.get(key, { type: 'json' })) as CacheEntry<T> | null
     if (hit) {
-      const isExpired = hit.expiresAt <= Date.now()
+      if (hit.expiresAt > Date.now()) {
+        return hit.value
+      }
 
-      if (isExpired && options?.event) {
-        // SWR Mode: Kick off a background revalidation task that runs after the response
-        // is sent, ensuring Serverless environments do not freeze before execution.
-        const revalidatePromise = (async () => {
-          try {
-            await runAndCache(key, ttlMs, fn, store)
-          } catch (err) {
+      const waitUntil = options?.event ? platformWaitUntil(options.event) : null
+      if (waitUntil) {
+        // SWR: serve the stale value now and revalidate in the background, with
+        // the platform holding the container open until that work settles.
+        waitUntil(
+          runAndCache(key, ttlMs, fn, store).catch((err) => {
             console.error(`[blobCache] SWR revalidation failed for key ${key}:`, err)
-          }
-        })()
-
-        options.event.waitUntil(revalidatePromise)
+          }),
+        )
         return hit.value
       }
-
-      if (!isExpired) {
-        return hit.value
-      }
+      // Otherwise fall through and refresh synchronously: a slower response is
+      // better than a revalidation the runtime is free to freeze mid-flight.
     }
   }
 
@@ -61,9 +81,22 @@ async function runAndCache<T>(
 ): Promise<T> {
   let promise = activePromises.get(key)
   if (!promise) {
+    const startedAt = Date.now()
     promise = fn()
       .then(async (value) => {
-        await store.setJSON(key, { value, expiresAt: Date.now() + ttlMs } satisfies CacheEntry<T>)
+        // Another writer — a concurrent serverless instance, or a revalidation
+        // that was frozen and resumed — may have stored a result since this
+        // fetch began. Theirs is based on a later read of CSES than ours, so
+        // leave it alone rather than reverting the key to our older scrape.
+        const current = (await store.get(key, { type: 'json' })) as CacheEntry<T> | null
+        if (!current || (current.writtenAt ?? 0) <= startedAt) {
+          const now = Date.now()
+          await store.setJSON(key, {
+            value,
+            expiresAt: now + ttlMs,
+            writtenAt: now,
+          } satisfies CacheEntry<T>)
+        }
         activePromises.delete(key)
         return value
       })

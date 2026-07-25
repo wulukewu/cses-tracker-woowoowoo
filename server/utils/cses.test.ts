@@ -269,12 +269,10 @@ describe('fetchProblemStats', () => {
     expect(stats).toBeNull()
   })
 
-  it('returns null when the response is not ok', async () => {
+  it('throws when the response is not ok, so a transient failure is not cached as null', async () => {
     mockFetchOnce('', 500)
 
-    const stats = await fetchProblemStats(1234, 'PHPSESSID=abc')
-
-    expect(stats).toBeNull()
+    await expect(fetchProblemStats(1234, 'PHPSESSID=abc')).rejects.toThrow('returned 500')
   })
 
   it('returns null when the expected table rows are missing', async () => {
