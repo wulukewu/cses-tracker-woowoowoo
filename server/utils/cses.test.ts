@@ -131,6 +131,62 @@ describe('fetchSubmissionSummary', () => {
     expect(summary.submissions).toHaveLength(2)
   })
 
+  it('does not duplicate rows when CSES clamps out-of-range pages to the same content', async () => {
+    // mockFetchOnce re-serves the same page for every fetch — exactly how CSES
+    // treats an out-of-range page number (re-serving an existing page, not 404).
+    // An unsolved problem has no AC to break on, so the loop must instead detect
+    // the repeated page and stop, rather than appending the row once per page.
+    mockFetchOnce(`
+      <table class="full-width">
+        <tr><th>Time</th></tr>
+        ${row('2024-01-01 10:00:00', 'zero')}
+      </table>
+    `)
+
+    const summary = await fetchSubmissionSummary(1234, 'alice', 'PHPSESSID=abc')
+
+    expect(summary.waCount).toBe(1)
+    expect(summary.submissions).toHaveLength(1)
+    expect(summary.submissions.map((s) => s.verdict)).toEqual(['FAIL'])
+  })
+
+  it('captures every WA across multiple genuinely different pages before clamping', async () => {
+    // Two real pages of distinct WA rows, then CSES clamps: the sequence is
+    // exhausted so the mock re-serves the last (page 2) again. All four rows must
+    // be captured and none dropped — guarding against stopping too early.
+    mockFetchSequence([
+      {
+        html: `
+      <table class="full-width">
+        <tr><th>Time</th></tr>
+        ${row('2024-01-04 10:00:00', 'zero')}
+        ${row('2024-01-03 10:00:00', 'zero')}
+      </table>
+    `,
+      },
+      {
+        html: `
+      <table class="full-width">
+        <tr><th>Time</th></tr>
+        ${row('2024-01-02 10:00:00', 'zero')}
+        ${row('2024-01-01 10:00:00', 'zero')}
+      </table>
+    `,
+      },
+    ])
+
+    const summary = await fetchSubmissionSummary(1234, 'alice', 'PHPSESSID=abc')
+
+    expect(summary.waCount).toBe(4)
+    expect(summary.submissions).toHaveLength(4)
+    expect(summary.submissions.map((s) => s.time)).toEqual([
+      '2024-01-01 10:00:00',
+      '2024-01-02 10:00:00',
+      '2024-01-03 10:00:00',
+      '2024-01-04 10:00:00',
+    ])
+  })
+
   it('skips CE (compile error) rows entirely — not counted as WA and not in submissions', async () => {
     mockFetchOnce(`
       <table class="full-width">
