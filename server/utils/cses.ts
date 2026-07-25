@@ -86,7 +86,7 @@ export async function fetchSolvedTaskIds(csesId: string, sessionCookie: string):
  * Pages through the submission history (up to MAX_PAGES) so a busy user
  * with many submissions per problem does not miss an older first AC.
  */
-const SUBMISSION_MAX_PAGES = 5
+const SUBMISSION_MAX_PAGES = 10
 
 export async function fetchSubmissionSummary(
   taskId: number,
@@ -102,6 +102,13 @@ export async function fetchSubmissionSummary(
     detailUrl: string | null
   }
   const newestFirst: ParsedRow[] = []
+  // CSES clamps out-of-range page numbers, re-serving an existing page instead of
+  // 404-ing. Track a signature per row so a repeated page is recognised and the
+  // loop stops, rather than appending the same rows once per page (up to
+  // SUBMISSION_MAX_PAGES times). Distinct submissions always differ by timestamp,
+  // so this never drops genuinely older rows.
+  const seen = new Set<string>()
+  let reachedCap = false
 
   for (let page = 1; page <= SUBMISSION_MAX_PAGES; page++) {
     const res = await fetchWithTimeout(
@@ -126,6 +133,7 @@ export async function fetchSubmissionSummary(
     if (rows.length === 0) break
 
     let foundAcOnPage = false
+    let newOnPage = 0
     rows.each((_, el) => {
       const tds = $(el).find('td')
       if (tds.length < 6) return
@@ -139,13 +147,27 @@ export async function fetchSubmissionSummary(
         : classes.includes('skipped')
           ? 'CE'
           : 'FAIL'
+      const sig = `${time}|${verdict}|${lang}|${execTime}|${codeSize}`
+      if (seen.has(sig)) return
+      seen.add(sig)
+      newOnPage++
       const detailHref = $(el).find('a.details-link').attr('href') || null
       const detailUrl = detailHref ? `https://cses.fi${detailHref}` : null
       newestFirst.push({ time, verdict, lang, execTime, codeSize, detailUrl })
       if (verdict === 'AC') foundAcOnPage = true
     })
 
+    // Whole page was already seen -> CSES clamped us past the last real page.
+    if (newOnPage === 0) break
     if (foundAcOnPage) break
+    if (page === SUBMISSION_MAX_PAGES) reachedCap = true
+  }
+
+  if (reachedCap) {
+    console.warn(
+      `[cses] submission history for task ${taskId} user ${username} hit page cap ` +
+        `(${SUBMISSION_MAX_PAGES}) without an AC; older submissions may be truncated`,
+    )
   }
 
   const chronological = [...newestFirst].reverse()
