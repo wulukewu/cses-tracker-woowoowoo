@@ -107,33 +107,35 @@ onUnmounted(() => {
         <div class="split-layout">
           <div class="split-col">
             <h3 class="section-title">送出紀錄</h3>
-            <table v-if="!locked && reversedSubmissions.length" class="sub-table">
-              <thead>
-                <tr>
-                  <th class="c-time">時間 (台灣)</th>
-                  <th class="c-verdict">結果</th>
-                  <th class="c-lang">語言</th>
-                  <th class="c-exec">執行</th>
-                  <th class="c-size">大小</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(s, idx) in reversedSubmissions"
-                  :key="idx"
-                  :class="s.verdict === 'AC' ? 'ac-row' : 'fail-row'"
-                >
-                  <td class="c-time">{{ csesTimeToTaiwan(s.time) }}</td>
-                  <td class="c-verdict">
-                    <a v-if="s.detailUrl" :href="s.detailUrl" target="_blank" rel="noopener" class="detail-link">{{ s.verdict }}</a>
-                    <span v-else>{{ s.verdict }}</span>
-                  </td>
-                  <td class="c-lang">{{ s.lang }}</td>
-                  <td class="c-exec">{{ s.execTime }}</td>
-                  <td class="c-size">{{ s.codeSize }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div v-if="!locked && reversedSubmissions.length" class="sub-table-scroll">
+              <table class="sub-table">
+                <thead>
+                  <tr>
+                    <th class="c-time">時間 (台灣)</th>
+                    <th class="c-verdict">結果</th>
+                    <th class="c-lang">語言</th>
+                    <th class="c-exec">執行</th>
+                    <th class="c-size">大小</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(s, idx) in reversedSubmissions"
+                    :key="idx"
+                    :class="s.verdict === 'AC' ? 'ac-row' : 'fail-row'"
+                  >
+                    <td class="c-time">{{ csesTimeToTaiwan(s.time) }}</td>
+                    <td class="c-verdict">
+                      <a v-if="s.detailUrl" :href="s.detailUrl" target="_blank" rel="noopener" class="detail-link">{{ s.verdict }}</a>
+                      <span v-else>{{ s.verdict }}</span>
+                    </td>
+                    <td class="c-lang">{{ s.lang }}</td>
+                    <td class="c-exec">{{ s.execTime }}</td>
+                    <td class="c-size">{{ s.codeSize }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
             <p v-else-if="!locked" class="empty-sub">沒有提交紀錄。</p>
           </div>
 
@@ -270,6 +272,10 @@ onUnmounted(() => {
   border-bottom: 1px solid var(--cf-sep);
 }
 
+.sub-table-scroll {
+  overflow-x: auto;
+}
+
 .sub-table {
   width: 100%;
   border-collapse: collapse;
@@ -368,5 +374,32 @@ onUnmounted(() => {
 
 .note-textarea:focus {
   border-color: var(--cf-blue);
+}
+
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .overlay {
+    padding: 0.5rem;
+  }
+
+  .card-title {
+    flex-wrap: wrap;
+  }
+
+  .card-title h2 {
+    white-space: normal;
+  }
+
+  .card-body {
+    padding: 0.6rem;
+  }
+
+  .split-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sub-table {
+    font-size: 0.75rem;
+  }
 }
 </style>

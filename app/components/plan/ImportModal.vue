@@ -275,4 +275,24 @@ function handleConfirm() {
   color: var(--cf-red) !important;
   word-break: break-all;
 }
+
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .modal-card {
+    padding: 1rem;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .modal-actions .cf-btn {
+    width: 100%;
+  }
+}
 </style>

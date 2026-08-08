@@ -60,6 +60,7 @@ const cellInfoMap = computed(() => {
             <div v-if="problemMeta(p.id)" class="problem-meta">{{ problemMeta(p.id) }}</div>
           </td>
           <td v-for="(u, i) in users" :key="u.csesId" class="col-user">
+            <span class="user-cell-label">{{ u.name }}</span>
             <HomeProblemCell
               :user="u"
               :problem="p"
@@ -220,31 +221,86 @@ const cellInfoMap = computed(() => {
   text-decoration: underline;
 }
 
+/* 行動裝置專用的人員標籤（手機卡牌式時才顯示） */
+.user-cell-label {
+  display: none;
+}
+
 /* ---------- Responsive: mobile ---------- */
 @media (max-width: 640px) {
+  /* 卡牌式：把多欄表格改成「卡片」，每個問題一張卡，包含整行題名與一列
+     四人狀態格；徹底擺脫固定欄寬（240px + 4×75px）造成的橫向捲動。 */
+  .problem-table,
+  .problem-table tbody,
+  .problem-table tbody tr {
+    display: block;
+    width: 100%;
+  }
+
   .problem-table {
+    table-layout: auto;
     font-size: 0.75rem;
   }
 
-  .problem-table th {
-    padding: 0.35rem 0.4rem;
+  .problem-table thead {
+    display: none;
   }
 
   .problem-table td {
-    padding: 0.3rem 0.4rem;
+    padding: 0;
+    border-bottom: none;
+    width: auto;
+    background: var(--cf-bg);
   }
 
-  .col-problem {
-    width: 240px;
+  .category-row td {
+    display: block;
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid var(--cf-sep);
+    background: var(--cf-cell);
   }
 
-  .col-user {
-    width: 75px;
-    padding: 0.3rem !important;
+  .problem-table tbody tr:not(.category-row) {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.4rem;
+    padding: 0.6rem 0.5rem;
+    border-bottom: 1px solid var(--cf-sep);
+  }
+
+  .problem-table tr:not(.category-row) td.col-problem {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid var(--cf-sep);
+    padding: 0 0 0.4rem;
+    min-width: 0;
+  }
+
+  .problem-table tr:not(.category-row) td.col-user {
+    width: auto !important;
+    padding: 0 !important;
+    min-width: 0;
+  }
+
+  .problem-title-row {
+    overflow: visible;
+    flex-wrap: wrap;
   }
 
   .problem-name {
-    font-size: 0.75rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 0.78rem;
+  }
+
+  .user-cell-label {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--cf-text-secondary);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 0.15rem;
   }
 
   .problem-id-tag {
@@ -256,8 +312,9 @@ const cellInfoMap = computed(() => {
     font-size: 0.72rem;
   }
 
-  .category-row td {
-    padding: 0.3rem 0.4rem;
+  /* 最後一組的最後一張卡不要殘留分隔線 */
+  .problem-table tbody:last-child tr:last-child {
+    border-bottom: none;
   }
 }
 </style>

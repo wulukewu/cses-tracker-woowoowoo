@@ -267,4 +267,59 @@ function closeImportModal() {
   color: var(--cf-red);
   font-size: 0.85rem;
 }
+
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .cf-page-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .cf-page-title h1 {
+    font-size: 1.15rem;
+  }
+
+  .plan-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .header-links,
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .header-actions .cf-btn {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .plan-footer {
+    padding: 0.75rem 0 0.4rem;
+  }
+
+  .footer-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .deadline-label {
+    justify-content: space-between;
+  }
+
+  .deadline-label input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .save-btn {
+    width: 100%;
+  }
+}
 </style>
