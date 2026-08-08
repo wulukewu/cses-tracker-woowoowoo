@@ -290,4 +290,15 @@ function toggleCategory(name: string) {
 .profile-problem-name:hover {
   text-decoration: underline;
 }
+
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .modal-card {
+    padding: 1rem 0.85rem;
+  }
+}
 </style>

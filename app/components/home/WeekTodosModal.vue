@@ -299,4 +299,32 @@ function handleRemoveTodo(todoId: string) {
   font-size: 0.82rem;
   cursor: pointer;
 }
+
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .modal-body {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .modal-footer {
+    padding: 0.65rem 0.85rem;
+  }
+
+  .add-row {
+    flex-wrap: wrap;
+  }
+
+  .add-input {
+    flex: 1 1 100%;
+  }
+
+  .add-select {
+    flex: 1;
+    min-width: 0;
+  }
+}
 </style>

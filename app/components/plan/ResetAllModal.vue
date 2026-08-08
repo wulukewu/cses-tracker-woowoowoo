@@ -95,4 +95,22 @@ const emit = defineEmits<{
   gap: 0.6rem;
 }
 
+/* ---------- Responsive: mobile ---------- */
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .modal-card {
+    padding: 1rem;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions .cf-btn {
+    width: 100%;
+  }
+}
 </style>
