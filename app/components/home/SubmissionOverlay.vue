@@ -23,6 +23,12 @@ const noteStuck = ref(props.initialStuck || false)
 const lastSavedStuck = ref(props.initialStuck || false)
 const syncStatus = ref<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
+const dirty = computed(
+  () =>
+    noteContent.value !== lastSavedContent.value ||
+    noteStuck.value !== lastSavedStuck.value,
+)
+
 const reversedSubmissions = computed(() => {
   return [...(props.summary?.submissions ?? [])].reverse()
 })
@@ -38,53 +44,100 @@ watch(
   },
 )
 
-let saveTimeout: ReturnType<typeof setTimeout> | null = null
+let saveTimer: ReturnType<typeof setTimeout> | null = null
+let saveChain: Promise<void> = Promise.resolve()
+let closing = false
 
-async function performSave() {
-  if (noteContent.value === lastSavedContent.value && noteStuck.value === lastSavedStuck.value) {
+async function flushCurrent(): Promise<boolean> {
+  if (!dirty.value) {
+    syncStatus.value = 'saved'
+    return true
+  }
+  syncStatus.value = 'saving'
+  try {
+    const res = await fetch(`/api/notes/${props.problemId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: props.userName,
+        content: noteContent.value,
+        stuck: noteStuck.value,
+      }),
+      keepalive: true,
+    })
+    if (!res.ok) throw new Error(`save failed: ${res.status}`)
+    lastSavedContent.value = noteContent.value
+    lastSavedStuck.value = noteStuck.value
+    syncStatus.value = 'saved'
+    emit('saveNote', props.userName, noteContent.value, noteStuck.value)
+    return true
+  } catch {
+    syncStatus.value = 'error'
+    return false
+  }
+}
+
+function enqueueSave() {
+  saveChain = saveChain.then(() => flushCurrent()).catch(() => {})
+}
+
+watch([noteContent, noteStuck], () => {
+  if (!dirty.value) {
     syncStatus.value = 'saved'
     return
   }
   syncStatus.value = 'saving'
-  try {
-    const { error } = await useFetch(`/api/notes/${props.problemId}`, {
-      method: 'PUT',
-      body: {
-        username: props.userName,
-        content: noteContent.value,
-        stuck: noteStuck.value,
-      },
-    })
-    if (error.value) {
-      syncStatus.value = 'error'
-    } else {
-      syncStatus.value = 'saved'
-      lastSavedContent.value = noteContent.value
-      lastSavedStuck.value = noteStuck.value
-      emit('saveNote', props.userName, noteContent.value, noteStuck.value)
-    }
-  } catch {
-    syncStatus.value = 'error'
+  if (saveTimer) clearTimeout(saveTimer)
+  saveTimer = setTimeout(() => enqueueSave(), 1000)
+})
+
+async function handleClose() {
+  if (closing) return
+  closing = true
+  if (saveTimer) {
+    clearTimeout(saveTimer)
+    saveTimer = null
   }
+  await saveChain
+  if (!dirty.value) {
+    emit('close')
+    return
+  }
+  const ok = await flushCurrent()
+  if (!ok) {
+    closing = false
+    return
+  }
+  emit('close')
 }
 
-watch([noteContent, noteStuck], () => {
-  if (noteContent.value !== lastSavedContent.value || noteStuck.value !== lastSavedStuck.value) {
-    syncStatus.value = 'saving'
-    if (saveTimeout) clearTimeout(saveTimeout)
-    saveTimeout = setTimeout(performSave, 1000)
-  } else {
-    syncStatus.value = 'saved'
+function forceClose() {
+  if (saveTimer) {
+    clearTimeout(saveTimer)
+    saveTimer = null
   }
+  emit('close')
+}
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') void handleClose()
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown)
 })
 
 onUnmounted(() => {
-  if (saveTimeout) clearTimeout(saveTimeout)
+  window.removeEventListener('keydown', onKeydown)
+  if (saveTimer) clearTimeout(saveTimer)
+  if (dirty.value) {
+    void flushCurrent()
+  }
 })
 </script>
 
 <template>
-  <div class="overlay" @click.self="emit('close')">
+  <div class="overlay" @click.self="handleClose">
     <div class="overlay-card">
       <div class="card-header">
         <div class="card-title">
@@ -95,7 +148,10 @@ onUnmounted(() => {
           <span v-if="syncStatus === 'saving'" class="sync-hint saving">同步中</span>
           <span v-else-if="syncStatus === 'error'" class="sync-hint error">同步失敗</span>
           <span v-else class="sync-hint saved">已同步</span>
-          <button type="button" class="close-btn" aria-label="關閉" @click="emit('close')">✕</button>
+          <button v-if="syncStatus === 'error'" type="button" class="discard-btn" @click="forceClose">
+            仍要關閉（捨棄）
+          </button>
+          <button type="button" class="close-btn" aria-label="關閉" @click="handleClose">✕</button>
         </div>
       </div>
 
@@ -235,6 +291,21 @@ onUnmounted(() => {
 .close-btn:hover {
   border-color: var(--cf-border);
   color: var(--cf-text);
+}
+
+.discard-btn {
+  background: none;
+  border: 1px solid var(--cf-red);
+  cursor: pointer;
+  color: var(--cf-red);
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+}
+
+.discard-btn:hover {
+  background: var(--cf-red);
+  color: var(--cf-bg);
 }
 
 .card-body {

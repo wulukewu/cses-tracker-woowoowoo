@@ -74,6 +74,51 @@ export async function useHomeProgress() {
 
   const { data: notes, refresh: refreshNotes } = await useFetch<Record<string, Record<string, UserNote>>>('/api/notes')
 
+  // Tracks the user's own note edits (with a local timestamp). Used to keep the
+  // refresh of /api/notes from stomping a note that was just saved locally while
+  // that GET was still in flight (the PUT lands after the stale GET, so the
+  // server response briefly shows the old content).
+  interface NoteEdit {
+    content: string
+    stuck: boolean
+    at: number
+  }
+  const localNoteEdits = ref<Record<string, Record<string, NoteEdit>>>({})
+
+  function recordNoteSave(problemId: string, username: string, content: string, stuck: boolean) {
+    if (notes.value) {
+      const newNotes = { ...notes.value }
+      if (!newNotes[problemId]) newNotes[problemId] = {}
+      newNotes[problemId] = { ...newNotes[problemId], [username]: { content, stuck } }
+      notes.value = newNotes
+    }
+    localNoteEdits.value = {
+      ...localNoteEdits.value,
+      [problemId]: {
+        ...localNoteEdits.value[problemId],
+        [username]: { content, stuck, at: Date.now() },
+      },
+    }
+  }
+
+  async function refreshNotesGuarded() {
+    const startedAt = Date.now()
+    await refreshNotes()
+    if (!notes.value) return
+    let changed = false
+    const merged = { ...notes.value }
+    for (const [pid, users] of Object.entries(localNoteEdits.value)) {
+      for (const [username, edit] of Object.entries(users)) {
+        if (edit.at >= startedAt) {
+          if (!merged[pid]) merged[pid] = {}
+          merged[pid] = { ...merged[pid], [username]: { content: edit.content, stuck: edit.stuck } }
+          changed = true
+        }
+      }
+    }
+    if (changed) notes.value = merged
+  }
+
   const week = computed(() => progress.value?.week ?? null)
   const users = computed(() => progress.value?.users ?? [])
   const staleSince = computed(() => progress.value?.staleSince ?? null)
@@ -109,7 +154,12 @@ export async function useHomeProgress() {
     refreshing.value = true
     forceRefresh.value = true
     try {
-      await Promise.all([refresh(), refreshSubmissions(), refreshProblemStats(), refreshNotes()])
+      await Promise.all([
+        refresh(),
+        refreshSubmissions(),
+        refreshProblemStats(),
+        refreshNotesGuarded(),
+      ])
     } finally {
       forceRefresh.value = false
       refreshing.value = false
@@ -195,6 +245,7 @@ export async function useHomeProgress() {
     groupedProblems,
     notes,
     refreshNotes,
+    recordNoteSave,
     progress,
   }
 }

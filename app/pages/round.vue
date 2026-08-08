@@ -17,6 +17,7 @@ const {
   groupedProblems,
   notes,
   progress,
+  recordNoteSave,
 } = await useHomeProgress()
 
 const overlayProblem = ref<WeekProblem | null>(null)
@@ -36,12 +37,8 @@ const overlayLocked = computed(() => {
 })
 
 function handleSaveNote(username: string, content: string, stuck: boolean) {
-  if (notes.value && overlayProblem.value) {
-    const pid = String(overlayProblem.value.id)
-    const newNotes = { ...notes.value }
-    if (!newNotes[pid]) newNotes[pid] = {}
-    newNotes[pid] = { ...newNotes[pid], [username]: { content, stuck } }
-    notes.value = newNotes
+  if (overlayProblem.value) {
+    recordNoteSave(String(overlayProblem.value.id), username, content, stuck)
   }
 }
 
