@@ -1,4 +1,5 @@
 import problems from '~~/server/data/problems.json'
+import { computeProblemInsights } from '~~/shared/insights'
 import type {
   ProblemCategory,
   ProblemStatsResponse,
@@ -116,46 +117,20 @@ export async function useHomeProgress() {
   }
 
   interface ProblemInsight {
-    firstSolverName: string | null
-    fastestName: string | null
+    firstSolverNames: string[]
+    fastestNames: string[]
   }
 
   // Credited even when only one tracked user has a comparable value: a solo
-  // solver still earns the dot (see 4dae7b5). Null only when nobody qualifies.
+  // solver still earns the dot (see 4dae7b5). Empty arrays when nobody
+  // qualifies. Single-winner selection: blue and gold each take the best value
+  // across a user's own submissions (best AC execution time / earliest AC time)
+  // and credit everyone tied on that best value.
   const problemInsights = computed(() => {
     const map = new Map<number, ProblemInsight>()
     for (const p of week.value?.problems ?? []) {
-      const key = String(p.id)
-      let firstSolverName: string | null = null
-      let firstAcTime: string | null = null
-      let solvedCount = 0
-      let fastestName: string | null = null
-      let fastestTime = Infinity
-      let timedCount = 0
-
-      for (const u of users.value) {
-        const summary = submissions.value?.[key]?.[u.name]
-        if (!summary?.unlocked || !summary.firstAcTime) continue
-        solvedCount++
-        if (firstAcTime === null || summary.firstAcTime < firstAcTime) {
-          firstAcTime = summary.firstAcTime
-          firstSolverName = u.name
-        }
-        const acEntry = summary.submissions.find((s) => s.verdict === 'AC')
-        const execSeconds = acEntry ? Number.parseFloat(acEntry.execTime) : NaN
-        if (!Number.isNaN(execSeconds)) {
-          timedCount++
-          if (execSeconds < fastestTime) {
-            fastestTime = execSeconds
-            fastestName = u.name
-          }
-        }
-      }
-
-      map.set(p.id, {
-        firstSolverName: solvedCount >= 1 ? firstSolverName : null,
-        fastestName: timedCount >= 1 ? fastestName : null,
-      })
+      const insight = computeProblemInsights(String(p.id), users.value ?? [], submissions.value ?? {})
+      map.set(p.id, insight)
     }
     return map
   })
@@ -177,8 +152,8 @@ export async function useHomeProgress() {
       waCount: summary.waCount,
       locked: !summary.unlocked,
       clickable: solved && summary.unlocked,
-      isFirstSolver: insight?.firstSolverName === userName,
-      isFastest: insight?.fastestName === userName,
+      isFirstSolver: insight?.firstSolverNames.includes(userName) ?? false,
+      isFastest: insight?.fastestNames.includes(userName) ?? false,
     }
   }
 
